@@ -44,6 +44,18 @@
         <div class="flight-stage">
 
           <div class="stage-box">
+            BOOT
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="stage-box">
+            TEST_MODE
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="stage-box">
             LAUNCH_PAD
           </div>
 
@@ -56,37 +68,45 @@
           <div class="arrow">→</div>
 
           <div class="stage-box">
-            APOGEE
+            ROCKET_DEPLOY
           </div>
 
           <div class="arrow">→</div>
 
           <div class="stage-box">
-            DESCENT
+           DESCENT
           </div>
 
           <div class="arrow">→</div>
 
           <div class="stage-box">
-            PROBE_RELEASE
+            AEROBREAK_RELEASE
           </div>
 
           <div class="arrow">→</div>
 
           <div class="stage-box">
-            PAYLOAD_RELEASE
-          </div>
-
-          <div class="arrow">→</div>
-
-          <div class="stage-box">
-            LANDED
+            IMPACT
           </div>
 
         </div>
       </div>
       <!-- Main telemetry visualizations - csv, graphs, map section-->
       <div class="telemetry-visualization-section">
+        <div class="sidebar-sub-section">
+        <div class="sidebar-sub-title">GNSS TELEMETRY</div>
+        <div class="sidebar-fields">
+          GNSS Time: <span class="sidebar-gps-time-value">--</span><br />
+          <br />
+          GNSS Altitude: <span class="sidebar-gps-altitude-value">--</span><br />
+          <br />
+          GNSS Latitude: <span class="sidebar-gps-latitude-value">--</span><br />
+          <br />
+          GNSS Longitude: <span class="sidebar-gps-longitude-value">--</span><br />
+          <br />
+          GNSS Sats: <span class="sidebar-gps-sats-value">--</span>
+        </div>
+      </div>
         <div class="telemetry-csv-container"></div>
         <div class="telemetry-graph-container"></div>
         <div class="telemetry-map-container"></div>
@@ -98,9 +118,10 @@
     <div class="sidebar">
       <!--Power & restart buttons-->
       <div class="tabs-options">
+        <button class="page-button telemetry-btn--home">HOME</button>
         <button class="page-button telemetry-btn--graph">GRAPHS</button>
         <button class="page-button telemetry-btn--csv">CSV</button>
-        <button class="page-button telemetry-btn--map">MAPS</button>
+        <!-- <button class="page-button telemetry-btn--map">MAPS</button> -->
       </div>
       <!--New position for Command section-->
       <div class="command-area">
@@ -124,20 +145,7 @@
           CMD ECHO: <span class="sidebar-cmd-value">--</span>
         </div>
       </div>
-      <div class="sidebar-sub-section">
-        <div class="sidebar-sub-title">GPS TELEMETRY</div>
-        <div class="sidebar-fields">
-          GPS Time: <span class="sidebar-gps-time-value">--</span><br />
-          <br />
-          GPS Altitude: <span class="sidebar-gps-altitude-value">--</span><br />
-          <br />
-          GPS Latitude: <span class="sidebar-gps-latitude-value">--</span><br />
-          <br />
-          GPS Longitude: <span class="sidebar-gps-longitude-value">--</span><br />
-          <br />
-          GPS Sats: <span class="sidebar-gps-sats-value">--</span>
-        </div>
-      </div>
+      
       <div class="sidebar-sub-section-for-simulation">
         <div class="sim-option">
           <button class="switch"><h4 class="simulation-mode-title">SIM ENABLE</h4></button>
