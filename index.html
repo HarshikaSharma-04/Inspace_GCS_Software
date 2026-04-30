@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DJS ARYA GUI</title>
+  <link rel="stylesheet" href="sectionsCSS/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+</head>
+
+<body>
+  <div class="title-container">
+    <img src="images/indian_flag.png" alt="flag" class="indian-flag" />
+
+    <div class="title-text">
+      <h1 class="team-name">DJS ARYA</h1>
+      <h3 class="team-id">TEAM ID XXX</h3>
+    </div>
+
+    <div class="data-details">
+      <h3 class="data">
+        Mission Time: <span class="mission-time-value">00:00:00</span>
+      </h3>
+      <h3 class="data">
+        Packet Count: <span class="packet-count-value">0000</span>
+      </h3>
+      <h3 class="data">Mode: <span class="mode-value">Flight </span></h3>
+    </div>
+
+    <img src="images/team_logo.png" alt="team-logo" class="team-logo" />
+  </div>
+
+  <!-- Yahan se Essential info + Flight State + Command Section -->
+  <div class="main-container">
+    <div class="essential-container">
+      <!-- Yahan se Mission Time, Packet Count, Flight Mode-->
+
+      <!--Yahan se Flight state aur command section-->
+      <div class="flight-state-command-section">
+        <div class="flight-stage">
+
+          <div class="stage-box">
+            LAUNCH_PAD
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="stage-box">
+            ASCENT
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="stage-box">
+            APOGEE
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="stage-box">
+            DESCENT
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="stage-box">
+            PROBE_RELEASE
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="stage-box">
+            PAYLOAD_RELEASE
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="stage-box">
+            LANDED
+          </div>
+
+        </div>
+      </div>
+      <!-- Main telemetry visualizations - csv, graphs, map section-->
+      <div class="telemetry-visualization-section">
+        <div class="telemetry-csv-container"></div>
+        <div class="telemetry-graph-container"></div>
+        <div class="telemetry-map-container"></div>
+        <div id="map"></div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!--Power & restart buttons-->
+      <div class="tabs-options">
+        <button class="page-button telemetry-btn--graph">GRAPHS</button>
+        <button class="page-button telemetry-btn--csv">CSV</button>
+        <button class="page-button telemetry-btn--map">MAPS</button>
+      </div>
+      <!--New position for Command section-->
+      <div class="command-area">
+          <div class="command-section">
+            <input type="text" class="command" placeholder="Enter Command" />
+          </div>
+          <button class="send-btn">SEND</button>
+        </div>
+
+      <div class="sidebar-sub-section sidebar-sub-section">
+        <div class="sidebar-sub-title">TELEMETRY</div>
+        <div class="sidebar-fields">
+          Temperature (°C): <span class="sidebar-temp-value">--</span><br />
+          <br />
+          Voltage (V): <span class="sidebar-voltage-value">--</span><br />
+          <br />
+          Pressure (Pa): <span class="sidebar-pressure-value">--</span><br />
+          <br />
+          Altitude (m): <span class="sidebar-altitude-value">--</span><br />
+          <br />
+          CMD ECHO: <span class="sidebar-cmd-value">--</span>
+        </div>
+      </div>
+      <div class="sidebar-sub-section">
+        <div class="sidebar-sub-title">GPS TELEMETRY</div>
+        <div class="sidebar-fields">
+          GPS Time: <span class="sidebar-gps-time-value">--</span><br />
+          <br />
+          GPS Altitude: <span class="sidebar-gps-altitude-value">--</span><br />
+          <br />
+          GPS Latitude: <span class="sidebar-gps-latitude-value">--</span><br />
+          <br />
+          GPS Longitude: <span class="sidebar-gps-longitude-value">--</span><br />
+          <br />
+          GPS Sats: <span class="sidebar-gps-sats-value">--</span>
+        </div>
+      </div>
+      <div class="sidebar-sub-section-for-simulation">
+        <div class="sim-option">
+          <button class="switch"><h4 class="simulation-mode-title">SIM ENABLE</h4></button>
+        </div>
+
+        <div class="sim-option">
+          <button class="switch"><h4 class="simulation-mode-title">SIM ACTIVATE</h4></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--seperate div for other data fields-->
+  <div class="second-container"></div>
+</body>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<script src="chart.js"></script>
+<script type="module" src="telemetry.js"></script>
+
+</html>

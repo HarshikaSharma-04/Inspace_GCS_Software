@@ -1,0 +1,90 @@
+const packetNumbers = [1,2,3,4,5,6,7,8];
+//these are all the assumed values for now
+const data_altitude = [120, 130, 125, 140, 135, 138, 142, 145];
+const data_temperature = [23,24,25,25.5,26,27,26.5,27.2];
+const voltage = [12.5,12.3,12.1,11.9,11.8,11.7,11.6,11.5];
+const gyro_r = [0,5,10,7,3,-5,0,2];
+const gyro_p = [2,4,3,6,8,5,7,4];
+const gyro_y = [-3,0,2,4,1,5,-2,0];
+const accel_r = [0.01,-0.02,0.03,0,0.01,0.04,0.03,0.05];
+const accel_p = [0.03,0.02,-0.01,0,0.01,0.04,0.03,0.05];
+
+
+//info of each
+const chartsInfo = [
+  {id: "chart-altitude", label: "ALTITUDE", data:data_altitude},
+  {id: "chart-temperature", label: "TEMPERATURE", data:data_temperature},
+  {id: "chart-voltage", label: "VOLTAGE", data:voltage},
+  {id: "chart-gyro_r", label: "GYRO_R", data:gyro_r},
+  {id: "chart-gyro_p", label: "GYRO_P", data:gyro_p},
+  {id: "chart-gyro_y", label: "GYRO_Y", data:gyro_y},
+  {id: "chart-accel_r", label: "ACCEL_R", data:accel_r},
+  {id: "chart-accel_p", label: "ACCEL_P", data:accel_p}
+];
+
+// styling for the graphs or any sort of editing to be done from here.
+chartsInfo.forEach(info => {
+  const ctx = document.getElementById(info.id).getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: packetNumbers,
+      datasets: [{
+        label: info.label,
+        data: info.data,
+        borderColor: '#0d05a7ff',
+        backgroundColor: '#ffffff', 
+        fill: false,
+        borderWidth: 3, 
+        pointRadius: 4, 
+        pointHoverRadius: 6,
+      }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          labels: {
+            color: '#000000',  
+            font: { weight: 'bold', size: 14 }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: "Packets",
+            color: '#000000',
+            font: { weight: 'bold', size: 14 }
+          },
+          ticks: {
+            color: '#000000',
+            font: { weight: 'bold', size: 12 }
+          },
+          grid: { 
+            color: '#555555' 
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: info.label,
+            color: '#000000',
+            font: { weight: 'bold', size: 14 }
+          },
+          ticks: {
+            color: '#000000',
+            font: { weight: 'bold', size: 12 }
+          },
+          grid: {
+            color: '#555555'
+          }
+        }
+      },
+      layout: {
+        padding: 10
+      },
+      backgroundColor: '#ffffff' 
+    }
+  });
+});
