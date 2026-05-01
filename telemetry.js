@@ -257,47 +257,78 @@ function updateSidebarTelemetry(row) {
 
 function loadGraphs() {
   if (!csvData || csvData.length === 0) return;
-
   if (chartInitialized) return;
-
-  let columns = Object.keys(csvData[0]).filter(
-    (col) =>
-      col !== "MISSION_TIME" &&
-      col !== "PACKET_COUNT" &&
-      col !== "MODE" &&
-      col !== "GPS_SATS" &&
-      col !== "CMD_ECHO" &&
-      col != "TEAM_ID" &&
-      col != "STATE"
-  );
 
   graphContainer.innerHTML = `
     <div class="telemtry-data-container-graph">
-      ${columns
-        .map(
-          (col) => `
-        <div class="telemetry-grid-item">
-          <canvas id="${col}_chart"></canvas>
-        </div>
-      `
-        )
-        .join("")}
+
+      <div class="telemetry-grid-item">
+        <canvas id="altitude_chart"></canvas>
+      </div>
+
+      <div class="telemetry-grid-item">
+        <canvas id="pressure_chart"></canvas>
+      </div>
+
+      <div class="telemetry-grid-item">
+        <canvas id="temperature_chart"></canvas>
+      </div>
+
+      <div class="telemetry-grid-item">
+        <canvas id="voltage_chart"></canvas>
+      </div>
+
+      <div class="telemetry-grid-item">
+        <canvas id="gyro_chart"></canvas>
+      </div>
+
+      <div class="telemetry-grid-item">
+        <canvas id="accel_chart"></canvas>
+      </div>
+
+      <div class="telemetry-grid-item">
+        <canvas id="mag_chart"></canvas>
+      </div>
+
     </div>
   `;
 
   charts = {};
 
-  columns.forEach((col) => {
-    const ctx = document.getElementById(`${col}_chart`);
+  function createMultiLineChart(id, labels) {
+    return new Chart(document.getElementById(id), {
+      type: "line",
+      data: {
+        datasets: [
+          { label: "R", data: [], borderColor: "red", tension: 0.4 },
+          { label: "P", data: [], borderColor: "green", tension: 0.4 },
+          { label: "Y", data: [], borderColor: "blue", tension: 0.4 },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        plugins: {
+          legend: { display: true },
+        },
+        scales: {
+          x: { type: "linear", title: { display: true, text: "Packet" } },
+          y: { title: { display: true, text: labels } },
+        },
+      },
+    });
+  }
 
-    charts[col] = new Chart(ctx, {
+  function createSingleChart(id, label) {
+    return new Chart(document.getElementById(id), {
       type: "line",
       data: {
         datasets: [
           {
+            label: label,
             data: [],
-            borderWidth: 2,
-            borderColor: "#8787ffff",
+            borderColor: "#8787ff",
             tension: 0.4,
           },
         ],
@@ -306,58 +337,69 @@ function loadGraphs() {
         responsive: true,
         maintainAspectRatio: false,
         animation: false,
-        plugins: {
-          legend: { display: false },
-        },
+        plugins: { legend: { display: true } },
         scales: {
-          x: {
-            type: "linear",
-            reverse: false,
-            title: { display: true, text: "Packet" },
-          },
-          y: { title: { display: true, text: col } },
+          x: { type: "linear", title: { display: true, text: "Packet" } },
+          y: { title: { display: true, text: label } },
         },
       },
     });
-  });
+  }
 
-  allRows.forEach((row) => {
-    const packet = Number(row["PACKET_COUNT"]);
+  // create charts
+  charts.altitude = createSingleChart("altitude_chart", "ALTITUDE");
+  charts.pressure = createSingleChart("pressure_chart", "PRESSURE");
+  charts.temperature = createSingleChart("temperature_chart", "TEMPERATURE");
+  charts.voltage = createSingleChart("voltage_chart", "VOLTAGE");
 
-    for (let col in charts) {
-      const value = Number(row[col]);
-      if (isNaN(value)) continue;
-
-      charts[col].data.datasets[0].data.push({ x: packet, y: value });
-    }
-  });
+  charts.gyro = createMultiLineChart("gyro_chart", "GYRO (deg/s)");
+  charts.accel = createMultiLineChart("accel_chart", "ACCEL (m/s²)");
+  charts.mag = createMultiLineChart("mag_chart", "MAG (µT)");
 
   chartInitialized = true;
 }
 
 function updateGraphs(row) {
-  if (!row || Object.keys(charts).length === 0) return;
+  if (!row || !charts) return;
 
   const packet = Number(row["PACKET_COUNT"]);
   if (isNaN(packet)) return;
 
-  for (let col in charts) {
-    const value = Number(row[col]);
-    if (isNaN(value)) continue;
+  // Single value charts
+  charts.altitude.data.datasets[0].data.push({ x: packet, y: Number(row["ALTITUDE"]) });
+  charts.pressure.data.datasets[0].data.push({ x: packet, y: Number(row["PRESSURE"]) });
+  charts.temperature.data.datasets[0].data.push({ x: packet, y: Number(row["TEMPERATURE"]) });
+  charts.voltage.data.datasets[0].data.push({ x: packet, y: Number(row["VOLTAGE"]) });
 
-    charts[col].data.datasets[0].data.push({ x: packet, y: value });
+  // Gyro (R,P,Y)
+  charts.gyro.data.datasets[0].data.push({ x: packet, y: Number(row["GYRO_R"]) });
+  charts.gyro.data.datasets[1].data.push({ x: packet, y: Number(row["GYRO_P"]) });
+  charts.gyro.data.datasets[2].data.push({ x: packet, y: Number(row["GYRO_Y"]) });
 
-    if (charts[col].data.datasets[0].data.length > MAX_POINTS) {
-      charts[col].data.datasets[0].data.shift();
-    }
+  // Accel (R,P,Y)
+  charts.accel.data.datasets[0].data.push({ x: packet, y: Number(row["ACCEL_R"]) });
+  charts.accel.data.datasets[1].data.push({ x: packet, y: Number(row["ACCEL_P"]) });
+  charts.accel.data.datasets[2].data.push({ x: packet, y: Number(row["ACCEL_Y"]) });
+
+  // Mag (R,P,Y)
+  charts.mag.data.datasets[0].data.push({ x: packet, y: Number(row["MAG_R"]) });
+  charts.mag.data.datasets[1].data.push({ x: packet, y: Number(row["MAG_P"]) });
+  charts.mag.data.datasets[2].data.push({ x: packet, y: Number(row["MAG_Y"]) });
+
+  // LIMIT POINTS + UPDATE
+  Object.values(charts).forEach(chart => {
+    chart.data.datasets.forEach(ds => {
+      if (ds.data.length > MAX_POINTS) ds.data.shift();
+    });
 
     const minX = Math.max(0, packet - MAX_POINTS + 1);
     const maxX = minX + MAX_POINTS;
 
-    charts[col].options.scales.x.min = minX;
-    charts[col].options.scales.x.max = maxX;
-    charts[col].update("none");
-  }
+    chart.options.scales.x.min = minX;
+    chart.options.scales.x.max = maxX;
+
+    chart.update("none");
+  });
 }
 
 function stopTelemetry() {
