@@ -3,7 +3,7 @@ import { Map } from "./Map.js";
 /* SELECTORS */
 const csvBtn = document.querySelector(".telemetry-btn--csv");
 const graphBtn = document.querySelector(".telemetry-btn--graph");
-const mapBtn = document.querySelector(".telemetry-btn--map");
+const homeBtn = document.querySelector(".telemetry-btn--home");
 
 const missionTimeEl = document.querySelector(".mission-time-value");
 const packetEl = document.querySelector(".packet-count-value");
@@ -12,12 +12,22 @@ const modeEl = document.querySelector(".mode-value");
 const csvContainer = document.querySelector(".telemetry-csv-container");
 const graphContainer = document.querySelector(".telemetry-graph-container");
 const mapContainer = document.querySelector(".telemetry-map-container");
-
+const gnssContainer = document.querySelector(".gnss-container");
+const mainSection = document.querySelector(".telemetry-visualization-section");
 
 const sidebarTempEl = document.querySelector(".sidebar-temp-value");
 const sidebarVoltageEl = document.querySelector(".sidebar-voltage-value");
 const sidebarPressureEl = document.querySelector(".sidebar-pressure-value");
 const sidebarAltitudeEl = document.querySelector(".sidebar-altitude-value");
+const accelREl = document.querySelector(".sidebar-accel-r");
+const accelPEl = document.querySelector(".sidebar-accel-p");
+const accelYEl = document.querySelector(".sidebar-accel-y");
+const gyroREl = document.querySelector(".sidebar-gyro-r");
+const gyroPEl = document.querySelector(".sidebar-gyro-p");
+const gyroYEl = document.querySelector(".sidebar-gyro-y");
+const magREl = document.querySelector(".sidebar-mag-r");
+const magPEl = document.querySelector(".sidebar-mag-p");
+const magYEl = document.querySelector(".sidebar-mag-y");
 const sidebarCmdEl = document.querySelector(".sidebar-cmd-value");
 const sidebarGpsTimeEl = document.querySelector(".sidebar-gps-time-value");
 const sidebarGpsAltitudeEl = document.querySelector(".sidebar-gps-altitude-value");
@@ -38,8 +48,8 @@ let allRows = []; // stores all past telemetry rows
 let chartInitialized = false;
 
 /* DEFAULT VIEW  */
-setActiveButton(graphBtn);
-showGraphView();
+setActiveButton(homeBtn);
+showHomeView();
 loadCSV();
 
 csvBtn.addEventListener("click", () => {
@@ -50,38 +60,56 @@ csvBtn.addEventListener("click", () => {
 
 graphBtn.addEventListener("click", () => {
   setActiveButton(graphBtn);
-  showGraphView();
+  showHomeView();   
   loadGraphs();
+
+  setTimeout(() => {
+    graphContainer.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, 200);
 });
 
-mapBtn.addEventListener("click", () => {
-  setActiveButton(mapBtn);
-  showMapView();
-  Map();
+homeBtn.addEventListener("click", () => {
+  setActiveButton(homeBtn);
+  showHomeView();
+
+  mainSection.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
 });
 
 /*  VIEW FUNCTIONS */
+function showHomeView() {
+  csvContainer.style.display = "none";
+  graphContainer.style.display = "grid";
+  mapContainer.style.display = "none";
+
+  mapDiv.style.display = "block";      
+  gnssContainer.style.display = "block"; 
+
+  Map(); // 
+}
 
 function showCSVView() {
   csvContainer.style.display = "block";
   graphContainer.style.display = "none";
   mapContainer.style.display = "none";
   mapDiv.style.display = "none";
+  gnssContainer.style.display = "none";
+  csvContainer.style.gridColumn = "1 / -1";
 }
 
 function showGraphView() {
   csvContainer.style.display = "none";
   graphContainer.style.display = "grid";
   mapContainer.style.display = "none";
-  mapDiv.style.display = "none";
+  mapDiv.style.display = "block";
+  gnssContainer.style.display = "block";
 }
 
-function showMapView() {
-  csvContainer.style.display = "none";
-  graphContainer.style.display = "none";
-  mapContainer.style.display = "block";
-  mapDiv.style.display = "block";
-}
 
 /* ACTIVE BUTTON */
 
@@ -212,6 +240,17 @@ function updateSidebarTelemetry(row) {
   sidebarGpsLatitudeEl.innerText = row["GPS_LATITUDE"];
   sidebarGpsLongitudeEl.innerText = row["GPS_LONGITUDE"];
   sidebarGpsSatsEl.innerText = row["GPS_SATS"];
+  accelREl.innerText = row["ACCEL_R"];
+  accelPEl.innerText = row["ACCEL_P"];
+  accelYEl.innerText = row["ACCEL_Y"];
+
+  gyroREl.innerText = row["GYRO_R"];
+  gyroPEl.innerText = row["GYRO_P"];
+  gyroYEl.innerText = row["GYRO_Y"];
+
+  magREl.innerText = row["MAG_R"];
+  magPEl.innerText = row["MAG_P"];
+  magYEl.innerText = row["MAG_Y"];
 }
 
 /*  GRAPHS */

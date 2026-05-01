@@ -93,20 +93,38 @@
       </div>
       <!-- Main telemetry visualizations - csv, graphs, map section-->
       <div class="telemetry-visualization-section">
-        <div class="sidebar-sub-section">
+        <div class="sidebar-sub-section gnss-container">
         <div class="sidebar-sub-title">GNSS TELEMETRY</div>
-        <div class="sidebar-fields">
-          GNSS Time: <span class="sidebar-gps-time-value">--</span><br />
-          <br />
-          GNSS Altitude: <span class="sidebar-gps-altitude-value">--</span><br />
-          <br />
-          GNSS Latitude: <span class="sidebar-gps-latitude-value">--</span><br />
-          <br />
-          GNSS Longitude: <span class="sidebar-gps-longitude-value">--</span><br />
-          <br />
-          GNSS Sats: <span class="sidebar-gps-sats-value">--</span>
-        </div>
-      </div>
+
+    <div class="sidebar-fields">
+
+    <div class="field">
+      <span class="label">GNSS Time:</span>
+      <span class="value sidebar-gps-time-value">--</span>
+    </div>
+
+    <div class="field">
+      <span class="label">GNSS Altitude:</span>
+      <span class="value sidebar-gps-altitude-value">--</span>
+    </div>
+
+    <div class="field">
+      <span class="label">GNSS Latitude:</span>
+      <span class="value sidebar-gps-latitude-value">--</span>
+    </div>
+
+    <div class="field">
+      <span class="label">GNSS Longitude:</span>
+      <span class="value sidebar-gps-longitude-value">--</span>
+    </div>
+
+    <div class="field">
+      <span class="label">GNSS Sats:</span>
+      <span class="value sidebar-gps-sats-value">--</span>
+    </div>
+
+  </div>
+  </div>
         <div class="telemetry-csv-container"></div>
         <div class="telemetry-graph-container"></div>
         <div class="telemetry-map-container"></div>
@@ -132,19 +150,64 @@
         </div>
 
       <div class="sidebar-sub-section sidebar-sub-section">
-        <div class="sidebar-sub-title">TELEMETRY</div>
-        <div class="sidebar-fields">
-          Temperature (°C): <span class="sidebar-temp-value">--</span><br />
-          <br />
-          Voltage (V): <span class="sidebar-voltage-value">--</span><br />
-          <br />
-          Pressure (Pa): <span class="sidebar-pressure-value">--</span><br />
-          <br />
-          Altitude (m): <span class="sidebar-altitude-value">--</span><br />
-          <br />
-          CMD ECHO: <span class="sidebar-cmd-value">--</span>
-        </div>
-      </div>
+  <div class="sidebar-sub-title">TELEMETRY</div>
+
+  <div class="sidebar-fields">
+
+  <div class="field">
+    <span class="label">Temperature (°C):</span>
+    <span class="value sidebar-temp-value">--</span>
+  </div>
+
+  <div class="field">
+    <span class="label">Voltage (V):</span>
+    <span class="value sidebar-voltage-value">--</span>
+  </div>
+
+  <div class="field">
+    <span class="label">Pressure (Pa):</span>
+    <span class="value sidebar-pressure-value">--</span>
+  </div>
+
+  <div class="field">
+    <span class="label">Altitude (m):</span>
+    <span class="value sidebar-altitude-value">--</span>
+  </div>
+
+  <div class="field column">
+    <span class="label">Acceleration [R, P, Y] (m/s²)</span>
+    <span class="value">
+      [ <span class="sidebar-accel-r">--</span>, 
+        <span class="sidebar-accel-p">--</span>, 
+        <span class="sidebar-accel-y">--</span> ]
+    </span>
+  </div>
+
+  <div class="field column">
+    <span class="label">Gyro Spin Rate [R, P, Y] (deg/s)</span>
+    <span class="value">
+      [ <span class="sidebar-gyro-r">--</span>, 
+        <span class="sidebar-gyro-p">--</span>, 
+        <span class="sidebar-gyro-y">--</span> ]
+    </span>
+  </div>
+
+  <div class="field column">
+    <span class="label">Magnetic Field [R, P, Y] (µT)</span>
+    <span class="value">
+      [ <span class="sidebar-mag-r">--</span>, 
+        <span class="sidebar-mag-p">--</span>, 
+        <span class="sidebar-mag-y">--</span> ]
+    </span>
+  </div>
+
+  <div class="field">
+    <span class="label">CMD ECHO:</span>
+    <span class="value sidebar-cmd-value">--</span>
+  </div>
+
+</div>
+  </div>
       
       <div class="sidebar-sub-section-for-simulation">
         <div class="sim-option">
