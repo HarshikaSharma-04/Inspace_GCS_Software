@@ -28,7 +28,38 @@ const gyroYEl = document.querySelector(".sidebar-gyro-y");
 const magREl = document.querySelector(".sidebar-mag-r");
 const magPEl = document.querySelector(".sidebar-mag-p");
 const magYEl = document.querySelector(".sidebar-mag-y");
-const sidebarCmdEl = document.querySelector(".sidebar-cmd-value");
+const cmdEchoList = document.getElementById("cmd-echo-list");
+const commandInput = document.querySelector(".command");
+const sendBtn = document.querySelector(".send-btn");
+let commandHistory = [];
+
+function renderCmdEcho(){
+  if(commandHistory.length === 0){
+    cmdEchoList.innerHTML = '<span class="cmd-echo-empty">No commands sent</span>';
+    return;
+  }
+  cmdEchoList.innerHTML = commandHistory
+    .map((cmd, i) => `<div class="cmd-echo-item${i === 0 ? ' cmd-echo-latest' : ''}">&gt; ${cmd}</div>`)
+    .join("");
+}
+
+sendBtn.addEventListener("click", () => {
+  const val = commandInput.value.trim();
+  if(!val) return;
+  commandHistory.unshift(val);
+  renderCmdEcho();
+  commandInput.value = "";
+});
+
+commandInput.addEventListener("keydown", (e)=> {
+  if(e.key !== "Enter") return;
+  const val = commandInput.value.trim();
+  if(!val) return;
+  commandHistory.unshift(val);
+  renderCmdEcho();
+  commandInput.value = "";
+});
+
 const sidebarGpsTimeEl = document.querySelector(".sidebar-gps-time-value");
 const sidebarGpsAltitudeEl = document.querySelector(".sidebar-gps-altitude-value");
 const sidebarGpsLatitudeEl = document.querySelector(".sidebar-gps-latitude-value");
@@ -234,7 +265,6 @@ function updateSidebarTelemetry(row) {
   sidebarVoltageEl.innerText = row["VOLTAGE"];
   sidebarPressureEl.innerText = row["PRESSURE"];
   sidebarAltitudeEl.innerText = row["ALTITUDE"];
-  sidebarCmdEl.innerText = row["CMD_ECHO"];
   sidebarGpsTimeEl.innerText = row["GPS_TIME"];
   sidebarGpsAltitudeEl.innerText = row["GPS_ALTITUDE"];
   sidebarGpsLatitudeEl.innerText = row["GPS_LATITUDE"];

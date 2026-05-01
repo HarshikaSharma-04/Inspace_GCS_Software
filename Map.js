@@ -1,5 +1,5 @@
 let map = null;
-const cansatLocation = [38.4137, -79.5863]; 
+const cansatLocation = [26.69, 84.17];
 
 export function Map(){
     const mapDiv = document.getElementById('map');

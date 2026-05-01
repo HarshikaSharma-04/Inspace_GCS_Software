@@ -253,12 +253,12 @@ body {
 }
 
 .command-area {
-  height: 80px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 2px;
+  padding: 6px 5px;
 }
 
 .command-section .command {
@@ -576,5 +576,57 @@ body {
 /* GRAPHS BELOW FULL WIDTH */
 .telemetry-graph-container {
   grid-column: 1 / span 2;
-  /* grid-row: 2; */
+}
+
+.cmd-echo-section{
+  margin: 0 5px 5px 5px;
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: #ffffff;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cmd-echo-title{
+  font-size: 13px;
+  font-weight: bold;
+  color: #414040;
+  letter-spacing: 0.04em;
+}
+
+.cmd-echo-list{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 80px;
+  max-height: 80px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #b9b8e3 transparent;
+}
+
+.cmd-echo-empty{
+  font-size: 12px;
+  color: #999;
+  font-style: italic;
+}
+
+.cmd-echo-item{
+  font-size: 12px;
+  font-family: monospace;
+  color: #444;
+  padding: 3px 6px;
+  background-color: #eaebfb;
+  border-radius: 4px;
+  border-left: 3px solid #b9b8e3;
+  word-break: break-all;
+}
+
+.cmd-echo-item.cmd-echo-latest{
+  color: #111;
+  border-left-color: #6750a4;
+  font-weight: 700;
+  background-color: #e0dff8;
 }
