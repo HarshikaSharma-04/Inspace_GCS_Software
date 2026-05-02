@@ -205,6 +205,11 @@ function loadCSV() {
         updateTopTelemetry(row);
         updateSidebarTelemetry(row);
         updateGraphs(row);
+        
+        // Update 3D plot
+        if (typeof window.update3DPlot === 'function') {
+          window.update3DPlot(row);
+        }
 
         currentIndex++;
       }
@@ -452,6 +457,11 @@ function stopTelemetry() {
       charts[col].data.datasets[0].data = [];
       charts[col].update("none");
     }
+  }
+
+  // Clear 3D plot
+  if (typeof window.clear3DPlot === 'function') {
+    window.clear3DPlot();
   }
 
   csvData = [];
