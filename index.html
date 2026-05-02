@@ -13,26 +13,43 @@
 </head>
 
 <body>
-  <div class="title-container">
-    <img src="images/indian_flag.png" alt="flag" class="indian-flag" />
+  <header class="title-container">
 
-    <div class="title-text">
-      <h1 class="team-name">DJS ARYA</h1>
-      <h3 class="team-id">TEAM ID XXX</h3>
+  <!-- TOP ROW -->
+  <div class="data-details">
+
+  <img src="images/indian_flag.png" alt="flag" class="indian-flag" />
+
+  <h3 class="team-id">TEAM ID XXX</h3>
+
+  <h3 class="data">
+    Mission Time: <span class="mission-time-value">00:00:00</span>
+  </h3>
+
+  <h1 class="team-name">DJS ARYA</h1>
+
+  <h3 class="data">
+    Packet Count: <span class="packet-count-value">0000</span>
+  </h3>
+
+  <h3 class="data">
+    Mode: <span class="mode-value">Flight</span>
+  </h3>
+
+  <img src="images/team_logo.png" alt="team-logo" class="team-logo" />
+
+</div>
+
+  <!-- NAV ROW -->
+  <div class="nav-tabs">
+    <div class="tabs-options">
+      <button class="page-button telemetry-btn--home">HOME</button>
+      <button class="page-button telemetry-btn--graph">GRAPHS</button>
+      <button class="page-button telemetry-btn--csv">CSV</button>
     </div>
-
-    <div class="data-details">
-      <h3 class="data">
-        Mission Time: <span class="mission-time-value">00:00:00</span>
-      </h3>
-      <h3 class="data">
-        Packet Count: <span class="packet-count-value">0000</span>
-      </h3>
-      <h3 class="data">Mode: <span class="mode-value">Flight </span></h3>
-    </div>
-
-    <img src="images/team_logo.png" alt="team-logo" class="team-logo" />
   </div>
+
+</header>
 
   <!-- Yahan se Essential info + Flight State + Command Section -->
   <div class="main-container">
@@ -90,6 +107,7 @@
           </div>
 
         </div>
+         
       </div>
       <!-- Main telemetry visualizations - csv, graphs, map section-->
       <div class="telemetry-visualization-section">
@@ -135,12 +153,7 @@
     <!-- Sidebar -->
     <div class="sidebar">
       <!--Power & restart buttons-->
-      <div class="tabs-options">
-        <button class="page-button telemetry-btn--home">HOME</button>
-        <button class="page-button telemetry-btn--graph">GRAPHS</button>
-        <button class="page-button telemetry-btn--csv">CSV</button>
-        <!-- <button class="page-button telemetry-btn--map">MAPS</button> -->
-      </div>
+     
       <div class="cmd-echo-section">
         <div class="cmd-echo-title">CMD ECHO</div>
         <div class="cmd-echo-list" id="cmd-echo-list">
