@@ -39,14 +39,15 @@ function renderCmdEcho(){
     return;
   }
   cmdEchoList.innerHTML = commandHistory
-    .map((cmd, i) => `<div class="cmd-echo-item${i === 0 ? ' cmd-echo-latest' : ''}">&gt; ${cmd}</div>`)
+    .map((cmd, i) => `<div class="cmd-echo-item${i === commandHistory.length - 1 ? ' cmd-echo-latest' : ''}">&gt; ${cmd}</div>`)
     .join("");
+  cmdEchoList.scrollTop = cmdEchoList.scrollHeight;
 }
 
 sendBtn.addEventListener("click", () => {
   const val = commandInput.value.trim();
   if(!val) return;
-  commandHistory.unshift(val);
+  commandHistory.push(val);
   renderCmdEcho();
   commandInput.value = "";
 });
@@ -55,7 +56,7 @@ commandInput.addEventListener("keydown", (e)=> {
   if(e.key !== "Enter") return;
   const val = commandInput.value.trim();
   if(!val) return;
-  commandHistory.unshift(val);
+  commandHistory.push(val);
   renderCmdEcho();
   commandInput.value = "";
 });
