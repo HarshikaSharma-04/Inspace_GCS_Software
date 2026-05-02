@@ -31,6 +31,7 @@ const magYEl = document.querySelector(".sidebar-mag-y");
 const cmdEchoList = document.getElementById("cmd-echo-list");
 const commandInput = document.querySelector(".command");
 const sendBtn = document.querySelector(".send-btn");
+const cmdBottomContainer = document.querySelector(".cmd-bottom-container");
 let commandHistory = [];
 
 function renderCmdEcho(){
@@ -120,7 +121,8 @@ function showHomeView() {
   mapContainer.style.display = "none";
 
   mapDiv.style.display = "block";      
-  gnssContainer.style.display = "block"; 
+  gnssContainer.style.display = "block";
+  cmdBottomContainer.style.display = "flex";
 
   Map(); // 
 }
@@ -131,6 +133,7 @@ function showCSVView() {
   mapContainer.style.display = "none";
   mapDiv.style.display = "none";
   gnssContainer.style.display = "none";
+  cmdBottomContainer.style.display = "none";
   csvContainer.style.gridColumn = "1 / -1";
 }
 
@@ -140,6 +143,7 @@ function showGraphView() {
   mapContainer.style.display = "none";
   mapDiv.style.display = "block";
   gnssContainer.style.display = "block";
+  cmdBottomContainer.style.display = "flex";
 }
 
 
