@@ -356,8 +356,8 @@ function loadGraphs() {
           legend: { display: true },
         },
         scales: {
-          x: { type: "linear", title: { display: true, text: "Packet" } },
-          y: { title: { display: true, text: labels } },
+          x: { type: "linear", title: { display: true, text: "Packet" } ,grid: { display: false }},
+          y: { title: { display: true, text: labels },grid: { display: false }},
         },
       },
     });
@@ -382,8 +382,8 @@ function loadGraphs() {
         animation: false,
         plugins: { legend: { display: true } },
         scales: {
-          x: { type: "linear", title: { display: true, text: "Packet" } },
-          y: { title: { display: true, text: label } },
+          x: { type: "linear", title: { display: true, text: "Packet" } ,grid: { display: false }},
+          y: { title: { display: true, text: label },grid: { display: false }},
         },
       },
     });
