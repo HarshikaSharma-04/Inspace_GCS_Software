@@ -399,6 +399,9 @@ body {
   font-weight: bold;
   margin-bottom: 20px;
 }
+.telemetry{
+  text-align: center;
+}
 
 .sidebar-fields {
   display: flex;
