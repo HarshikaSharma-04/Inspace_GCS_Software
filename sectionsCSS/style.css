@@ -725,7 +725,7 @@ body {
 .label {
   font-size: 18px;
   font-weight: bold;
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
   color: #555;
 }
 

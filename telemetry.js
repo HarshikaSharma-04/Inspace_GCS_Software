@@ -278,10 +278,10 @@ function updateSidebarTelemetry(row) {
   sidebarVoltageEl.innerText = row["VOLTAGE"];
   sidebarPressureEl.innerText = row["PRESSURE"];
   sidebarAltitudeEl.innerText = row["ALTITUDE"];
-  sidebarGpsTimeEl.innerText = row["GNSS_TIME"];
-  sidebarGpsAltitudeEl.innerText = row["GNSS_ALTITUDE"];
-  sidebarGpsLatitudeEl.innerText = row["GNSS_LATITUDE"];
-  sidebarGpsLongitudeEl.innerText = row["GNSS_LONGITUDE"];
+  sidebarGpsTimeEl.innerText = row["GNSS_TIME"]+" s";
+  sidebarGpsAltitudeEl.innerText = row["GNSS_ALTITUDE"]+" m";
+  sidebarGpsLatitudeEl.innerText = row["GNSS_LATITUDE"]+"°";
+  sidebarGpsLongitudeEl.innerText = row["GNSS_LONGITUDE"]+"°";
   sidebarGpsSatsEl.innerText = row["GNSS_SATS"];
   accelREl.innerText = row["ACCEL_R"];
   accelPEl.innerText = row["ACCEL_P"];
