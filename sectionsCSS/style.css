@@ -20,7 +20,7 @@ body {
 .title-container {
   display: flex;
   align-items: center;
-  padding: 10px 30px;
+  padding: 0 30px;
   height: 80px;
   background: #cfd0f2;
   border-bottom: 1px solid black;
@@ -29,8 +29,7 @@ body {
 
 .indian-flag,
 .team-logo {
-  height: 70px;
-  width: auto;
+  margin: 1px;
 }
 
 .title-text {
@@ -50,6 +49,12 @@ body {
 .team-id {
   font-size: 40px;
   color: #666;
+}
+
+.team-id,
+.team-name,
+.data-details h3 {
+  margin: 0;
 }
 
 .essential-container {
@@ -93,7 +98,7 @@ body {
 }
 
 .data {
-  margin-top: 7px;
+  margin-top: 0;
 }
 
 .main-container {
@@ -118,7 +123,7 @@ body {
 }
 
 .sidebar {
-  max-width: 20%;     
+  width: 22%;
   background-color: #cfd0f2;
   border: 1px solid black;
   border-radius: 5px;
@@ -132,15 +137,17 @@ body {
 
 .tabs-options {
   margin-top: 5px;
-  width: 95%;
+  /* width: 100%; */
+  max-width: 20%;
   border: 1px solid black;
   border-radius: 5px;
   display: flex;
-  align-items: center;
-  justify-content: space-around;
+  gap: 5px;
+  /* align-items: center; */
+  justify-content: space-between;
   background-color: white;
   padding: 10px;
-  margin: 5px;
+  /* margin: 5px; */
   font-weight: bolder;
 }
 
@@ -158,17 +165,30 @@ body {
 }
 
 .data-details {
-  height: auto;
+  /* height: 100%;        */
   display: flex;
+  /* align-items: center;  */
+  justify-content: space-between;
   flex-direction: row;
+  height: 80px;
+  width: 100%;
   background-color: #cfd0f2;
   color: black;
-  gap: 20px;
+  gap: 50px;
+}
+
+.data-details h1,
+.data-details h3,
+.data-details .data {
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
 }
 
 .data-details h3 {
   font-weight: 500;
 }
+
 .data-details span {
   font-weight: 700;
 }
@@ -261,18 +281,12 @@ body {
   padding: 6px 5px;
 }
 
-.cmd-echo-section{
-  margin: 0 5px 5px 5px;
-  border: 1px solid black;
-  border-radius: 5px;
-  background-color: #ffffff;
-  padding: 8px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.command-section {
+  flex: 1;
 }
 
 .command-section .command {
+  width: 100%;
   background-color: #eaebfb;
   border: 2px solid black;
   border-radius: 8px;
@@ -302,7 +316,8 @@ body {
   margin: 5px;
   gap: 10px;
 }
-.sidebar-sub-section-for-simulation{
+
+.sidebar-sub-section-for-simulation {
   margin-top: 5px;
   border: 1px solid black;
   border-radius: 5px;
@@ -315,6 +330,7 @@ body {
   margin: 5px;
   gap: 50px;
 }
+
 .sim-option {
   display: flex;
   flex-direction: row;
@@ -342,11 +358,11 @@ body {
   border-radius: 12px;
 }
 
-.switch:hover{
+.switch:hover {
   background-color: #88fd5d;
 }
 
-.send-btn:hover{
+.send-btn:hover {
   background-color: #88fd5d;
 }
 
@@ -383,17 +399,19 @@ body {
   font-weight: bold;
   margin-bottom: 20px;
 }
+
 .sidebar-fields {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  font-size: 14px;
+  font-size: 20px;
 }
 
 .field {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
 }
 
 .field.column {
@@ -409,7 +427,7 @@ body {
 
 .value {
   font-weight: 700;
-  font-size: 16px;
+  font-size: 20px;
   color: #111;
 }
 
@@ -451,7 +469,8 @@ body {
 
 .telemetry-csv-container {
   width: 100%;
-  grid-column: 1 / -1; /* FULL WIDTH */
+  grid-column: 1 / -1;
+  /* FULL WIDTH */
 }
 
 .csv-table {
@@ -526,7 +545,7 @@ body {
 }
 
 .stage-box {
-  background: #e9e6ff;           
+  background: #e9e6ff;
   padding: 8px 18px;
   border-radius: 8px;
   font-size: 15px;
@@ -542,7 +561,7 @@ body {
 }
 
 .stage-box.current {
-  background: #39a845;           
+  background: #39a845;
   border-color: #39a845;
   color: white;
 }
@@ -561,16 +580,10 @@ body {
   text-align: center;
   transition: 0.2s;
 }
-.telemetry-visualization-section {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  grid-template-rows: auto auto;
-  gap: 15px;
-}
 
 .telemetry-visualization-section {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto;
   gap: 15px;
 }
@@ -578,14 +591,14 @@ body {
 /* GNSS */
 .gnss-container {
   grid-column: 1;
+  grid-row: 1 / span 2;
+  height: 60%;
 }
 
 /* MAP RIGHT */
 #map {
-  width: 100%;
-  height: 100%;
-  background-color: #eee;
-  z-index: 1;
+  min-height: 30rem;
+  background-color: #eeeeee00;
   grid-column: 2;
   grid-row: 1;
   border-radius: 10px;
@@ -596,14 +609,50 @@ body {
   grid-column: 1 / span 2;
 }
 
-.cmd-echo-title{
+.cmd-echo-section {
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: #ffffff;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.cmd-bottom-container {
+  margin-top: 30px;
+  height: 60%;
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  width: 100%;
+  background-color: #cfd0f2;
+  border-radius: 5px;
+  border: 2px solid #8f82b2;
+}
+
+.cmd-bottom-container .command-area {
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 0;
+  width: 100%;
+}
+
+.cmd-echo-title {
   font-size: 13px;
   font-weight: bold;
   color: #414040;
   letter-spacing: 0.04em;
 }
 
-.cmd-echo-list{
+.cmd-echo-list {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -614,13 +663,13 @@ body {
   scrollbar-color: #b9b8e3 transparent;
 }
 
-.cmd-echo-empty{
+.cmd-echo-empty {
   font-size: 12px;
   color: #999;
   font-style: italic;
 }
 
-.cmd-echo-item{
+.cmd-echo-item {
   font-size: 12px;
   font-family: monospace;
   color: #444;
@@ -631,37 +680,59 @@ body {
   word-break: break-all;
 }
 
-.cmd-echo-item.cmd-echo-latest{
+.cmd-echo-item.cmd-echo-latest {
   color: #111;
   border-left-color: #6750a4;
   font-weight: 700;
   background-color: #e0dff8;
 }
 
-/* 3D Plot Section */
-.plot-3d-section {
-  margin: 5px;
-  border: 1px solid black;
-  border-radius: 5px;
-  background-color: #ffffff;
-  padding: 10px;
+
+/* Container for the 2-column top section */
+/* Container for the 2-column top section */
+.sensor-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  /* Slightly tighter gap between boxes */
+  margin-bottom: 8px;
+}
+
+/* Individual boxes */
+.sensor-grid .field,
+.field.column {
+  background: #e8e8e8;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  /* Centers the group vertically */
 }
 
-.plot-3d-title {
-  font-size: 14px;
+.sensor-grid .field {
+  flex: 1 1 calc(50% - 8px);
+  height: 50%;
+}
+
+/* THE FIX: Reduce gap between label and value */
+.label {
+  font-size: 18px;
   font-weight: bold;
-  color: #414040;
-  letter-spacing: 0.04em;
-  text-align: center;
+  text-transform: uppercase;
+  color: #555;
 }
 
-#plot-3d-container {
+.value {
+  font-family: monospace;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+/* Ensure the full-width boxes also stay tight */
+.field.column {
+  margin-bottom: 5px;
   width: 100%;
-  height: 300px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
 }
