@@ -7,6 +7,14 @@ let trajectoryData = {
 
 // Initialize 3D Plot
 function init3DPlot() {
+  console.log('Initializing 3D Plot...');
+  
+  const container = document.getElementById('plot-3d-container');
+  if (!container) {
+    console.error('3D plot container not found!');
+    return;
+  }
+  
   const trace = {
     x: [0],
     y: [0],
@@ -19,15 +27,7 @@ function init3DPlot() {
     },
     marker: {
       size: 4,
-      color: [0],
-      colorscale: 'Jet',
-      showscale: true,
-      colorbar: {
-        title: 'Alt (m)',
-        thickness: 10,
-        len: 0.6,
-        x: 1.02
-      }
+      color: '#6750a4'
     },
     name: 'Flight Path'
   };
@@ -49,12 +49,12 @@ function init3DPlot() {
 
   const config = {
     responsive: true,
-    displayModeBar: true,
-    displaylogo: false,
-    modeBarButtonsToRemove: ['toImage', 'select2d', 'lasso2d']
+    displayModeBar: false
   };
 
-  Plotly.newPlot('plot-3d-container', [trace], layout, config);
+  Plotly.newPlot('plot-3d-container', [trace], layout, config)
+    .then(() => console.log('3D Plot initialized successfully!'))
+    .catch(err => console.error('Error initializing 3D plot:', err));
 }
 
 // Initialize when DOM is ready
@@ -68,21 +68,28 @@ if (document.readyState === 'loading') {
 function update3DPlot(row) {
   if (!row) return;
   
-  const lat = parseFloat(row.GPS_LATITUDE);
-  const lon = parseFloat(row.GPS_LONGITUDE);
-  const alt = parseFloat(row.GPS_ALTITUDE);
+  // Handle column names with or without spaces
+  const lat = parseFloat(row.GNSS_LATITUDE || row[' GNSS_LATITUDE'] || row['GNSS_LATITUDE ']);
+  const lon = parseFloat(row.GNSS_LONGITUDE || row[' GNSS_LONGITUDE'] || row['GNSS_LONGITUDE ']);
+  const alt = parseFloat(row.GNSS_ALTITUDE || row[' GNSS_ALTITUDE'] || row['GNSS_ALTITUDE ']);
   
-  if (isNaN(lat) || isNaN(lon) || isNaN(alt)) return;
+  console.log('3D Plot Update:', { lat, lon, alt, row }); // Debug log
+  
+  if (isNaN(lat) || isNaN(lon) || isNaN(alt)) {
+    console.log('Invalid GPS data, skipping update');
+    return;
+  }
   
   trajectoryData.lat.push(lat);
   trajectoryData.lon.push(lon);
   trajectoryData.alt.push(alt);
   
+  console.log('Trajectory data:', trajectoryData); // Debug log
+  
   const update = {
     x: [trajectoryData.lon],
     y: [trajectoryData.lat],
-    z: [trajectoryData.alt],
-    'marker.color': [trajectoryData.alt]
+    z: [trajectoryData.alt]
   };
   
   Plotly.restyle('plot-3d-container', update, [0]);
@@ -94,8 +101,7 @@ function clear3DPlot() {
   const update = {
     x: [[0]],
     y: [[0]],
-    z: [[0]],
-    'marker.color': [[0]]
+    z: [[0]]
   };
   Plotly.restyle('plot-3d-container', update, [0]);
 }

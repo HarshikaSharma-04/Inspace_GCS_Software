@@ -32,7 +32,6 @@ const magYEl = document.querySelector(".sidebar-mag-y");
 const cmdEchoList = document.getElementById("cmd-echo-list");
 const commandInput = document.querySelector(".command");
 const sendBtn = document.querySelector(".send-btn");
-const cmdBottomContainer = document.querySelector(".cmd-bottom-container");
 let commandHistory = [];
 
 function renderCmdEcho(){
@@ -63,11 +62,11 @@ commandInput.addEventListener("keydown", (e)=> {
   commandInput.value = "";
 });
 
-const sidebarGnssTimeEl = document.querySelector(".sidebar-gnss-time-value");
-const sidebarGnssAltitudeEl = document.querySelector(".sidebar-gnss-altitude-value");
-const sidebarGnssLatitudeEl = document.querySelector(".sidebar-gnss-latitude-value");
-const sidebarGnssLongitudeEl = document.querySelector(".sidebar-gnss-longitude-value");
-const sidebarGnssSatsEl = document.querySelector(".sidebar-gnss-sats-value");
+const sidebarGpsTimeEl = document.querySelector(".sidebar-gps-time-value");
+const sidebarGpsAltitudeEl = document.querySelector(".sidebar-gps-altitude-value");
+const sidebarGpsLatitudeEl = document.querySelector(".sidebar-gps-latitude-value");
+const sidebarGpsLongitudeEl = document.querySelector(".sidebar-gps-longitude-value");
+const sidebarGpsSatsEl = document.querySelector(".sidebar-gps-sats-value");
 const mapDiv = document.getElementById("map");
 
 
@@ -122,10 +121,9 @@ function showHomeView() {
   mapContainer.style.display = "none";
 
   mapDiv.style.display = "block";      
-  gnssContainer.style.display = "block";
-  cmdBottomContainer.style.display = "flex";
-  sidebar.style.display = "flex";
-  Map(); // 
+  gnssContainer.style.display = "block"; 
+
+  Map();
 }
 
 function showCSVView() {
@@ -134,8 +132,6 @@ function showCSVView() {
   mapContainer.style.display = "none";
   mapDiv.style.display = "none";
   gnssContainer.style.display = "none";
-  cmdBottomContainer.style.display = "none";
-  sidebar.style.display = "none";
   csvContainer.style.gridColumn = "1 / -1";
   
 }
@@ -146,8 +142,6 @@ function showGraphView() {
   mapContainer.style.display = "none";
   mapDiv.style.display = "block";
   gnssContainer.style.display = "block";
-  cmdBottomContainer.style.display = "flex";
-  sidebar.style.display = "flex"; 
 }
 
 
@@ -215,8 +209,11 @@ function loadCSV() {
         updateGraphs(row);
         
         // Update 3D plot
+        console.log('Attempting to update 3D plot, function exists:', typeof window.update3DPlot);
         if (typeof window.update3DPlot === 'function') {
           window.update3DPlot(row);
+        } else {
+          console.error('update3DPlot function not found!');
         }
 
         currentIndex++;
@@ -279,11 +276,11 @@ function updateSidebarTelemetry(row) {
   sidebarVoltageEl.innerText = row["VOLTAGE"];
   sidebarPressureEl.innerText = row["PRESSURE"];
   sidebarAltitudeEl.innerText = row["ALTITUDE"];
-  sidebarGnssTimeEl.innerText = row["GNSS_TIME"];
-  sidebarGnssAltitudeEl.innerText = row["GNSS_ALTITUDE"];
-  sidebarGnssLatitudeEl.innerText = row["GNSS_LATITUDE"];
-  sidebarGnssLongitudeEl.innerText = row["GNSS_LONGITUDE"];
-  sidebarGnssSatsEl.innerText = row["GNSS_SATS"];
+  sidebarGpsTimeEl.innerText = row["GNSS_TIME"];
+  sidebarGpsAltitudeEl.innerText = row["GNSS_ALTITUDE"];
+  sidebarGpsLatitudeEl.innerText = row["GNSS_LATITUDE"];
+  sidebarGpsLongitudeEl.innerText = row["GNSS_LONGITUDE"];
+  sidebarGpsSatsEl.innerText = row["GNSS_SATS"];
   accelREl.innerText = row["ACCEL_R"];
   accelPEl.innerText = row["ACCEL_P"];
   accelYEl.innerText = row["ACCEL_Y"];

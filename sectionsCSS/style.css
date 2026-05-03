@@ -261,6 +261,17 @@ body {
   padding: 6px 5px;
 }
 
+.cmd-echo-section{
+  margin: 0 5px 5px 5px;
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: #ffffff;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .command-section .command {
   background-color: #eaebfb;
   border: 2px solid black;
@@ -557,6 +568,13 @@ body {
   gap: 15px;
 }
 
+.telemetry-visualization-section {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  grid-template-rows: auto auto;
+  gap: 15px;
+}
+
 /* GNSS */
 .gnss-container {
   grid-column: 1;
@@ -576,17 +594,6 @@ body {
 /* GRAPHS BELOW FULL WIDTH */
 .telemetry-graph-container {
   grid-column: 1 / span 2;
-}
-
-.cmd-echo-section{
-  margin: 0 5px 5px 5px;
-  border: 1px solid black;
-  border-radius: 5px;
-  background-color: #ffffff;
-  padding: 8px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
 }
 
 .cmd-echo-title{
