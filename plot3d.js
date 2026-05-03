@@ -7,43 +7,77 @@ let trajectoryData = {
 
 // Initialize 3D Plot
 function init3DPlot() {
-  console.log('Initializing 3D Plot...');
-  
   const container = document.getElementById('plot-3d-container');
   if (!container) {
     console.error('3D plot container not found!');
     return;
   }
-  
+
+  // Color constants from your desired config
+  const woodMain = "#ffffff",
+    woodDarkText = "#131313",
+    woodPath = "#2E7D32";
+
   const trace = {
     x: [0],
     y: [0],
     z: [0],
-    mode: 'lines+markers',
+    mode: 'lines', // Changed to lines per second config
     type: 'scatter3d',
     line: {
-      color: '#6750a4',
-      width: 6
+      color: woodPath,
+      width: 8
     },
-    marker: {
-      size: 4,
-      color: '#6750a4'
-    },
+    hovertemplate: "<b>Lat:</b> %{x:.4f}<br><b>Long:</b> %{y:.4f}<br><b>Alt:</b> %{z:.1f}m<extra></extra>",
     name: 'Flight Path'
   };
 
   const layout = {
-    margin: { l: 0, r: 0, t: 10, b: 0 },
+    autosize: true,
+    margin: { l: 0, r: 40, b: 40, t: 0 },
+    paper_bgcolor: "transparent",
+    plot_bgcolor: "white",
     scene: {
-      xaxis: { title: 'Longitude', gridcolor: '#e0e0e0', showbackground: true },
-      yaxis: { title: 'Latitude', gridcolor: '#e0e0e0', showbackground: true },
-      zaxis: { title: 'Altitude (m)', gridcolor: '#e0e0e0', showbackground: true },
+      aspectmode: "manual",
+      aspectratio: { x: 1.0, y: 0.8, z: 1.5 },
+      bgcolor: woodMain,
       camera: {
-        eye: { x: 1.8, y: 1.8, z: 1.3 }
+        eye: { x: 2.0, y: -2.0, z: 1.2 },
+        center: { x: 0, y: 0, z: 0 },
+        up: { x: 0, y: 0, z: 1 },
       },
-      bgcolor: '#f8f9fa'
+      xaxis: {
+        title: {
+          text: "Latitude",
+          font: { color: woodDarkText, weight: "bold" },
+        },
+        backgroundcolor: woodMain,
+        gridcolor: woodDarkText,
+        showbackground: true,
+        tickfont: { color: woodDarkText },
+      },
+      yaxis: {
+        title: {
+          text: "Longitude",
+          font: { color: woodDarkText, weight: "bold" },
+        },
+        backgroundcolor: woodMain,
+        gridcolor: woodDarkText,
+        showbackground: true,
+        tickfont: { color: woodDarkText },
+      },
+      zaxis: {
+        title: {
+          text: "Altitude",
+          font: { color: woodDarkText, weight: "bold", size: 16 },
+        },
+        backgroundcolor: woodMain,
+        gridcolor: woodDarkText,
+        showbackground: true,
+        tickfont: { color: woodDarkText },
+      },
     },
-    paper_bgcolor: '#ffffff',
+    font: { family: "monospace", size: 14, color: woodDarkText },
     showlegend: false
   };
 
@@ -53,7 +87,13 @@ function init3DPlot() {
   };
 
   Plotly.newPlot('plot-3d-container', [trace], layout, config)
-    .then(() => console.log('3D Plot initialized successfully!'))
+    .then(() => {
+      console.log('3D Plot initialized successfully!');
+      // Assuming you still want to track initialization state
+      if (typeof is3DMapInitialized !== 'undefined') {
+          is3DMapInitialized = true;
+      }
+    })
     .catch(err => console.error('Error initializing 3D plot:', err));
 }
 

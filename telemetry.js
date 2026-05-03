@@ -250,7 +250,7 @@ function loadCSV() {
 function updateTopTelemetry(row) {
   if (!row) return;
 
-  missionTimeEl.innerText = row["MISSION_TIME"];
+  missionTimeEl.innerText = row["TIME_STAMPING"];
   packetEl.innerText = String(row["PACKET_COUNT"]).padStart(2, "0");
 
   if (row["MODE"] === " F") {
@@ -369,7 +369,9 @@ function loadGraphs() {
           legend: { display: true },
         },
         scales: {
-          x: { type: "linear", title: { display: true, text: "Packet" } ,grid: { display: false }},
+          x: { type: "linear", title: { display: true, text: "Packet" } ,grid: { display: false },beginAtZero: true,min: 0,ticks: {
+                stepSize: 1
+            },},
           y: { title: { display: true, text: labels },grid: { display: false }},
         },
       },
@@ -395,8 +397,10 @@ function loadGraphs() {
         animation: false,
         plugins: { legend: { display: true } },
         scales: {
-          x: { type: "linear", title: { display: true, text: "Packet" } ,grid: { display: false }},
-          y: { title: { display: true, text: label },grid: { display: false }},
+          x: { type: "linear", title: { display: true, text: "Packet" } ,grid: { display: false },beginAtZero: true,min: 0,ticks: {
+                stepSize: 1,
+            },},
+          y: { title: { display: true, text: label },grid: { display: false },beginAtZero: true,min: 0 },
         },
       },
     });
