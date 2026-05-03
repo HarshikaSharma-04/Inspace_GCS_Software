@@ -1,6 +1,6 @@
 const packetNumbers = [1,2,3,4,5,6,7,8];
 //these are all the assumed values for now
-const data_altitude = [120, 130, 125, 140, 135, 138, 142, 145];
+const data_altitude = [10,10.2,10.1,10,10,10,10,10];
 const data_temperature = [23,24,25,25.5,26,27,26.5,27.2];
 const voltage = [12.5,12.3,12.1,11.9,11.8,11.7,11.6,11.5];
 const gyro_r = [0,5,10,7,3,-5,0,2];
