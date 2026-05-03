@@ -19,8 +19,8 @@ body {
 
 .title-container {
   display: flex;
-  align-items: center;
-  padding: 10px 30px;
+  align-items: center; 
+  padding: 0 30px;   
   height: 80px;
   background: #cfd0f2;
   border-bottom: 1px solid black;
@@ -50,6 +50,10 @@ body {
 .team-id {
   font-size: 40px;
   color: #666;
+}
+
+.team-id, .team-name, .data-details h3 {
+  margin: 0;
 }
 
 .essential-container {
@@ -93,7 +97,7 @@ body {
 }
 
 .data {
-  margin-top: 7px;
+  margin-top: 0;
 }
 
 .main-container {
@@ -137,7 +141,7 @@ body {
   border-radius: 5px;
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-between;
   background-color: white;
   padding: 10px;
   margin: 5px;
@@ -158,9 +162,12 @@ body {
 }
 
 .data-details {
-  height: auto;
+  /* height: 100%;        */
   display: flex;
+  align-items: center; 
   flex-direction: row;
+  height: 80px;           
+  width: 100%;
   background-color: #cfd0f2;
   color: black;
   gap: 20px;
