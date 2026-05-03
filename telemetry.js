@@ -14,6 +14,7 @@ const graphContainer = document.querySelector(".telemetry-graph-container");
 const mapContainer = document.querySelector(".telemetry-map-container");
 const gnssContainer = document.querySelector(".gnss-container");
 const mainSection = document.querySelector(".telemetry-visualization-section");
+const sidebar = document.querySelector(".sidebar");
 
 const sidebarTempEl = document.querySelector(".sidebar-temp-value");
 const sidebarVoltageEl = document.querySelector(".sidebar-voltage-value");
@@ -123,7 +124,7 @@ function showHomeView() {
   mapDiv.style.display = "block";      
   gnssContainer.style.display = "block";
   cmdBottomContainer.style.display = "flex";
-
+  sidebar.style.display = "flex";
   Map(); // 
 }
 
@@ -134,7 +135,9 @@ function showCSVView() {
   mapDiv.style.display = "none";
   gnssContainer.style.display = "none";
   cmdBottomContainer.style.display = "none";
+  sidebar.style.display = "none";
   csvContainer.style.gridColumn = "1 / -1";
+  
 }
 
 function showGraphView() {
@@ -144,6 +147,7 @@ function showGraphView() {
   mapDiv.style.display = "block";
   gnssContainer.style.display = "block";
   cmdBottomContainer.style.display = "flex";
+  sidebar.style.display = "flex"; 
 }
 
 
