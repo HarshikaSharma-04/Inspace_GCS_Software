@@ -122,7 +122,7 @@ function showHomeView() {
 
   mapDiv.style.display = "block";      
   gnssContainer.style.display = "block"; 
-
+  sidebar.style.display = "flex";
   Map();
 }
 
@@ -132,6 +132,7 @@ function showCSVView() {
   mapContainer.style.display = "none";
   mapDiv.style.display = "none";
   gnssContainer.style.display = "none";
+  sidebar.style.display = "none";
   csvContainer.style.gridColumn = "1 / -1";
   
 }
@@ -141,6 +142,7 @@ function showGraphView() {
   graphContainer.style.display = "grid";
   mapContainer.style.display = "none";
   mapDiv.style.display = "block";
+  sidebar.style.display = "flex"; 
   gnssContainer.style.display = "block";
 }
 
