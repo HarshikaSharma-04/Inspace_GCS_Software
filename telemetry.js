@@ -32,6 +32,18 @@ const magYEl = document.querySelector(".sidebar-mag-y");
 const cmdEchoList = document.getElementById("cmd-echo-list");
 const commandInput = document.querySelector(".command");
 const sendBtn = document.querySelector(".send-btn");
+
+const STATE_ORDER = [
+  "BOOT",
+  "TEST_MODE",
+  "LAUNCH_PAD",
+  "ASCENT",
+  "ROCKET_DEPLOY",
+  "DESCENT",
+  "AEROBREAK_RELEASE",
+  "IMPACT"
+];
+
 let commandHistory = [];
 
 function renderCmdEcho(){
@@ -247,7 +259,10 @@ function updateTopTelemetry(row) {
     modeEl.innerText = "SIMULATION";
   }
 
-  updateStageIndicators(parseInt(row["STATE"]));
+  const stateStr = row["STATE"].trim();
+  const currentStateIndex = STATE_ORDER.indexOf(stateStr);
+
+  updateStageIndicators(currentStateIndex);
   allRows.push(row);
 }
 
@@ -256,14 +271,12 @@ function updateStageIndicators(currentState) {
   const stageBoxes = document.querySelectorAll(".stage-box");
 
   stageBoxes.forEach((box, index) => {
-    const stageNumber = index + 1;
-
-    // reset
     box.classList.remove("completed", "current");
 
-    if (stageNumber > currentState) {
+    if (index < currentState) {
       box.classList.add("completed");
-    } else if (stageNumber === currentState) {
+    } 
+    else if (index === currentState) {
       box.classList.add("current");
     }
   });
