@@ -118,27 +118,27 @@
 
             <div class="field">
               <span class="label">GNSS Time:</span>
-              <span class="value sidebar-gnss-time-value">--</span>
+              <span class="value sidebar-gps-time-value">--</span>
             </div>
 
             <div class="field">
               <span class="label">GNSS Altitude:</span>
-              <span class="value sidebar-gnss-altitude-value">--</span>
+              <span class="value sidebar-gps-altitude-value">--</span>
             </div>
 
             <div class="field">
               <span class="label">GNSS Latitude:</span>
-              <span class="value sidebar-gnss-latitude-value">--</span>
+              <span class="value sidebar-gps-latitude-value">--</span>
             </div>
 
             <div class="field">
               <span class="label">GNSS Longitude:</span>
-              <span class="value sidebar-gnss-longitude-value">--</span>
+              <span class="value sidebar-gps-longitude-value">--</span>
             </div>
 
             <div class="field">
               <span class="label">GNSS Sats:</span>
-              <span class="value sidebar-gnss-sats-value">--</span>
+              <span class="value sidebar-gps-sats-value">--</span>
             </div>
 
           </div>
@@ -234,6 +234,12 @@
           <button class="switch"><h4 class="simulation-mode-title">SIM ACTIVATE</h4></button>
         </div>
       </div> -->
+
+      <!-- 3D Plot Section -->
+      <div class="plot-3d-section">
+        <div class="plot-3d-title">3D TRAJECTORY</div>
+        <div id="plot-3d-container"></div>
+      </div>
     </div>
   </div>
   <!--seperate div for other data fields-->
@@ -243,8 +249,10 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 
 <script src="chart.js"></script>
+<script src="plot3d.js"></script>
 <script type="module" src="telemetry.js"></script>
 
 </html>
