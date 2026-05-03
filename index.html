@@ -15,41 +15,41 @@
 <body>
   <header class="title-container">
 
-  <!-- TOP ROW -->
-  <div class="data-details">
+    <!-- TOP ROW -->
+    <div class="data-details">
 
-  <img src="images/indian_flag.png" alt="flag" class="indian-flag" />
+      <img src="images/indian_flag.png" alt="flag" class="indian-flag" />
 
-  <h3 class="team-id">TEAM ID XXX</h3>
+      <h3 class="team-id">TEAM ID XXX</h3>
 
-  <h3 class="data">
-    Mission Time: <span class="mission-time-value">00:00:00</span>
-  </h3>
+      <h3 class="data">
+        Mission Time: <span class="mission-time-value">00:00:00</span>
+      </h3>
 
-  <h1 class="team-name">DJS ARYA</h1>
+      <h1 class="team-name">DJS ARYA</h1>
 
-  <h3 class="data">
-    Packet Count: <span class="packet-count-value">0000</span>
-  </h3>
+      <h3 class="data">
+        Packet Count: <span class="packet-count-value">0000</span>
+      </h3>
 
-  <h3 class="data">
-    Mode: <span class="mode-value">Flight</span>
-  </h3>
+      <h3 class="data">
+        Mode: <span class="mode-value">Flight</span>
+      </h3>
 
-  <img src="images/team_logo.png" alt="team-logo" class="team-logo" />
+      <img src="images/team_logo.png" alt="team-logo" class="team-logo" />
 
-</div>
+    </div>
 
-  <!-- NAV ROW -->
-  <!-- <div class="nav-tabs"> -->
+    <!-- NAV ROW -->
+    <!-- <div class="nav-tabs"> -->
     <div class="tabs-options">
       <button class="page-button telemetry-btn--home">HOME</button>
       <button class="page-button telemetry-btn--graph">GRAPHS</button>
       <button class="page-button telemetry-btn--csv">CSV</button>
     </div>
-  <!-- </div> -->
+    <!-- </div> -->
 
-</header>
+  </header>
 
   <!-- Yahan se Essential info + Flight State + Command Section -->
   <div class="main-container">
@@ -91,7 +91,7 @@
           <div class="arrow">→</div>
 
           <div class="stage-box">
-           DESCENT
+            DESCENT
           </div>
 
           <div class="arrow">→</div>
@@ -107,42 +107,42 @@
           </div>
 
         </div>
-         
+
       </div>
       <!-- Main telemetry visualizations - csv, graphs, map section-->
       <div class="telemetry-visualization-section">
         <div class="sidebar-sub-section gnss-container">
-        <div class="sidebar-sub-title">GNSS TELEMETRY</div>
+          <div class="sidebar-sub-title">GNSS TELEMETRY</div>
 
-    <div class="sidebar-fields">
+          <div class="sidebar-fields">
 
-    <div class="field">
-      <span class="label">GNSS Time:</span>
-      <span class="value sidebar-gnss-time-value">--</span>
-    </div>
+            <div class="field">
+              <span class="label">GNSS Time:</span>
+              <span class="value sidebar-gnss-time-value">--</span>
+            </div>
 
-    <div class="field">
-      <span class="label">GNSS Altitude:</span>
-      <span class="value sidebar-gnss-altitude-value">--</span>
-    </div>
+            <div class="field">
+              <span class="label">GNSS Altitude:</span>
+              <span class="value sidebar-gnss-altitude-value">--</span>
+            </div>
 
-    <div class="field">
-      <span class="label">GNSS Latitude:</span>
-      <span class="value sidebar-gnss-latitude-value">--</span>
-    </div>
+            <div class="field">
+              <span class="label">GNSS Latitude:</span>
+              <span class="value sidebar-gnss-latitude-value">--</span>
+            </div>
 
-    <div class="field">
-      <span class="label">GNSS Longitude:</span>
-      <span class="value sidebar-gnss-longitude-value">--</span>
-    </div>
+            <div class="field">
+              <span class="label">GNSS Longitude:</span>
+              <span class="value sidebar-gnss-longitude-value">--</span>
+            </div>
 
-    <div class="field">
-      <span class="label">GNSS Sats:</span>
-      <span class="value sidebar-gnss-sats-value">--</span>
-    </div>
+            <div class="field">
+              <span class="label">GNSS Sats:</span>
+              <span class="value sidebar-gnss-sats-value">--</span>
+            </div>
 
-  </div>
-  </div>
+          </div>
+        </div>
         <div class="telemetry-csv-container"></div>
         <div class="telemetry-graph-container"></div>
         <div class="telemetry-map-container"></div>
@@ -169,60 +169,62 @@
     <div class="sidebar">
 
       <div class="sidebar-sub-section sidebar-sub-section">
-  <div class="sidebar-sub-title">TELEMETRY</div>
+        <div class="sidebar-sub-title">TELEMETRY</div>
 
-  <div class="sidebar-fields">
+        <div class="sidebar-fields">
+          <!-- Grid wrapper for 1 row, 2 boxes -->
+          <div class="sensor-grid">
+            <div class="field">
+              <span class="label">Temperature (°C)</span>
+              <span class="value sidebar-temp-value">--</span>
+            </div>
 
-  <div class="field">
-    <span class="label">Temperature (°C):</span>
-    <span class="value sidebar-temp-value">--</span>
-  </div>
+            <div class="field">
+              <span class="label">Pressure (Pa)</span>
+              <span class="value sidebar-pressure-value">--</span>
+            </div>
 
-  <div class="field">
-    <span class="label">Voltage (V):</span>
-    <span class="value sidebar-voltage-value">--</span>
-  </div>
+            <div class="field">
+              <span class="label">Voltage (V)</span>
+              <span class="value sidebar-voltage-value">--</span>
+            </div>
 
-  <div class="field">
-    <span class="label">Pressure (Pa):</span>
-    <span class="value sidebar-pressure-value">--</span>
-  </div>
+            <div class="field">
+              <span class="label">Altitude (m)</span>
+              <span class="value sidebar-altitude-value">--</span>
+            </div>
+          </div>
 
-  <div class="field">
-    <span class="label">Altitude (m):</span>
-    <span class="value sidebar-altitude-value">--</span>
-  </div>
+          <!-- RPY Fields (Full Width) -->
+          <div class="field column">
+            <span class="label">Acceleration [R, P, Y] (m/s²)</span>
+            <span class="value">
+              [ <span class="sidebar-accel-r">--</span>,
+              <span class="sidebar-accel-p">--</span>,
+              <span class="sidebar-accel-y">--</span> ]
+            </span>
+          </div>
 
-  <div class="field column">
-    <span class="label">Acceleration [R, P, Y] (m/s²)</span>
-    <span class="value">
-      [ <span class="sidebar-accel-r">--</span>, 
-        <span class="sidebar-accel-p">--</span>, 
-        <span class="sidebar-accel-y">--</span> ]
-    </span>
-  </div>
+          <div class="field column">
+            <span class="label">Gyro Spin Rate [R, P, Y] (deg/s)</span>
+            <span class="value">
+              [ <span class="sidebar-gyro-r">--</span>,
+              <span class="sidebar-gyro-p">--</span>,
+              <span class="sidebar-gyro-y">--</span> ]
+            </span>
+          </div>
 
-  <div class="field column">
-    <span class="label">Gyro Spin Rate [R, P, Y] (deg/s)</span>
-    <span class="value">
-      [ <span class="sidebar-gyro-r">--</span>, 
-        <span class="sidebar-gyro-p">--</span>, 
-        <span class="sidebar-gyro-y">--</span> ]
-    </span>
-  </div>
+          <div class="field column">
+            <span class="label">Magnetic Field [R, P, Y] (µT)</span>
+            <span class="value">
+              [ <span class="sidebar-mag-r">--</span>,
+              <span class="sidebar-mag-p">--</span>,
+              <span class="sidebar-mag-y">--</span> ]
+            </span>
+          </div>
+        </div>
+      </div>
 
-  <div class="field column">
-    <span class="label">Magnetic Field [R, P, Y] (µT)</span>
-    <span class="value">
-      [ <span class="sidebar-mag-r">--</span>, 
-        <span class="sidebar-mag-p">--</span>, 
-        <span class="sidebar-mag-y">--</span> ]
-    </span>
-  </div>
-
-</div>
-  </div>
-      
       <!-- <div class="sidebar-sub-section-for-simulation">
         <div class="sim-option">
           <button class="switch"><h4 class="simulation-mode-title">SIM ENABLE</h4></button>

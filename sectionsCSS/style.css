@@ -19,8 +19,8 @@ body {
 
 .title-container {
   display: flex;
-  align-items: center; 
-  padding: 0 30px;   
+  align-items: center;
+  padding: 0 30px;
   height: 80px;
   background: #cfd0f2;
   border-bottom: 1px solid black;
@@ -29,7 +29,7 @@ body {
 
 .indian-flag,
 .team-logo {
-  margin:1px;
+  margin: 1px;
 }
 
 .title-text {
@@ -51,7 +51,9 @@ body {
   color: #666;
 }
 
-.team-id, .team-name, .data-details h3 {
+.team-id,
+.team-name,
+.data-details h3 {
   margin: 0;
 }
 
@@ -121,7 +123,7 @@ body {
 }
 
 .sidebar {
-  max-width: 20%;
+  width: 22%;
   background-color: #cfd0f2;
   border: 1px solid black;
   border-radius: 5px;
@@ -140,7 +142,7 @@ body {
   border: 1px solid black;
   border-radius: 5px;
   display: flex;
-  gap:5px;
+  gap: 5px;
   /* align-items: center; */
   justify-content: space-between;
   background-color: white;
@@ -168,22 +170,25 @@ body {
   /* align-items: center;  */
   justify-content: space-between;
   flex-direction: row;
-  height: 80px;           
+  height: 80px;
   width: 100%;
   background-color: #cfd0f2;
   color: black;
   gap: 50px;
 }
-.data-details h1, 
-.data-details h3, 
+
+.data-details h1,
+.data-details h3,
 .data-details .data {
-  margin: 0 !important; 
+  margin: 0 !important;
   display: flex;
   align-items: center;
 }
+
 .data-details h3 {
   font-weight: 500;
 }
+
 .data-details span {
   font-weight: 700;
 }
@@ -276,7 +281,7 @@ body {
   padding: 6px 5px;
 }
 
-.command-section{
+.command-section {
   flex: 1;
 }
 
@@ -311,7 +316,8 @@ body {
   margin: 5px;
   gap: 10px;
 }
-.sidebar-sub-section-for-simulation{
+
+.sidebar-sub-section-for-simulation {
   margin-top: 5px;
   border: 1px solid black;
   border-radius: 5px;
@@ -324,6 +330,7 @@ body {
   margin: 5px;
   gap: 50px;
 }
+
 .sim-option {
   display: flex;
   flex-direction: row;
@@ -351,11 +358,11 @@ body {
   border-radius: 12px;
 }
 
-.switch:hover{
+.switch:hover {
   background-color: #88fd5d;
 }
 
-.send-btn:hover{
+.send-btn:hover {
   background-color: #88fd5d;
 }
 
@@ -392,17 +399,19 @@ body {
   font-weight: bold;
   margin-bottom: 20px;
 }
+
 .sidebar-fields {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  font-size: 14px;
+  font-size: 20px;
 }
 
 .field {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
 }
 
 .field.column {
@@ -418,7 +427,7 @@ body {
 
 .value {
   font-weight: 700;
-  font-size: 16px;
+  font-size: 20px;
   color: #111;
 }
 
@@ -460,7 +469,8 @@ body {
 
 .telemetry-csv-container {
   width: 100%;
-  grid-column: 1 / -1; /* FULL WIDTH */
+  grid-column: 1 / -1;
+  /* FULL WIDTH */
 }
 
 .csv-table {
@@ -570,6 +580,7 @@ body {
   text-align: center;
   transition: 0.2s;
 }
+
 .telemetry-visualization-section {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -634,14 +645,14 @@ body {
   width: 100%;
 }
 
-.cmd-echo-title{
+.cmd-echo-title {
   font-size: 13px;
   font-weight: bold;
   color: #414040;
   letter-spacing: 0.04em;
 }
 
-.cmd-echo-list{
+.cmd-echo-list {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -652,13 +663,13 @@ body {
   scrollbar-color: #b9b8e3 transparent;
 }
 
-.cmd-echo-empty{
+.cmd-echo-empty {
   font-size: 12px;
   color: #999;
   font-style: italic;
 }
 
-.cmd-echo-item{
+.cmd-echo-item {
   font-size: 12px;
   font-family: monospace;
   color: #444;
@@ -669,9 +680,59 @@ body {
   word-break: break-all;
 }
 
-.cmd-echo-item.cmd-echo-latest{
+.cmd-echo-item.cmd-echo-latest {
   color: #111;
   border-left-color: #6750a4;
   font-weight: 700;
   background-color: #e0dff8;
+}
+
+
+/* Container for the 2-column top section */
+/* Container for the 2-column top section */
+.sensor-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  /* Slightly tighter gap between boxes */
+  margin-bottom: 8px;
+}
+
+/* Individual boxes */
+.sensor-grid .field,
+.field.column {
+  background: #e8e8e8;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Centers the group vertically */
+}
+
+.sensor-grid .field {
+  flex: 1 1 calc(50% - 8px);
+  height: 50%;
+}
+
+/* THE FIX: Reduce gap between label and value */
+.label {
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #555;
+}
+
+.value {
+  font-family: monospace;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+/* Ensure the full-width boxes also stay tight */
+.field.column {
+  margin-bottom: 5px;
+  width: 100%;
 }
