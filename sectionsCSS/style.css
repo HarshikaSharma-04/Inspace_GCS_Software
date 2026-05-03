@@ -620,6 +620,9 @@ body {
   align-items: flex-end;
   gap: 15px;
   width: 100%;
+  background-color: #cfd0f2;
+  border-radius: 5px;
+  border: 2px solid #8f82b2;
 }
 
 .cmd-bottom-container .command-area {
