@@ -62,11 +62,11 @@ commandInput.addEventListener("keydown", (e)=> {
   commandInput.value = "";
 });
 
-const sidebarGpsTimeEl = document.querySelector(".sidebar-gps-time-value");
-const sidebarGpsAltitudeEl = document.querySelector(".sidebar-gps-altitude-value");
-const sidebarGpsLatitudeEl = document.querySelector(".sidebar-gps-latitude-value");
-const sidebarGpsLongitudeEl = document.querySelector(".sidebar-gps-longitude-value");
-const sidebarGpsSatsEl = document.querySelector(".sidebar-gps-sats-value");
+const sidebarGnssTimeEl = document.querySelector(".sidebar-gnss-time-value");
+const sidebarGnssAltitudeEl = document.querySelector(".sidebar-gnss-altitude-value");
+const sidebarGnssLatitudeEl = document.querySelector(".sidebar-gnss-latitude-value");
+const sidebarGnssLongitudeEl = document.querySelector(".sidebar-gnss-longitude-value");
+const sidebarGnssSatsEl = document.querySelector(".sidebar-gnss-sats-value");
 const mapDiv = document.getElementById("map");
 
 
@@ -270,11 +270,11 @@ function updateSidebarTelemetry(row) {
   sidebarVoltageEl.innerText = row["VOLTAGE"];
   sidebarPressureEl.innerText = row["PRESSURE"];
   sidebarAltitudeEl.innerText = row["ALTITUDE"];
-  sidebarGpsTimeEl.innerText = row["GPS_TIME"];
-  sidebarGpsAltitudeEl.innerText = row["GPS_ALTITUDE"];
-  sidebarGpsLatitudeEl.innerText = row["GPS_LATITUDE"];
-  sidebarGpsLongitudeEl.innerText = row["GPS_LONGITUDE"];
-  sidebarGpsSatsEl.innerText = row["GPS_SATS"];
+  sidebarGnssTimeEl.innerText = row["GNSS_TIME"];
+  sidebarGnssAltitudeEl.innerText = row["GNSS_ALTITUDE"];
+  sidebarGnssLatitudeEl.innerText = row["GNSS_LATITUDE"];
+  sidebarGnssLongitudeEl.innerText = row["GNSS_LONGITUDE"];
+  sidebarGnssSatsEl.innerText = row["GNSS_SATS"];
   accelREl.innerText = row["ACCEL_R"];
   accelPEl.innerText = row["ACCEL_P"];
   accelYEl.innerText = row["ACCEL_Y"];
