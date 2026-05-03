@@ -395,7 +395,7 @@ body {
 }
 
 .sidebar-sub-title {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: bold;
   margin-bottom: 20px;
 }
@@ -482,10 +482,11 @@ body {
 }
 
 .csv-table thead th {
-  background: #f1f5f9;
+  color:white;
+  background: #6750a4;
   font-weight: 600;
   text-align: left;
-  padding: 1px 1.8px;
+  padding: 12px 6px;  
   border-bottom: 1px solid #cbd5e1;
   border-right: 0.5px solid #e2e8f0;
   white-space: nowrap;
@@ -701,8 +702,8 @@ body {
 /* Individual boxes */
 .sensor-grid .field,
 .field.column {
-  background: #e8e8e8;
-  border: 1px solid #ccc;
+  background: #e9e6ff;
+  border: 1px solid #e9e6ff;
   border-radius: 4px;
   padding: 6px 8px;
   display: flex;
@@ -735,4 +736,15 @@ body {
 .field.column {
   margin-bottom: 5px;
   width: 100%;
+}
+.plot-3d-section{
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+.plot-3d-title{
+  font-size: 20px;
+  font-weight: bold;
+  margin: 10px 0 10px 0;
+  /* text-align: center; */
 }

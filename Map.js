@@ -18,7 +18,7 @@ export function Map(){
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution: '© OpenStreetMap'
+        // attribution: '© OpenStreetMap'
     }).addTo(map);
 
     L.marker(cansatLocation)
