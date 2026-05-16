@@ -48,7 +48,7 @@ body {
 
 .team-id {
   font-size: 40px;
-  color: #666;
+  color: #000;
 }
 
 .team-id,
@@ -293,7 +293,7 @@ body {
   border-radius: 8px;
   padding: 8px 4px;
   font-weight: 600;
-  font-size: 15px;
+  font-size: 20px;
 }
 
 .send-btn {
@@ -598,7 +598,7 @@ body {
 .gnss-container {
   grid-column: 1;
   grid-row: 1 / span 2;
-  height: 60%;
+  height: 55%;
 }
 
 /* MAP RIGHT */
@@ -652,7 +652,7 @@ body {
 }
 
 .cmd-echo-title {
-  font-size: 13px;
+  font-size: 20px;
   font-weight: bold;
   color: #414040;
   letter-spacing: 0.04em;
@@ -670,7 +670,7 @@ body {
 }
 
 .cmd-echo-empty {
-  font-size: 12px;
+  font-size: 18px;
   color: #999;
   font-style: italic;
 }
