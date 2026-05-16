@@ -628,7 +628,7 @@ body {
 
 .cmd-bottom-container {
   margin-top: 30px;
-  height: 60%;
+  height: 70%;
   grid-column: 2;
   grid-row: 2;
   display: flex;
@@ -676,7 +676,7 @@ body {
 }
 
 .cmd-echo-item {
-  font-size: 12px;
+  font-size: 18px;
   font-family: monospace;
   color: #444;
   padding: 3px 6px;

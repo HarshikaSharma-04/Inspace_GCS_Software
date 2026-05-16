@@ -26,22 +26,18 @@ const accelYEl = document.querySelector(".sidebar-accel-y");
 const gyroREl = document.querySelector(".sidebar-gyro-r");
 const gyroPEl = document.querySelector(".sidebar-gyro-p");
 const gyroYEl = document.querySelector(".sidebar-gyro-y");
-const magREl = document.querySelector(".sidebar-mag-r");
-const magPEl = document.querySelector(".sidebar-mag-p");
-const magYEl = document.querySelector(".sidebar-mag-y");
+
 const cmdEchoList = document.getElementById("cmd-echo-list");
 const commandInput = document.querySelector(".command");
 const sendBtn = document.querySelector(".send-btn");
 
 const STATE_ORDER = [
   "BOOT",
-  "TEST_MODE",
   "LAUNCH_PAD",
   "ASCENT",
-  "ROCKET_DEPLOY",
   "DESCENT",
-  "AEROBREAK_RELEASE",
-  "IMPACT"
+  "PARAGLIDER_DEPLOYMENT",
+  "LANDED"
 ];
 
 let commandHistory = [];
@@ -304,9 +300,7 @@ function updateSidebarTelemetry(row) {
   gyroPEl.innerText = row["GYRO_P"];
   gyroYEl.innerText = row["GYRO_Y"];
 
-  magREl.innerText = row["MAG_R"];
-  magPEl.innerText = row["MAG_P"];
-  magYEl.innerText = row["MAG_Y"];
+  
 }
 
 /*  GRAPHS */
@@ -342,9 +336,7 @@ function loadGraphs() {
         <canvas id="accel_chart"></canvas>
       </div>
 
-      <div class="telemetry-grid-item">
-        <canvas id="mag_chart"></canvas>
-      </div>
+      
 
     </div>
   `;
@@ -352,70 +344,136 @@ function loadGraphs() {
   charts = {};
 
   function createMultiLineChart(id, labels) {
-    return new Chart(document.getElementById(id), {
-      type: "line",
-      data: {
-        datasets: [
-          { label: "R", data: [], borderColor: "red", tension: 0.4 },
-          { label: "P", data: [], borderColor: "green", tension: 0.4 },
-          { label: "Y", data: [], borderColor: "blue", tension: 0.4 },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: false,
-        plugins: {
-          legend: { display: true },
-        },
-        scales: {
-          x: { type: "linear", title: { display: true, text: "Packet" } ,grid: { display: false },beginAtZero: true,min: 0,ticks: {
-                stepSize: 1
-            },},
-          y: { title: { display: true, text: labels },grid: { display: false }},
+  return new Chart(document.getElementById(id), {
+    type: "line",
+    data: {
+      datasets: [
+        { label: "X", data: [], borderColor: "red", tension: 0.4 },
+        { label: "Y", data: [], borderColor: "green", tension: 0.4 },
+        { label: "Z", data: [], borderColor: "blue", tension: 0.4 },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: { display: true },
+        title: {
+          display: true,
+          text: labels,
         },
       },
-    });
-  }
-
-  function createSingleChart(id, label) {
-    return new Chart(document.getElementById(id), {
-      type: "line",
-      data: {
-        datasets: [
-          {
-            label: label,
-            data: [],
-            borderColor: "#8787ff",
-            tension: 0.4,
+      scales: {
+        x: {
+          type: "linear",
+          title: {
+            display: true,
+            text: "Packet Count",
           },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: false,
-        plugins: { legend: { display: true } },
-        scales: {
-          x: { type: "linear", title: { display: true, text: "Packet" } ,grid: { display: false },beginAtZero: true,min: 0,ticks: {
-                stepSize: 1,
-            },},
-          y: { title: { display: true, text: label },grid: { display: false },beginAtZero: true,min: 0 },
+          grid: { display: false },
+          beginAtZero: true,
+          min: 0,
+          ticks: {
+            stepSize: 1,
+          },
+        },
+        y: {
+          title: {
+            display: true,
+            text: labels,
+          },
+          grid: { display: false },
         },
       },
-    });
-  }
+    },
+  });
+}
 
-  // create charts
-  charts.altitude = createSingleChart("altitude_chart", "ALTITUDE");
-  charts.pressure = createSingleChart("pressure_chart", "PRESSURE");
-  charts.temperature = createSingleChart("temperature_chart", "TEMPERATURE");
-  charts.voltage = createSingleChart("voltage_chart", "VOLTAGE");
+function createSingleChart(id, label) {
+  return new Chart(document.getElementById(id), {
+    type: "line",
+    data: {
+      datasets: [
+        {
+          label: label,
+          data: [],
+          borderColor: "#8787ff",
+          tension: 0.4,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: { display: true },
+        title: {
+          display: true,
+          text: label,
+        },
+      },
+      scales: {
+        x: {
+          type: "linear",
+          title: {
+            display: true,
+            text: "Packet Count",
+          },
+          grid: { display: false },
+          beginAtZero: true,
+          min: 0,
+          ticks: {
+            stepSize: 1,
+          },
+        },
+        y: {
+          title: {
+            display: true,
+            text: label,
+          },
+          grid: { display: false },
+          beginAtZero: true,
+          min: 0,
+        },
+      },
+    },
+  });
+}
 
-  charts.gyro = createMultiLineChart("gyro_chart", "GYRO (deg/s)");
-  charts.accel = createMultiLineChart("accel_chart", "ACCEL (m/s²)");
-  charts.mag = createMultiLineChart("mag_chart", "MAG (µT)");
+// create charts
+charts.altitude = createSingleChart(
+  "altitude_chart",
+  "Altitude (m)"
+);
 
+charts.pressure = createSingleChart(
+  "pressure_chart",
+  "Pressure (Pa)"
+);
+
+charts.temperature = createSingleChart(
+  "temperature_chart",
+  "Temperature (°C)"
+);
+
+charts.voltage = createSingleChart(
+  "voltage_chart",
+  "Voltage (V)"
+);
+
+charts.gyro = createMultiLineChart(
+  "gyro_chart",
+  "Gyroscope Spin Rate (deg/s)"
+);
+
+charts.accel = createMultiLineChart(
+  "accel_chart",
+  "Acceleration (m/s²)"
+);
+
+  
   chartInitialized = true;
 }
 
@@ -441,10 +499,7 @@ function updateGraphs(row) {
   charts.accel.data.datasets[1].data.push({ x: packet, y: Number(row["ACCEL_P"]) });
   charts.accel.data.datasets[2].data.push({ x: packet, y: Number(row["ACCEL_Y"]) });
 
-  // Mag (R,P,Y)
-  charts.mag.data.datasets[0].data.push({ x: packet, y: Number(row["MAG_R"]) });
-  charts.mag.data.datasets[1].data.push({ x: packet, y: Number(row["MAG_P"]) });
-  charts.mag.data.datasets[2].data.push({ x: packet, y: Number(row["MAG_Y"]) });
+  
 
   // LIMIT POINTS + UPDATE
   Object.values(charts).forEach(chart => {
