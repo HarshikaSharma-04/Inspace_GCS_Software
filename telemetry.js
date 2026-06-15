@@ -348,9 +348,9 @@ function loadGraphs() {
     type: "line",
     data: {
       datasets: [
-        { label: "X", data: [], borderColor: "red", tension: 0.4 },
-        { label: "Y", data: [], borderColor: "green", tension: 0.4 },
-        { label: "Z", data: [], borderColor: "blue", tension: 0.4 },
+        { label: "R", data: [], borderColor: "red", tension: 0.4 },
+        { label: "P", data: [], borderColor: "green", tension: 0.4 },
+        { label: "Y", data: [], borderColor: "blue", tension: 0.4 },
       ],
     },
     options: {
