@@ -52,20 +52,52 @@ function renderCmdEcho(){
     .join("");
   cmdEchoList.scrollTop = cmdEchoList.scrollHeight;
 }
+//process command here => jab command type hoga
+
+function processCommand(cmd) {
+  const normalized = cmd.trim().toUpperCase();
+
+  if (normalized === "CMD,041,SIM,ENABLE") {
+    simEnabled = true;
+  }
+
+  if (
+    normalized === "CMD,041,SIM,ACTIVE" &&
+    simEnabled
+  ) {
+    currentMode = "SIMULATION";
+  }
+
+  if (normalized === "CMD,041,SIM,DISABLE") {
+    simEnabled = false;
+    currentMode = "FLIGHT";
+  }
+
+  modeEl.innerText = currentMode;
+}
 
 sendBtn.addEventListener("click", () => {
   const val = commandInput.value.trim();
   if(!val) return;
+
   commandHistory.push(val);
+
+  processCommand(val);
+
   renderCmdEcho();
   commandInput.value = "";
 });
 
 commandInput.addEventListener("keydown", (e)=> {
   if(e.key !== "Enter") return;
+
   const val = commandInput.value.trim();
   if(!val) return;
+
   commandHistory.push(val);
+
+  processCommand(val);
+
   renderCmdEcho();
   commandInput.value = "";
 });
@@ -87,6 +119,8 @@ let charts = {};
 let MAX_POINTS = 20; // this is the number of points visible in a view
 let allRows = []; // stores all past telemetry rows
 let chartInitialized = false;
+let simEnabled = false;
+let currentMode = "FLIGHT";
 
 /* DEFAULT VIEW  */
 setActiveButton(homeBtn);
@@ -249,11 +283,7 @@ function updateTopTelemetry(row) {
   missionTimeEl.innerText = row["TIME_STAMPING"];
   packetEl.innerText = String(row["PACKET_COUNT"]).padStart(2, "0");
 
-  if (row["MODE"] === " F") {
-    modeEl.innerText = "FLIGHT";
-  } else {
-    modeEl.innerText = "SIMULATION";
-  }
+  modeEl.innerText = currentMode;
 
   const stateStr = row["STATE"].trim();
   const currentStateIndex = STATE_ORDER.indexOf(stateStr);
