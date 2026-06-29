@@ -1,4 +1,4 @@
-# Cansat 2026 GUI  
+# INSPACe 2026 GCS SOFTWARE  
 
 ## FILE SYSTEM OF THE REPO:  
 1. In the folder  `sectionCSS` we have below files:
