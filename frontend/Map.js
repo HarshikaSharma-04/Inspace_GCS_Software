@@ -1,4 +1,5 @@
 let map = null;
+let marker = null;
 const cansatLocation = [26.69, 84.17];
 
 export function Map(){
@@ -21,10 +22,21 @@ export function Map(){
         // attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    L.marker(cansatLocation)
+    marker = L.marker(cansatLocation)
         .addTo(map)
         .bindPopup("DJS ARYA")
         .openPopup();
 
     setTimeout(() => map.invalidateSize(), 200);
+}
+export function resizeMap() {
+    if (map) {
+        setTimeout(() => map.invalidateSize(), 100);
+    }
+}
+export function updateMapLocation(lat, lng) {
+    if (!map || !marker) return;
+
+    marker.setLatLng([lat, lng]);
+    map.panTo([lat, lng]);
 }

@@ -7,7 +7,7 @@ let trajectoryData = {
 
 // Initialize 3D Plot
 function init3DPlot() {
-  const container = document.getElementById('plot-3d-container');
+  const container = document.getElementById("GNSS-3d-plot");
   if (!container) {
     console.error('3D plot container not found!');
     return;
@@ -86,7 +86,7 @@ function init3DPlot() {
     displayModeBar: false
   };
 
-  Plotly.newPlot('plot-3d-container', [trace], layout, config)
+  Plotly.newPlot('GNSS-3d-plot', [trace], layout, config)
     .then(() => {
       console.log('3D Plot initialized successfully!');
       // Assuming you still want to track initialization state
@@ -132,7 +132,7 @@ function update3DPlot(row) {
     z: [trajectoryData.alt]
   };
   
-  Plotly.restyle('plot-3d-container', update, [0]);
+  Plotly.restyle('GNSS-3d-plot', update, [0]);
 }
 
 // Function to clear trajectory data
@@ -143,7 +143,7 @@ function clear3DPlot() {
     y: [[0]],
     z: [[0]]
   };
-  Plotly.restyle('plot-3d-container', update, [0]);
+  Plotly.restyle('GNSS-3d-plot', update, [0]);
 }
 
 // Make functions available globally

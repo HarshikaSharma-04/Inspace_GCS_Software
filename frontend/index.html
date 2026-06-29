@@ -108,27 +108,27 @@
 
             <div class="field">
               <span class="label">GNSS Time:</span>
-              <span class="value sidebar-gps-time-value">--</span>
+              <span class="value sidebar-gnss-time-value">--</span>
             </div>
 
             <div class="field">
               <span class="label">GNSS Altitude:</span>
-              <span class="value sidebar-gps-altitude-value">--</span>
+              <span class="value sidebar-gnss-altitude-value">--</span>
             </div>
 
             <div class="field">
               <span class="label">GNSS Latitude:</span>
-              <span class="value sidebar-gps-latitude-value">--</span>
+              <span class="value sidebar-gnss-latitude-value">--</span>
             </div>
 
             <div class="field">
               <span class="label">GNSS Longitude:</span>
-              <span class="value sidebar-gps-longitude-value">--</span>
+              <span class="value sidebar-gnss-longitude-value">--</span>
             </div>
 
             <div class="field">
               <span class="label">GNSS Sats:</span>
-              <span class="value sidebar-gps-sats-value">--</span>
+              <span class="value sidebar-gnss-sats-value">--</span>
             </div>
 
           </div>
@@ -142,13 +142,13 @@
             <!--New position for Command section-->
             <div class="command-area">
               <div class="command-section">
-                <input type="text" class="command" placeholder="Enter Command" />
+                <input type="text" class="command" id="commandInput" placeholder="Enter Command" />
               </div>
               <button class="send-btn">SEND</button>
             </div>
           </div>
         </div>
-        <div class="telemetry-csv-container"></div>
+        <div id="telemetry-table" class="telemetry-csv-container"></div>
         <div class="telemetry-graph-container"></div>
         <div class="telemetry-map-container"></div>
         <div id="map"></div>
@@ -221,7 +221,7 @@
       <!-- 3D Plot Section -->
       <div class="plot-3d-section">
         <div class="plot-3d-title">GPS Coordinates</div>
-        <div id="plot-3d-container"></div>
+        <div id="GNSS-3d-plot"></div>
       </div>
     </div>
   </div>
@@ -234,8 +234,8 @@
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 
-<script src="chart.js"></script>
 <script src="plot3d.js"></script>
+<script src="/socket.io/socket.io.js"></script>
 <script type="module" src="telemetry.js"></script>
 
 </html>
