@@ -821,3 +821,7 @@ body {
   border-color: #000000 !important;
   box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.4);
 }
+.mode-value.simulation {
+  color: red;
+  font-weight: 600;
+}

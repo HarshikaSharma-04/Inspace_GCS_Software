@@ -11,6 +11,7 @@ const graphContainer = document.querySelector(".telemetry-graph-container");
 const mapContainer = document.querySelector(".telemetry-map-container");
 const csvContainer =document.querySelector(".telemetry-csv-container");
 const cmdEchoList = document.getElementById("cmd-echo-list");
+const modeValue = document.querySelector(".mode-value");
 
 // Top Dashboard Elements
 const missionTimeEl = document.querySelector(".mission-time-value");
@@ -246,21 +247,29 @@ function resetAllTelemetryData() {
 
   updateStageIndicators(1);
 }
+ // Simulation state tracking
+ 
+let simEnabled = false;
 
-socket.on("sim-command", (response) => {
-  if (response === "Simulation Mode Started") {
-    if (simToggleImg) {
-      simToggleImg.src = "themed_assets/toggle_btn.png";
-      simToggleImg.alt = "Simulation Mode ON";
-    }
-    resetAllTelemetryData();
-  } else if (response === "Simulation Mode Stopped") {
-    if (simToggleImg) {
-      simToggleImg.src = "themed_assets/toggle_disable.png";
-      simToggleImg.alt = "Simulation Mode OFF";
-    }
-    sessionStorage.clear();
-    window.location.href = "/";
+socket.on("command-response", (response) => {
+  switch (response) {
+    case "Simulation Enabled":
+      simEnabled = true;
+      break;
+
+    case "Simulation Started":
+      if (simEnabled) {
+        modeValue.textContent = "Simulation";
+        modeValue.classList.add("simulation");
+        resetAllTelemetryData();
+      }
+      break;
+
+    case "Simulation Stopped":
+      simEnabled = false;
+      modeValue.textContent = "Flight";
+      modeValue.classList.remove("simulation");
+      break;
   }
 });
 
