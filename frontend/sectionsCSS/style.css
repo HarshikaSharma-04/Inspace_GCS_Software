@@ -124,7 +124,7 @@ body {
 }
 
 .sidebar {
-  width: 22%;
+  width: 20%;
   background-color: #cfd0f2;
   border: 1px solid black;
   border-radius: 5px;
@@ -598,12 +598,12 @@ body {
 .gnss-container {
   grid-column: 1;
   grid-row: 1 / span 2;
-  height: 55%;
+  height: 95%;
 }
 
 /* MAP RIGHT */
 #map {
-  min-height: 30rem;
+  min-height: 20rem;
   background-color: #eeeeee00;
   grid-column: 2;
   grid-row: 1;
@@ -627,8 +627,8 @@ body {
 }
 
 .cmd-bottom-container {
-  margin-top: 30px;
-  height: 70%;
+  margin-top: 0px;
+  height: 60%;
   grid-column: 2;
   grid-row: 2;
   display: flex;
@@ -710,7 +710,7 @@ body {
   background: #e9e6ff;
   border: 1px solid #e9e6ff;
   border-radius: 4px;
-  padding: 6px 8px;
+
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -720,7 +720,25 @@ body {
 
 .sensor-grid .field {
   flex: 1 1 calc(50% - 8px);
-  height: 50%;
+  height: auto;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+}
+
+.sensor-grid .field .label {
+  margin: 0;
+  padding: 0;
+  line-height: 1.2;
+}
+
+.sensor-grid .field .value {
+  margin: 0;
+  padding: 0;
+  line-height: 1.2;
 }
 
 /* THE FIX: Reduce gap between label and value */
@@ -733,7 +751,7 @@ body {
 
 .value {
   font-family: monospace;
-  font-size: 1.2em;
+  font-size: 1em;
   font-weight: bold;
 }
 
@@ -754,4 +772,52 @@ body {
   font-weight: bold;
   margin: 10px 0 10px 0;
   /* text-align: center; */
+}
+
+/* Buttons logic */
+/* Pyramid Button Layout Container */
+.pyramid-command-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 15px 10px;
+  background-color: #eaebfb;
+  border-top: 1px dashed #8f82b2;
+}
+
+.pyramid-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Base styling for quick commands */
+.cmd-btn {
+  flex: 1;
+  padding: 8px 4px;
+  font-weight: bold;
+  font-size: 14px;
+  border: 2px solid #333;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.cmd-btn:hover {
+  background-color: #f0f0ff;
+  transform: translateY(-1px);
+}
+
+/* Style for when toggle states are active/pressed */
+.cmd-btn.btn-active {
+  background-color: #6750a4 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+  box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.4);
 }

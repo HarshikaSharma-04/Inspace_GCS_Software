@@ -23,7 +23,24 @@ const sidebarTempEl = document.querySelector(".sidebar-temp-value");
 const sidebarVoltageEl = document.querySelector(".sidebar-voltage-value");
 const sidebarPressureEl = document.querySelector(".sidebar-pressure-value");
 const sidebarAltitudeEl = document.querySelector(".sidebar-altitude-value");
+// command buttons:
+const cxBtn = document.getElementById("btn-cx");
+const calBtn = document.getElementById("btn-cal");
+const simEnableBtn = document.getElementById("btn-sim-enable");
+const simActivateBtn = document.getElementById("btn-sim-activate");
+const simDisableBtn = document.getElementById("btn-sim-disable");
+const gyroBtn = document.getElementById("btn-gyro");
+const servoBtn = document.getElementById("btn-servo");
 
+document.querySelectorAll(".cmd-btn").forEach(button => {
+  button.addEventListener("click", () => {
+    const commandToFill = button.getAttribute("data-cmd");
+    if (commandInput) {
+      commandInput.value = commandToFill;
+      commandInput.focus();
+    }
+  });
+});
 
 
 // GNS & Specialized Sidebar Elements
@@ -60,6 +77,36 @@ socket.on("command-echo", (cmd) => {
     console.count("command-echo received");
     console.log(cmd);
     addCommandEcho(cmd);
+
+    if (cmd === "CMD,041,CX,ON") {
+    cxBtn.textContent = "CXOFF";
+    cxBtn.classList.add("btn-active");
+    cxBtn.setAttribute("data-cmd", "CMD,041,CX,OFF");
+  } else if (cmd === "CMD,041,CX,OFF") {
+    cxBtn.textContent = "CXON";
+    cxBtn.classList.remove("btn-active");
+    cxBtn.setAttribute("data-cmd", "CMD,041,CX,ON");
+  }
+
+  if (cmd === "CMD,041,MEC,GYRO,ON") {
+    gyroBtn.textContent = "GYRO OFF";
+    gyroBtn.classList.add("btn-active");
+    gyroBtn.setAttribute("data-cmd", "CMD,041,MEC,GYRO,OFF");
+  } else if (cmd === "CMD,041,MEC,GYRO,OFF") {
+    gyroBtn.textContent = "GYRO ON";
+    gyroBtn.classList.remove("btn-active");
+    gyroBtn.setAttribute("data-cmd", "CMD,041,MEC,GYRO,ON");
+  }
+
+  if (cmd === "CMD,041,MEC,SERVO,ON") {
+    servoBtn.textContent = "SERVO OFF";
+    servoBtn.classList.add("btn-active");
+    servoBtn.setAttribute("data-cmd", "CMD,041,MEC,SERVO,OFF");
+  } else if (cmd === "CMD,041,MEC,SERVO,OFF") {
+    servoBtn.textContent = "SERVO ON";
+    servoBtn.classList.remove("btn-active");
+    servoBtn.setAttribute("data-cmd", "CMD,041,MEC,SERVO,ON");
+  }
 });
 
 sendBtn.addEventListener("click", () => {
@@ -85,7 +132,7 @@ function addCommandEcho(cmd) {
     div.textContent = cmd;
 
     // Add newest command at the top
-    cmdEchoList.prepend(div);
+    cmdEchoList.appendChild(div);
 
     // Keep only the latest 3 commands
     while (cmdEchoList.children.length > 3) {
@@ -452,7 +499,7 @@ function updateSidebarTelemetry(row) {
 
   if (sidebarTempEl) sidebarTempEl.innerText = row["TEMPERATURE"] + " °C";
   if (sidebarVoltageEl) sidebarVoltageEl.innerText = row["VOLTAGE"] + " V";
-  if (sidebarPressureEl) sidebarPressureEl.innerText = row["PRESSURE"] + " kPa";
+  if (sidebarPressureEl) sidebarPressureEl.innerText = row["PRESSURE"] + " Pa";
   if (sidebarAltitudeEl) sidebarAltitudeEl.innerText = row["ALTITUDE"] + " m";
 
 document.querySelector(".sidebar-gyro-r").innerText = row.GYRO_R;
@@ -579,7 +626,7 @@ window.addEventListener("resize", () => {
 const UNIT_MAP = {
   ALTITUDE: "m",
   TEMPERATURE: "°C",
-  PRESSURE: "kPa",
+  PRESSURE: "Pa",
   VOLTAGE: "V",
   // CURRENT: "A",
   MAGNETOMETER: "μT",
