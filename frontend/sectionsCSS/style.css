@@ -598,7 +598,7 @@ body {
 .gnss-container {
   grid-column: 1;
   grid-row: 1 / span 2;
-  height: 95%;
+  height: 100%;
 }
 
 /* MAP RIGHT */
@@ -662,8 +662,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-height: 80px;
-  max-height: 80px;
+  min-height: 90px;
+  max-height: 90px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #b9b8e3 transparent;
@@ -821,6 +821,7 @@ body {
   border-color: #000000 !important;
   box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.4);
 }
+
 .mode-value.simulation {
   color: red;
   font-weight: 600;

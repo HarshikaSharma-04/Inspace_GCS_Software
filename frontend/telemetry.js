@@ -122,22 +122,23 @@ sendBtn.addEventListener("click", () => {
 });
 
 //command history handling
+// Initialize a global or scoped array to act as your queue
+let commandHistory = [];
+
 function addCommandEcho(cmd) {
     if (!cmdEchoList) return;
-
     const empty = cmdEchoList.querySelector(".cmd-echo-empty");
     if (empty) empty.remove();
-
+    commandHistory.push(cmd);
+    if (commandHistory.length > 3) {
+        commandHistory.shift(); 
+    }
     const div = document.createElement("div");
     div.className = "cmd-echo-item";
     div.textContent = cmd;
-
-    // Add newest command at the top
     cmdEchoList.appendChild(div);
-
-    // Keep only the latest 3 commands
-    while (cmdEchoList.children.length > 3) {
-        cmdEchoList.removeChild(cmdEchoList.lastElementChild);
+    if (cmdEchoList.children.length > 3) {
+        cmdEchoList.removeChild(cmdEchoList.firstElementChild);
     }
 }
 
