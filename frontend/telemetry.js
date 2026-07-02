@@ -11,6 +11,7 @@ const graphContainer = document.querySelector(".telemetry-graph-container");
 const mapContainer = document.querySelector(".telemetry-map-container");
 const csvContainer =document.querySelector(".telemetry-csv-container");
 const cmdEchoList = document.getElementById("cmd-echo-list");
+const modeValue = document.querySelector(".mode-value");
 
 // Top Dashboard Elements
 const missionTimeEl = document.querySelector(".mission-time-value");
@@ -23,7 +24,24 @@ const sidebarTempEl = document.querySelector(".sidebar-temp-value");
 const sidebarVoltageEl = document.querySelector(".sidebar-voltage-value");
 const sidebarPressureEl = document.querySelector(".sidebar-pressure-value");
 const sidebarAltitudeEl = document.querySelector(".sidebar-altitude-value");
+// command buttons:
+const cxBtn = document.getElementById("btn-cx");
+const calBtn = document.getElementById("btn-cal");
+const simEnableBtn = document.getElementById("btn-sim-enable");
+const simActivateBtn = document.getElementById("btn-sim-activate");
+const simDisableBtn = document.getElementById("btn-sim-disable");
+const gyroBtn = document.getElementById("btn-gyro");
+const servoBtn = document.getElementById("btn-servo");
 
+document.querySelectorAll(".cmd-btn").forEach(button => {
+  button.addEventListener("click", () => {
+    const commandToFill = button.getAttribute("data-cmd");
+    if (commandInput) {
+      commandInput.value = commandToFill;
+      commandInput.focus();
+    }
+  });
+});
 
 
 // GNS & Specialized Sidebar Elements
@@ -60,6 +78,36 @@ socket.on("command-echo", (cmd) => {
     console.count("command-echo received");
     console.log(cmd);
     addCommandEcho(cmd);
+
+    if (cmd === "CMD,041,CX,ON") {
+    cxBtn.textContent = "CXOFF";
+    cxBtn.classList.add("btn-active");
+    cxBtn.setAttribute("data-cmd", "CMD,041,CX,OFF");
+  } else if (cmd === "CMD,041,CX,OFF") {
+    cxBtn.textContent = "CXON";
+    cxBtn.classList.remove("btn-active");
+    cxBtn.setAttribute("data-cmd", "CMD,041,CX,ON");
+  }
+
+  if (cmd === "CMD,041,MEC,GYRO,ON") {
+    gyroBtn.textContent = "GYRO OFF";
+    gyroBtn.classList.add("btn-active");
+    gyroBtn.setAttribute("data-cmd", "CMD,041,MEC,GYRO,OFF");
+  } else if (cmd === "CMD,041,MEC,GYRO,OFF") {
+    gyroBtn.textContent = "GYRO ON";
+    gyroBtn.classList.remove("btn-active");
+    gyroBtn.setAttribute("data-cmd", "CMD,041,MEC,GYRO,ON");
+  }
+
+  if (cmd === "CMD,041,MEC,SERVO,ON") {
+    servoBtn.textContent = "SERVO OFF";
+    servoBtn.classList.add("btn-active");
+    servoBtn.setAttribute("data-cmd", "CMD,041,MEC,SERVO,OFF");
+  } else if (cmd === "CMD,041,MEC,SERVO,OFF") {
+    servoBtn.textContent = "SERVO ON";
+    servoBtn.classList.remove("btn-active");
+    servoBtn.setAttribute("data-cmd", "CMD,041,MEC,SERVO,ON");
+  }
 });
 
 sendBtn.addEventListener("click", () => {
@@ -74,22 +122,23 @@ sendBtn.addEventListener("click", () => {
 });
 
 //command history handling
+// Initialize a global or scoped array to act as your queue
+let commandHistory = [];
+
 function addCommandEcho(cmd) {
     if (!cmdEchoList) return;
-
     const empty = cmdEchoList.querySelector(".cmd-echo-empty");
     if (empty) empty.remove();
-
+    commandHistory.push(cmd);
+    if (commandHistory.length > 3) {
+        commandHistory.shift(); 
+    }
     const div = document.createElement("div");
     div.className = "cmd-echo-item";
     div.textContent = cmd;
-
-    // Add newest command at the top
-    cmdEchoList.prepend(div);
-
-    // Keep only the latest 3 commands
-    while (cmdEchoList.children.length > 3) {
-        cmdEchoList.removeChild(cmdEchoList.lastElementChild);
+    cmdEchoList.appendChild(div);
+    if (cmdEchoList.children.length > 3) {
+        cmdEchoList.removeChild(cmdEchoList.firstElementChild);
     }
 }
 
@@ -199,21 +248,29 @@ function resetAllTelemetryData() {
 
   updateStageIndicators(1);
 }
+ // Simulation state tracking
+ 
+let simEnabled = false;
 
-socket.on("sim-command", (response) => {
-  if (response === "Simulation Mode Started") {
-    if (simToggleImg) {
-      simToggleImg.src = "themed_assets/toggle_btn.png";
-      simToggleImg.alt = "Simulation Mode ON";
-    }
-    resetAllTelemetryData();
-  } else if (response === "Simulation Mode Stopped") {
-    if (simToggleImg) {
-      simToggleImg.src = "themed_assets/toggle_disable.png";
-      simToggleImg.alt = "Simulation Mode OFF";
-    }
-    sessionStorage.clear();
-    window.location.href = "/";
+socket.on("command-response", (response) => {
+  switch (response) {
+    case "Simulation Enabled":
+      simEnabled = true;
+      break;
+
+    case "Simulation Started":
+      if (simEnabled) {
+        modeValue.textContent = "Simulation";
+        modeValue.classList.add("simulation");
+        resetAllTelemetryData();
+      }
+      break;
+
+    case "Simulation Stopped":
+      simEnabled = false;
+      modeValue.textContent = "Flight";
+      modeValue.classList.remove("simulation");
+      break;
   }
 });
 
@@ -452,7 +509,7 @@ function updateSidebarTelemetry(row) {
 
   if (sidebarTempEl) sidebarTempEl.innerText = row["TEMPERATURE"] + " °C";
   if (sidebarVoltageEl) sidebarVoltageEl.innerText = row["VOLTAGE"] + " V";
-  if (sidebarPressureEl) sidebarPressureEl.innerText = row["PRESSURE"] + " kPa";
+  if (sidebarPressureEl) sidebarPressureEl.innerText = row["PRESSURE"] + " Pa";
   if (sidebarAltitudeEl) sidebarAltitudeEl.innerText = row["ALTITUDE"] + " m";
 
 document.querySelector(".sidebar-gyro-r").innerText = row.GYRO_R;
@@ -579,7 +636,7 @@ window.addEventListener("resize", () => {
 const UNIT_MAP = {
   ALTITUDE: "m",
   TEMPERATURE: "°C",
-  PRESSURE: "kPa",
+  PRESSURE: "Pa",
   VOLTAGE: "V",
   // CURRENT: "A",
   MAGNETOMETER: "μT",
