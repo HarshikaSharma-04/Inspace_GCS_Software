@@ -18,7 +18,7 @@ const timestamp = new Date()
   .replace(/, /g, "_")
   .replace(/:/g, "-");
 
-const TARGET_DIR = "./csv"; 
+const TARGET_DIR = "./gcs_csv"; 
 
 // 2. Update the path construction
 const TELEMETRY_CSV_PATH = join(
