@@ -549,7 +549,6 @@ body {
   align-items: center;
   gap: 5px;
 }
-
 .stage-box {
   background: #e9e6ff;
   padding: 8px 18px;
@@ -559,8 +558,10 @@ body {
   border: 1px solid #d3ccff;
   color: #2c2c2c;
   white-space: nowrap;
+  min-width: 120px;
+  text-align: center;
+  transition: 0.2s;
 }
-
 .stage-box.completed {
   background: #e9e6ff;
   border-color: #d3ccff;
@@ -578,14 +579,6 @@ body {
   font-weight: bold;
 }
 
-.stage-box {
-  background: #ddd;
-  border-radius: 8px;
-  font-weight: 600;
-  min-width: 120px;
-  text-align: center;
-  transition: 0.2s;
-}
 
 .telemetry-visualization-section {
   display: grid;
