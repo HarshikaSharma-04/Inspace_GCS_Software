@@ -292,7 +292,7 @@ socket.on("clear-data", () => {
 
 socket.on("telemetry-update", (data) => {
     telemetryQueue.push(data);
-
+    
     if (!telemetryFlushScheduled) {
         telemetryFlushScheduled = true;
         requestAnimationFrame(flushTelemetryQueue);
@@ -316,6 +316,9 @@ function flushTelemetryQueue() {
         data,
         shouldRenderDashboard
     );
+    console.log(data.FLIGHT_SOFTWARE_STATE);
+console.log(stateToNum(data.FLIGHT_SOFTWARE_STATE));
+     updateStageIndicators(stateToNum(data.FLIGHT_SOFTWARE_STATE));
 
     newRows.push(data);
 }
@@ -488,10 +491,9 @@ function updateStageIndicators(currentState) {
   stageBoxes.forEach((box, index) => {
     const stageNumber = index + 1;
 
-    box.classList.remove("active", "completed");
-
+    box.classList.remove("current", "completed");
     if (stageNumber === currentState) {
-      box.classList.add("active");
+      box.classList.add("current");
     } else if (stageNumber < currentState) {
       box.classList.add("completed");
     }

@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
 });
 
 //read csv file
-const csvPath = path.join(__dirname, "csv", "test_csv.csv");
+const csvPath = "test_csv.csv";
 const file = fs.readFileSync(csvPath, "utf8");
 
 // Split the file into rows, remove the header, and filter out empty rows
