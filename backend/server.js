@@ -163,29 +163,16 @@ data = {
     console.error("CSV write failed:", err.message),
   );
     const result = await filterGarbage(data); 
-    if (result) {
+    if (result!=null) {
       cleanedData = result;
-    } else {
-      // filterGarbage returned null/undefined — warn but continue with raw data
-      console.warn(
-        "filter function returned null/undefined — emitting unfiltered data",
-      );
-      io.emit("telemetry-warning", {
-        stage: "filterGarbage",
-        reason: "returned null",
-      });
-    }
+    } 
   } catch (filterError) {
     console.error(
       "filter function crashed-sending unfiltered data",
       filterError.message,
     );
-    io.emit("telemetry-warning", {
-      stage: "filterGarbage",
-      reason: filterError.message,
-    });
   }
-
+  
   if (isCalReceived) isCalReceived = false;
 
   // write to csv file
