@@ -207,11 +207,8 @@ io.on("connection", (socket) => {
         socket.emit("command-response", "Failed to send command");
         return;
     }
-
-    socket.emit("command-response", command);
    });
    });
-
     socket.on("disconnect", () => {
     console.log("GUI Disconnected");
    }); 

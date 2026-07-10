@@ -41,7 +41,7 @@ document.querySelectorAll(".cmd-btn").forEach(button => {
       commandInput.focus();
     }
   });
-});
+});       
 
 
 // GNS & Specialized Sidebar Elements
@@ -74,12 +74,8 @@ commandInput.addEventListener("keydown", (e) => {
     }
 });
 
-socket.on("command-echo", (cmd) => {
-    console.count("command-echo received");
-    console.log(cmd);
-    addCommandEcho(cmd);
-
-    if (cmd === "CMD,041,CX,ON") {
+function handleButtonStateUI(cmd) {
+  if (cmd === "CMD,041,CX,ON") {
     cxBtn.textContent = "CXOFF";
     cxBtn.classList.add("btn-active");
     cxBtn.setAttribute("data-cmd", "CMD,041,CX,OFF");
@@ -108,21 +104,20 @@ socket.on("command-echo", (cmd) => {
     servoBtn.classList.remove("btn-active");
     servoBtn.setAttribute("data-cmd", "CMD,041,MEC,SERVO,ON");
   }
-});
+}
 
 sendBtn.addEventListener("click", () => {
     const command = commandInput.value.trim();
 
     if (!command) return;
-
+    addCommandEcho(command);
+    handleButtonStateUI(command);
     socket.emit("send-command", command);
    
     commandInput.value = "";
     commandInput.focus();
 });
 
-//command history handling
-// Initialize a global or scoped array to act as your queue
 let commandHistory = [];
 
 function addCommandEcho(cmd) {
