@@ -7,6 +7,7 @@ const server = http.createServer(app);
 const fs = require("fs");
 const io = new Server(server, { cors: { origin: "*" } });
 const { filterGarbage } = require("./filterGarbage");
+const serialPort = require("./serialPort");
 // importing functions from telemetryWriter.js file
 const {
   initTelemetryCSV,
@@ -15,7 +16,6 @@ const {
 } = require("./telemetryWriter");
 
 const PORT = 3000;
-let telemetryInterval = null; //this is to read the data from csv file
 let isCalReceived = false;
 //6N:SIMP
 const validCommands = {
@@ -39,15 +39,6 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "..", "frontend", "index.html"));
 });
 
-//read csv file
-const csvPath = "test_csv.csv";
-const file = fs.readFileSync(csvPath, "utf8");
-
-// Split the file into rows, remove the header, and filter out empty rows
-const rows = file
-    .split("\n")
-    .slice(1)          // remove header
-    .filter(row => row.trim() !== "");
 
 //Resolve decimal values to a specific precision
 function resolveDecimal(value, precision) {
@@ -62,31 +53,31 @@ function resolveDecimal(value, precision) {
   return truncated.toFixed(precision);
 }
 //for starting the telemetry data reading from csv file
-function startTelemetry() {
-    // Read all rows from telemetry.csv
-     if (telemetryInterval) return;
-    let index = 0;
+// function startTelemetry() {
+//     // Read all rows from telemetry.csv
+//      if (telemetryInterval) return;
+//     let index = 0;
 
-    telemetryInterval = setInterval(() => {
+//     telemetryInterval = setInterval(() => {
 
-        if (index >= rows.length) {
-            clearInterval(telemetryInterval);
-            return;
-        }
+//         if (index >= rows.length) {
+//             clearInterval(telemetryInterval);
+//             return;
+//         }
 
-        handleCanSatData(rows[index]);
+//         handleCanSatData(rows[index]);
 
-        index++;
+//         index++;
 
-    }, 1000);
-}
-//for stopping the telemetry data reading from csv file
-function stopTelemetry() {
-    if (telemetryInterval) {
-        clearInterval(telemetryInterval);
-        telemetryInterval = null;
-    }
-}
+//     }, 1000);
+// }
+// //for stopping the telemetry data reading from csv file
+// function stopTelemetry() {
+//     if (telemetryInterval) {
+//         clearInterval(telemetryInterval);
+//         telemetryInterval = null;
+//     }
+// }
 // this function is taking the emitted values
 async function handleCanSatData(rawString) {
   let data;
@@ -180,32 +171,17 @@ data = {
   // final emit....this is independent
   io.emit("telemetry-update", cleanedData);
 }
+
+serialPort.on("telemetry", (packet) => {
+    handleCanSatData(packet);
+});
+
+
 io.on("connection", (socket) => {
 
     console.log("GUI Connected");
-
-    socket.on("send-command", (command) => {
-
-        const cmd = command.trim().toUpperCase();
-
-        if (!(cmd in validCommands)) {
-
-            socket.emit("command-error", {
-                message: "INVALID COMMAND",
-                received: cmd
-            });
-
-            return;
-        }
-
-        console.log("Received:", cmd);
-        // Send the accepted command to every connected GUI
-        console.count("Backend command-echo");
-        console.log(cmd);
-        io.emit("command-echo", cmd);
-
-        switch(validCommands[cmd]) { 
-          // remove this switch case and use port.write() for any incoming commands from GUI
+    
+        // remove this switch case and use port.write() for any incoming commands from GUI
           // all these handling is done by backend/cansat/send.py in handle_command() function
           // so we just need to send the command to the serial port
           // I would suggest to write on port before echoing the command back to GUI because command ka priority is to 
@@ -214,59 +190,28 @@ io.on("connection", (socket) => {
           // but since, in backend/cansat/send.py, API parsing is not implemented, use serialPorts.js from cansat repo, when we test with XBEE we will simply use API waali file.
           // actually, whole point of making n number of files was to make the code modular and keep server.js as simple as possible
           // also, after implementing ports, make sure to remove startTelemetry() and stopTelemetry() functions from server.js because they are not needed anymore, we will be using serial port to read the telemetry data from CANSAT
-            case "1N":
-                console.log("CX ON");
-                io.emit("clear-data");
-                startTelemetry();
-                socket.emit("command-response","Stream Started");
-                break;
+            
 
-            case "2N":
-                console.log("CX OFF");
-                stopTelemetry();
-                socket.emit("command-response","Stream Stopped");
-                break;
+    socket.on("send-command", (cmd) => {
+    const command = validCommands[cmd];
 
-            case "3N":
-                console.log("SIM ENABLE");
-                socket.emit("command-response","Simulation Enabled");
-                break;
+    if (!command) {
+        socket.emit("command-response", "Invalid Command");
+        return;
+    }
 
-            case "4N":
-                console.log("SIM ACTIVATE");
-                socket.emit("command-response","Simulation Started");
-                break;
+    //yaha it will write on serialPort and then echo back to GUI
+    serialPort.sendCommand(command, (err) => {
+    if (err) {
+        console.error(err);
+        socket.emit("command-response", "Failed to send command");
+        return;
+    }
 
-            case "5N":
-                console.log("SIM DISABLE");
-                socket.emit("command-response","Simulation Stopped");
-                break;
+    socket.emit("command-response", command);
+   });
+   });
 
-            case "7N":
-                console.log("CAL");
-                socket.emit("command-response", "Calibration Started");
-                break;
-
-            case "8N":
-                console.log("SERVO ON");
-                socket.emit("command-response", "Servo Enabled");
-                break;
-
-            case "9N":
-                console.log("SERVO OFF");
-                socket.emit("command-response", "Servo Disabled");
-                break;
-
-            case "10N":
-                console.log("GYRO ON");
-                break;
-
-            case "11N":
-                console.log("GYRO OFF");
-                break;
-        }
-
-    });
     socket.on("disconnect", () => {
     console.log("GUI Disconnected");
    }); 
