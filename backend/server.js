@@ -204,8 +204,16 @@ io.on("connection", (socket) => {
         console.log(cmd);
         io.emit("command-echo", cmd);
 
-        switch(validCommands[cmd]) {
-
+        switch(validCommands[cmd]) { 
+          // remove this switch case and use port.write() for any incoming commands from GUI
+          // all these handling is done by backend/cansat/send.py in handle_command() function
+          // so we just need to send the command to the serial port
+          // I would suggest to write on port before echoing the command back to GUI because command ka priority is to 
+          // be written on serial port and then echo back to GUI
+          // command's destiny: frontend(GUI) -> backend(server.js) -> write to port (serialPortAPI.js) -> backend/cansat/send.py -> handle_command() -> backend/cansat/send.py -> backend/server.js -> frontend(GUI)
+          // but since, in backend/cansat/send.py, API parsing is not implemented, use serialPorts.js from cansat repo, when we test with XBEE we will simply use API waali file.
+          // actually, whole point of making n number of files was to make the code modular and keep server.js as simple as possible
+          // also, after implementing ports, make sure to remove startTelemetry() and stopTelemetry() functions from server.js because they are not needed anymore, we will be using serial port to read the telemetry data from CANSAT
             case "1N":
                 console.log("CX ON");
                 io.emit("clear-data");

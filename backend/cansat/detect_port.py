@@ -31,9 +31,9 @@ def detect():
             "usbserial" in port or
             "usbmodem" in port
         ):
+        # if name in port
             if is_port_available(port):
                 return port
 
     return "No available XBEE port found."
 
-print(detect())

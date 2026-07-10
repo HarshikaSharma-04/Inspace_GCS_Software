@@ -5,7 +5,7 @@ from port import Port
 import time
 class Cansat:
     def __init__(self):
-        self.port = detect()
+        self.port = "COM1"
         self.p = Port(self.port)
         self.path = "./csv/test_csv.csv"
         self.prevcmd = ""
