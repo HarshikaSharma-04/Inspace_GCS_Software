@@ -35,3 +35,5 @@ def detect():
                 return port
 
     return "No available XBEE port found."
+
+print(detect())

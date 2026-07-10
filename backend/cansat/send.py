@@ -1,14 +1,12 @@
 # this file contains the core logic for simulating CanSat's telemetry transmission
 import csv
 from detect_port import detect
-from handle_command import Commands
 from port import Port
 import time
 class Cansat:
     def __init__(self):
         self.port = detect()
         self.p = Port(self.port)
-        self.c = Commands()
         self.path = "./csv/test_csv.csv"
         self.prevcmd = ""
         self.sim_mode = False
