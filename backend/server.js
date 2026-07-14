@@ -17,6 +17,12 @@ const {
 
 const PORT = 3000;
 let isCalReceived = false;
+//let TELEMETRY_QUEUE = [];
+let isSimEnabled = false;
+let isSimActivated = false;
+let isSimDisabled = false;
+let inFlightMode = true;
+let inSimMode = false;
 //6N:SIMP
 const validCommands = {
   "CMD,041,CX,ON":"1N",
@@ -52,32 +58,6 @@ function resolveDecimal(value, precision) {
 
   return truncated.toFixed(precision);
 }
-//for starting the telemetry data reading from csv file
-// function startTelemetry() {
-//     // Read all rows from telemetry.csv
-//      if (telemetryInterval) return;
-//     let index = 0;
-
-//     telemetryInterval = setInterval(() => {
-
-//         if (index >= rows.length) {
-//             clearInterval(telemetryInterval);
-//             return;
-//         }
-
-//         handleCanSatData(rows[index]);
-
-//         index++;
-
-//     }, 1000);
-// }
-// //for stopping the telemetry data reading from csv file
-// function stopTelemetry() {
-//     if (telemetryInterval) {
-//         clearInterval(telemetryInterval);
-//         telemetryInterval = null;
-//     }
-// }
 // this function is taking the emitted values
 async function handleCanSatData(rawString) {
   let data;
@@ -147,7 +127,6 @@ data = {
     });
     return; // No data exists
   }
-
   let cleanedData = data; // Temporary variable to hold filtered data
   try {
     writeTelemetryRow(cleanedData).catch((err) =>
@@ -180,17 +159,6 @@ serialPort.on("telemetry", (packet) => {
 io.on("connection", (socket) => {
 
     console.log("GUI Connected");
-    
-        // remove this switch case and use port.write() for any incoming commands from GUI
-          // all these handling is done by backend/cansat/send.py in handle_command() function
-          // so we just need to send the command to the serial port
-          // I would suggest to write on port before echoing the command back to GUI because command ka priority is to 
-          // be written on serial port and then echo back to GUI
-          // command's destiny: frontend(GUI) -> backend(server.js) -> write to port (serialPortAPI.js) -> backend/cansat/send.py -> handle_command() -> backend/cansat/send.py -> backend/server.js -> frontend(GUI)
-          // but since, in backend/cansat/send.py, API parsing is not implemented, use serialPorts.js from cansat repo, when we test with XBEE we will simply use API waali file.
-          // actually, whole point of making n number of files was to make the code modular and keep server.js as simple as possible
-          // also, after implementing ports, make sure to remove startTelemetry() and stopTelemetry() functions from server.js because they are not needed anymore, we will be using serial port to read the telemetry data from CANSAT
-            
 
     socket.on("send-command", (cmd) => {
     const command = validCommands[cmd];
@@ -200,6 +168,35 @@ io.on("connection", (socket) => {
         return;
     }
 
+    // handling simulation commands:
+    if (cmd === "CMD,041,SIM,ENABLE") {
+            if (inFlightMode) {
+                socket.emit("command-warning", "Warning: Cannot enable simulation while in Flight Mode!");
+                return;
+            }
+            isSimEnabled = true;
+            isSimActivated = false; // Reset activation state
+        } 
+        
+        else if (cmd === "CMD,041,SIM,ACTIVATE") {
+            if (!isSimEnabled) {
+                socket.emit("command-warning", "Warning: Please ENABLE the simulation mode first!");
+                return;
+            }
+            isSimActivated = true;
+        } 
+        
+        else if (cmd === "CMD,041,SIM,DISABLE") {
+            if (!isSimActivated) {
+                socket.emit("command-warning", "Warning: Simulation must be ACTIVATED before it can be disabled!");
+                return;
+            }
+            // Reset states upon successful disable
+            isSimEnabled = false;
+            isSimActivated = false;
+        }
+
+      
     //yaha it will write on serialPort and then echo back to GUI
     serialPort.sendCommand(command, (err) => {
     if (err) {
@@ -208,6 +205,7 @@ io.on("connection", (socket) => {
         return;
     }
    });
+   socket.emit("command-success", cmd);
    });
     socket.on("disconnect", () => {
     console.log("GUI Disconnected");

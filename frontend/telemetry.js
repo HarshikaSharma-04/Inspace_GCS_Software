@@ -110,7 +110,7 @@ sendBtn.addEventListener("click", () => {
     const command = commandInput.value.trim();
 
     if (!command) return;
-    addCommandEcho(command);
+    //addCommandEcho(command); 
     handleButtonStateUI(command);
     socket.emit("send-command", command);
    
@@ -244,9 +244,29 @@ function resetAllTelemetryData() {
   updateStageIndicators(1);
 }
  // Simulation state tracking
- 
-let simEnabled = false;
 
+
+let simEnabled = false;
+socket.on("command-success", (verifiedCommand) => {
+    addCommandEcho(verifiedCommand);
+});
+socket.on("command-warning", (warningMessage) => {
+    if (commandInput) {
+        commandInput.value = warningMessage;
+        commandInput.style.color = "red";
+        commandInput.style.fontWeight = "bold";
+        const clearWarning = () => {
+            commandInput.value = "";
+            commandInput.style.color = "";
+            commandInput.style.fontWeight = "";
+            commandInput.removeEventListener("focus", clearWarning);
+            commandInput.removeEventListener("input", clearWarning);
+        };
+
+        commandInput.addEventListener("focus", clearWarning);
+        commandInput.addEventListener("input", clearWarning);
+    }
+});
 socket.on("command-response", (response) => {
   switch (response) {
     case "Simulation Enabled":
