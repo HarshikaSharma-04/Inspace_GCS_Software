@@ -13,7 +13,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 __pycache__/
 .DS_Store
 .vscode/
-*.csv
+
 
 # Runtime data
 pids

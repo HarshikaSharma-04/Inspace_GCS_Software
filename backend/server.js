@@ -7,6 +7,7 @@ const server = http.createServer(app);
 const fs = require("fs");
 const io = new Server(server, { cors: { origin: "*" } });
 const { filterGarbage } = require("./filterGarbage");
+const serialPort = require("./serialPort");
 // importing functions from telemetryWriter.js file
 const {
   initTelemetryCSV,
@@ -15,8 +16,13 @@ const {
 } = require("./telemetryWriter");
 
 const PORT = 3000;
-let telemetryInterval = null; //this is to read the data from csv file
 let isCalReceived = false;
+//let TELEMETRY_QUEUE = [];
+let isSimEnabled = false;
+let isSimActivated = false;
+let isSimDisabled = false;
+let inFlightMode = true;
+let inSimMode = false;
 //6N:SIMP
 const validCommands = {
   "CMD,041,CX,ON":"1N",
@@ -39,15 +45,6 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "..", "frontend", "index.html"));
 });
 
-//read csv file
-const csvPath = "test_csv.csv";
-const file = fs.readFileSync(csvPath, "utf8");
-
-// Split the file into rows, remove the header, and filter out empty rows
-const rows = file
-    .split("\n")
-    .slice(1)          // remove header
-    .filter(row => row.trim() !== "");
 
 //Resolve decimal values to a specific precision
 function resolveDecimal(value, precision) {
@@ -60,32 +57,6 @@ function resolveDecimal(value, precision) {
   const truncated = Math.trunc(n * factor) / factor;
 
   return truncated.toFixed(precision);
-}
-//for starting the telemetry data reading from csv file
-function startTelemetry() {
-    // Read all rows from telemetry.csv
-     if (telemetryInterval) return;
-    let index = 0;
-
-    telemetryInterval = setInterval(() => {
-
-        if (index >= rows.length) {
-            clearInterval(telemetryInterval);
-            return;
-        }
-
-        handleCanSatData(rows[index]);
-
-        index++;
-
-    }, 1000);
-}
-//for stopping the telemetry data reading from csv file
-function stopTelemetry() {
-    if (telemetryInterval) {
-        clearInterval(telemetryInterval);
-        telemetryInterval = null;
-    }
 }
 // this function is taking the emitted values
 async function handleCanSatData(rawString) {
@@ -156,36 +127,22 @@ data = {
     });
     return; // No data exists
   }
-
   let cleanedData = data; // Temporary variable to hold filtered data
   try {
     writeTelemetryRow(cleanedData).catch((err) =>
     console.error("CSV write failed:", err.message),
   );
     const result = await filterGarbage(data); 
-    if (result) {
+    if (result!=null) {
       cleanedData = result;
-    } else {
-      // filterGarbage returned null/undefined — warn but continue with raw data
-      console.warn(
-        "filter function returned null/undefined — emitting unfiltered data",
-      );
-      io.emit("telemetry-warning", {
-        stage: "filterGarbage",
-        reason: "returned null",
-      });
-    }
+    } 
   } catch (filterError) {
     console.error(
       "filter function crashed-sending unfiltered data",
       filterError.message,
     );
-    io.emit("telemetry-warning", {
-      stage: "filterGarbage",
-      reason: filterError.message,
-    });
   }
-
+  
   if (isCalReceived) isCalReceived = false;
 
   // write to csv file
@@ -193,85 +150,63 @@ data = {
   // final emit....this is independent
   io.emit("telemetry-update", cleanedData);
 }
+
+serialPort.on("telemetry", (packet) => {
+    handleCanSatData(packet);
+});
+
+
 io.on("connection", (socket) => {
 
     console.log("GUI Connected");
 
-    socket.on("send-command", (command) => {
+    socket.on("send-command", (cmd) => {
+    const command = validCommands[cmd];
 
-        const cmd = command.trim().toUpperCase();
+    if (!command) {
+        socket.emit("command-response", "Invalid Command");
+        return;
+    }
 
-        if (!(cmd in validCommands)) {
-
-            socket.emit("command-error", {
-                message: "INVALID COMMAND",
-                received: cmd
-            });
-
-            return;
+    // handling simulation commands:
+    if (cmd === "CMD,041,SIM,ENABLE") {
+            if (inFlightMode) {
+                socket.emit("command-warning", "Warning: Cannot enable simulation while in Flight Mode!");
+                return;
+            }
+            isSimEnabled = true;
+            isSimActivated = false; // Reset activation state
+        } 
+        
+        else if (cmd === "CMD,041,SIM,ACTIVATE") {
+            if (!isSimEnabled) {
+                socket.emit("command-warning", "Warning: Please ENABLE the simulation mode first!");
+                return;
+            }
+            isSimActivated = true;
+        } 
+        
+        else if (cmd === "CMD,041,SIM,DISABLE") {
+            if (!isSimActivated) {
+                socket.emit("command-warning", "Warning: Simulation must be ACTIVATED before it can be disabled!");
+                return;
+            }
+            // Reset states upon successful disable
+            isSimEnabled = false;
+            isSimActivated = false;
         }
 
-        console.log("Received:", cmd);
-        // Send the accepted command to every connected GUI
-        console.count("Backend command-echo");
-        console.log(cmd);
-        io.emit("command-echo", cmd);
-
-        switch(validCommands[cmd]) {
-
-            case "1N":
-                console.log("CX ON");
-                io.emit("clear-data");
-                startTelemetry();
-                socket.emit("command-response","Stream Started");
-                break;
-
-            case "2N":
-                console.log("CX OFF");
-                stopTelemetry();
-                socket.emit("command-response","Stream Stopped");
-                break;
-
-            case "3N":
-                console.log("SIM ENABLE");
-                socket.emit("command-response","Simulation Enabled");
-                break;
-
-            case "4N":
-                console.log("SIM ACTIVATE");
-                socket.emit("command-response","Simulation Started");
-                break;
-
-            case "5N":
-                console.log("SIM DISABLE");
-                socket.emit("command-response","Simulation Stopped");
-                break;
-
-            case "7N":
-                console.log("CAL");
-                socket.emit("command-response", "Calibration Started");
-                break;
-
-            case "8N":
-                console.log("SERVO ON");
-                socket.emit("command-response", "Servo Enabled");
-                break;
-
-            case "9N":
-                console.log("SERVO OFF");
-                socket.emit("command-response", "Servo Disabled");
-                break;
-
-            case "10N":
-                console.log("GYRO ON");
-                break;
-
-            case "11N":
-                console.log("GYRO OFF");
-                break;
-        }
-
-    });
+      
+    //yaha it will write on serialPort and then echo back to GUI
+    serialPort.sendCommand(command, (err) => {
+    if (err) {
+        console.error(err);
+        socket.emit("command-response", "Failed to send command");
+        return;
+    }
+   });
+   socket.emit("command-success", cmd);
+   });
     socket.on("disconnect", () => {
     console.log("GUI Disconnected");
    }); 

@@ -1,102 +1,135 @@
-# this file contains the core logic for simulating CanSat's telemetry transmission
 import csv
-from detect_port import detect
-from handle_command import Commands
-from port import Port
+import serial
 import time
-class Cansat:
-    def __init__(self):
-        self.port = detect()
-        self.p = Port(self.port)
-        self.c = Commands()
-        self.path = "./csv/test_csv.csv"
-        self.prevcmd = ""
-        self.sim_mode = False
-        self.flight_mode = False
-        self.sim_mode_E = False
-        self._file_handle = None
-        self._csv_reader = None
+import os
 
-    # read csv
-    def read_csv(self):
-        """Initializes the CSV stream safely without an internal blocking loop."""
-        print("Operating on port: ", self.port)
-        try:
-            self._file_handle = open(self.path, mode="r", newline="", encoding="utf-8")
-            self._csv_reader = csv.reader(self._file_handle)
+# --- CONFIGURATION ---
+PORT = "COM1" #/dev/cu.SLAB_USBtoUART
+BAUD = 115200
 
-            try:
-                next(self._csv_reader)
-            except StopIteration:
-                print("File empty, nothing to read")
-                return
-            print("Telemetry stream ready")
+TELEMETRY_CSV = "test_csv.csv"
 
-        except FileNotFoundError:
-            print("Incorrect file name or path")
-            self.flight_mode = False
-        except Exception as e:
-            print("Exception: ", e)
-            self.flight_mode = False
+SIMULATION_CSV = "sim.txt"  # Create this file or point to your SIM path
+H = 0.0
 
-    # listen for commands
-    def handleCommand(self):
-        if not self.p.connect():
-            print("Failed to initialize port.")
-            return
-        print("Awaiting commands...")
+def run_sender():
+    try:
+        ser = serial.Serial(port=PORT, baudrate=BAUD, timeout=0.1)
+        print(f"Serial port opened: {ser.name}")
+    except Exception as e:
+        print(f"Error opening serial port: {e}")
+        return
+
+    print("--- GCS SENDER ACTIVE ---")
+    print("Waiting for commands...")
+
+    try:
         while True:
-            cmd = self.p.listen()
-            if cmd:
-                if cmd == "1N":
-                    # start the transmission
-                    self.flight_mode = True
-                    print("Telemetry started")
-                    self.read_csv()  # start the telemetry
-                elif cmd == "2N":
-                    # calibrate the altitude
-                    # logic for altitude calibration
-                    print("Altitude calibrated")
-                elif cmd == "3N":
-                    if self.flight_mode:
-                        print("Cannot enter simulation mode during flight, continuing in fligh mode")
-                    # enables the sim mode
-                    else:
-                        print("Simulated mode enabled")
-                        self.sim_mode_E = True
-                elif cmd == "4N":
-                    if self.sim_mode_E:
-                        # activates the sim mode
-                        print("Activated the sim mode")
-                        self.sim_mode = True
-                    else:
-                        # continue in flight mode
-                        print("Sim enable was not received, continuing in flight mode")
-                elif cmd == "5N":
-                    if self.sim_mode:
-                        # deactivate the sim mode
-                        print("Simulation mode deactivated")
-                        self.sim_mode = False
-                    else:
-                        print("Sim mode was not activated,continuing in flight mode")
-                elif cmd == "6N":
-                    # activate the gyro
-                    print("MEC GYRO ON")
-                elif cmd == "7N":
-                    # deactivate the gyro
-                    print("MEC GYRO OFF")
-                elif cmd == "8N":
-                    # activate the servo
-                    print("SERVO ON")
-                elif cmd == "9N":
-                    print("SERVO OFF")
-                elif cmd == "10N":
-                    # barometric pressure values
-                    print("Starting to send pressure values")
-                elif cmd == "11N":
-                    # stop the telemetry transmission
-                    print("Telemetry transmission stopped")
-                    self.flight_mode = False
-                self.prevcmd = cmd
-cansat = Cansat()
-cansat.handleCommand()
+            if ser.in_waiting > 0:
+                # Read command from Node.js
+                command = ser.readline().decode("utf-8").strip().upper()
+                print(f"Command Received: {command}")
+                #print(command)
+                if command == "1N":
+                    print("Action: Starting Telemetry Stream...")
+                    stream_csv_data(ser, TELEMETRY_CSV)
+                if command == "2N":
+                    print("CX_OFF") 
+                if command == "3N":
+                    print("Action: Simulation ENABLED")
+                if command == "4N":
+                    print("Action: Simulation Mode Active")
+                if command == "5N":
+                    print("Action: Simulation DISABLED")
+                
+                if command == "7N":
+                    
+                    print("Action: Calibrating altitude...")
+                if command == "8N":
+                    print("Action: Servo ON")
+                if command == "9N":
+                    print("Action: Servo OFF")
+                if command == "10N": 
+                    print("Action: GYRO ON") 
+                    ser.write("")
+                if command == "11N":
+                    print("Action: GYRO OFF")
+                
+                
+            time.sleep(0.1)
+
+    except KeyboardInterrupt:
+        print("\nSender stopped by user.")
+    finally:
+        if ser.is_open:
+            ser.close()
+            print("Serial port closed.")
+
+def stream_csv_data(ser, file_path,simulated_H = None,simulated_P = None):
+    """Generic function to stream any CSV until finished or stopped by GCS."""
+    TOTAL_PKT_COUNT = 0  # this will act as teensy's internal count for the packet
+    IS_SIM_ENABLED = False
+    if not os.path.exists(file_path):
+        print(f"Error: File {file_path} not found.")
+        return
+
+    try:
+        with open(file_path, "r") as file:
+            reader = csv.reader(file)
+            header = next(reader) 
+
+            is_calibrated = False
+
+            
+            for row in reader:
+                # Check for INTERRUPT commands while streaming
+                if ser.in_waiting > 0:
+                    interrupt = ser.readline().decode("utf-8").strip().upper()
+                    if interrupt == "2N":
+                        print(f"Stream interrupted by: {interrupt}")
+                        return
+                    elif interrupt == "3N":
+                        IS_SIM_ENABLED = True
+                        print("Action: Simulation ENABLED")
+                    elif interrupt == "4N":
+                        if IS_SIM_ENABLED:
+                            print("SIMUALTION MODE ACTIVATED....")    
+                        else:
+                            print("ERROR: SIMULATION MODE NOT ENABLED") 
+                    elif interrupt == "5N":
+                        if IS_SIM_ENABLED:
+                            print("SIMULATION MODE DEACTIVATED...")
+                        else:
+                            print("ERROR: SIMUALTION MODE NOT ACTIVATED..")  
+                    elif interrupt == "7N":
+                        is_calibrated = True
+                        print("Action: Calibrating...")
+                        
+                    elif interrupt == "8N":
+                         print("Action: Servo ON")
+                    elif interrupt == "9N":
+                           print("Action: Servo Off")   
+                    elif interrupt == "10N":
+                         print("Action: GYRO ON")   
+                    elif interrupt == "11N":
+                        print("GYRO OFF")
+
+                # Apply calibration if enabled
+                if is_calibrated:
+                    row[3] = "0.0"
+                # Send the data row
+                data_line = ",".join(row) + "\n"
+                ser.write(data_line.encode("utf-8"))
+                # print(f"Sending Data: {data_line.strip()}")
+                TOTAL_PKT_COUNT += 1
+                # print(f"Total Packet sent from CanSat:{TOTAL_PKT_COUNT}")
+                # Telemetry rate (0.02 second)
+                time.sleep(1)
+            
+            print("End of file reached.")
+
+    except Exception as e:
+        print(f"Streaming Error: {e}")
+
+if __name__ == "__main__":
+    run_sender()

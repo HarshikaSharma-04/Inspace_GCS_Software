@@ -41,7 +41,7 @@ document.querySelectorAll(".cmd-btn").forEach(button => {
       commandInput.focus();
     }
   });
-});
+});       
 
 
 // GNS & Specialized Sidebar Elements
@@ -74,12 +74,8 @@ commandInput.addEventListener("keydown", (e) => {
     }
 });
 
-socket.on("command-echo", (cmd) => {
-    console.count("command-echo received");
-    console.log(cmd);
-    addCommandEcho(cmd);
-
-    if (cmd === "CMD,041,CX,ON") {
+function handleButtonStateUI(cmd) {
+  if (cmd === "CMD,041,CX,ON") {
     cxBtn.textContent = "CXOFF";
     cxBtn.classList.add("btn-active");
     cxBtn.setAttribute("data-cmd", "CMD,041,CX,OFF");
@@ -108,21 +104,20 @@ socket.on("command-echo", (cmd) => {
     servoBtn.classList.remove("btn-active");
     servoBtn.setAttribute("data-cmd", "CMD,041,MEC,SERVO,ON");
   }
-});
+}
 
 sendBtn.addEventListener("click", () => {
     const command = commandInput.value.trim();
 
     if (!command) return;
-
+    //addCommandEcho(command); 
+    handleButtonStateUI(command);
     socket.emit("send-command", command);
    
     commandInput.value = "";
     commandInput.focus();
 });
 
-//command history handling
-// Initialize a global or scoped array to act as your queue
 let commandHistory = [];
 
 function addCommandEcho(cmd) {
@@ -249,9 +244,29 @@ function resetAllTelemetryData() {
   updateStageIndicators(1);
 }
  // Simulation state tracking
- 
-let simEnabled = false;
 
+
+let simEnabled = false;
+socket.on("command-success", (verifiedCommand) => {
+    addCommandEcho(verifiedCommand);
+});
+socket.on("command-warning", (warningMessage) => {
+    if (commandInput) {
+        commandInput.value = warningMessage;
+        commandInput.style.color = "red";
+        commandInput.style.fontWeight = "bold";
+        const clearWarning = () => {
+            commandInput.value = "";
+            commandInput.style.color = "";
+            commandInput.style.fontWeight = "";
+            commandInput.removeEventListener("focus", clearWarning);
+            commandInput.removeEventListener("input", clearWarning);
+        };
+
+        commandInput.addEventListener("focus", clearWarning);
+        commandInput.addEventListener("input", clearWarning);
+    }
+});
 socket.on("command-response", (response) => {
   switch (response) {
     case "Simulation Enabled":
