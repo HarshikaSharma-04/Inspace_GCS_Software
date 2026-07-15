@@ -171,7 +171,6 @@ io.on("connection", (socket) => {
         return;
       }
       isSimEnabled = true;
-      isSimActivated = false; // Reset activation state
     }
 
     else if (cmd === "CMD,041,SIM,ACTIVATE") {
