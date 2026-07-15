@@ -9,32 +9,31 @@ const io = new Server(server, { cors: { origin: "*" } });
 const { filterGarbage } = require("./filterGarbage");
 const serialPort = require("./serialPort");
 // importing functions from telemetryWriter.js file
-const {
-  initTelemetryCSV,
-  writeTelemetryRow,
-  deleteTelemetryCSV,
-} = require("./telemetryWriter");
+const { initTelemetryCSV, writeTelemetryRow, deleteTelemetryCSV, } = require("./telemetryWriter");
+const { getSimulationCommands, stripSimCommand } = require("./readSimValues");
 
 const PORT = 3000;
-let isCalReceived = false;
 //let TELEMETRY_QUEUE = [];
 let isSimEnabled = false;
 let isSimActivated = false;
 let isSimDisabled = false;
 let inFlightMode = true;
 let inSimMode = false;
+let isCxSent = false;
+let simInterval = null;
 //6N:SIMP
+
 const validCommands = {
-  "CMD,041,CX,ON":"1N",
-  "CMD,041,CX,OFF":"2N",
-  "CMD,041,SIM,ENABLE":"3N",
-  "CMD,041,SIM,ACTIVATE":"4N",
-  "CMD,041,SIM,DISABLE":"5N",
-  "CMD,041,CAL":"7N",
-  "CMD,041,MEC,SERVO,ON":"8N",
-  "CMD,041,MEC,SERVO,OFF":"9N",
-  "CMD,041,MEC,GYRO,ON":"10N",
-  "CMD,041,MEC,GYRO,OFF":"11N",
+  "CMD,041,CX,ON": "1N",
+  "CMD,041,CX,OFF": "2N",
+  "CMD,041,SIM,ENABLE": "3N",
+  "CMD,041,SIM,ACTIVATE": "4N",
+  "CMD,041,SIM,DISABLE": "5N",
+  "CMD,041,CAL": "7N",
+  "CMD,041,MEC,SERVO,ON": "8N",
+  "CMD,041,MEC,SERVO,OFF": "9N",
+  "CMD,041,MEC,GYRO,ON": "10N",
+  "CMD,041,MEC,GYRO,OFF": "11N",
 };
 
 // Serve static files from the frontend directory
@@ -42,7 +41,7 @@ app.use(express.static(path.join(__dirname, "..", "frontend")));
 
 // Serve the index.html file from the frontend directory when the root URL is accessed
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "..", "frontend", "index.html"));
+  res.sendFile(path.join(__dirname, "..", "frontend", "index.html"));
 });
 
 
@@ -87,41 +86,41 @@ async function handleCanSatData(rawString) {
     ] = parts;
 
 
-data = {
-  TEAM_ID,
-  TIME_STAMP,
-  PACKET_COUNT,
+    data = {
+      TEAM_ID,
+      TIME_STAMP,
+      PACKET_COUNT,
 
-  ALTITUDE: resolveDecimal(ALTITUDE, 1),
-  PRESSURE: resolveDecimal(PRESSURE, 1),
-  TEMPERATURE: resolveDecimal(TEMPERATURE, 1),
-  VOLTAGE: resolveDecimal(VOLTAGE, 2),
+      ALTITUDE: resolveDecimal(ALTITUDE, 1),
+      PRESSURE: resolveDecimal(PRESSURE, 1),
+      TEMPERATURE: resolveDecimal(TEMPERATURE, 1),
+      VOLTAGE: resolveDecimal(VOLTAGE, 2),
 
-  GNSS_TIME,
-  GNSS_LATITUDE: resolveDecimal(GNSS_LATITUDE, 4),
-  GNSS_LONGITUDE: resolveDecimal(GNSS_LONGITUDE, 4),
-  GNSS_ALTITUDE: resolveDecimal(GNSS_ALTITUDE, 1),
-  GNSS_SATS,
+      GNSS_TIME,
+      GNSS_LATITUDE: resolveDecimal(GNSS_LATITUDE, 4),
+      GNSS_LONGITUDE: resolveDecimal(GNSS_LONGITUDE, 4),
+      GNSS_ALTITUDE: resolveDecimal(GNSS_ALTITUDE, 1),
+      GNSS_SATS,
 
-  ACCEL_R: resolveDecimal(ACCEL_R, 2),
-  ACCEL_P: resolveDecimal(ACCEL_P, 2),
-  ACCEL_Y: resolveDecimal(ACCEL_Y, 2),
+      ACCEL_R: resolveDecimal(ACCEL_R, 2),
+      ACCEL_P: resolveDecimal(ACCEL_P, 2),
+      ACCEL_Y: resolveDecimal(ACCEL_Y, 2),
 
-  GYRO_R: resolveDecimal(GYRO_R, 2),
-  GYRO_P: resolveDecimal(GYRO_P, 2),
-  GYRO_Y: resolveDecimal(GYRO_Y, 2),
-  
-  FLIGHT_SOFTWARE_STATE,
+      GYRO_R: resolveDecimal(GYRO_R, 2),
+      GYRO_P: resolveDecimal(GYRO_P, 2),
+      GYRO_Y: resolveDecimal(GYRO_Y, 2),
 
-  CMD_ECHO: CMD_ECHO ? CMD_ECHO.replace(/"/g, "") : ""
-};
+      FLIGHT_SOFTWARE_STATE,
+
+      CMD_ECHO: CMD_ECHO ? CMD_ECHO.replace(/"/g, "") : ""
+    };
 
   } catch (parseError) {
     console.error(
       "Parse failed — dropping packet:",
       parseError.message,
     );
-    io.emit("telemetry-warning", {
+    socket.emit("telemetry-warning", {
       stage: "parse",
       reason: parseError.message,
     });
@@ -130,86 +129,105 @@ data = {
   let cleanedData = data; // Temporary variable to hold filtered data
   try {
     writeTelemetryRow(cleanedData).catch((err) =>
-    console.error("CSV write failed:", err.message),
-  );
-    const result = await filterGarbage(data); 
-    if (result!=null) {
+      console.error("CSV write failed:", err.message),
+    );
+    const result = await filterGarbage(data);
+    if (result != null) {
       cleanedData = result;
-    } 
+    }
   } catch (filterError) {
     console.error(
       "filter function crashed-sending unfiltered data",
       filterError.message,
     );
   }
-  
-  if (isCalReceived) isCalReceived = false;
-
-  // write to csv file
-
   // final emit....this is independent
   io.emit("telemetry-update", cleanedData);
 }
 
 serialPort.on("telemetry", (packet) => {
-    handleCanSatData(packet);
+  handleCanSatData(packet);
 });
 
 
 io.on("connection", (socket) => {
 
-    console.log("GUI Connected");
+  console.log("GUI Connected");
 
-    socket.on("send-command", (cmd) => {
+  socket.on("send-command", (cmd) => {
     const command = validCommands[cmd];
 
     if (!command) {
-        socket.emit("command-response", "Invalid Command");
-        return;
+      socket.emit("command-response", "Invalid Command");
+      return;
     }
-
+    if (cmd === "CMD,041,CX,ON") {
+      isCxSent = true;
+    }
     // handling simulation commands:
     if (cmd === "CMD,041,SIM,ENABLE") {
-            if (inFlightMode) {
-                socket.emit("command-warning", "Warning: Cannot enable simulation while in Flight Mode!");
-                return;
-            }
-            isSimEnabled = true;
-            isSimActivated = false; // Reset activation state
-        } 
-        
-        else if (cmd === "CMD,041,SIM,ACTIVATE") {
-            if (!isSimEnabled) {
-                socket.emit("command-warning", "Warning: Please ENABLE the simulation mode first!");
-                return;
-            }
-            isSimActivated = true;
-        } 
-        
-        else if (cmd === "CMD,041,SIM,DISABLE") {
-            if (!isSimActivated) {
-                socket.emit("command-warning", "Warning: Simulation must be ACTIVATED before it can be disabled!");
-                return;
-            }
-            // Reset states upon successful disable
-            isSimEnabled = false;
-            isSimActivated = false;
-        }
+      if (isCxSent) {
+        socket.emit("command-warning", "Warning: Cannot enable simulation while in Flight Mode!");
+        return;
+      }
+      isSimEnabled = true;
+      isSimActivated = false; // Reset activation state
+    }
 
-      
+    else if (cmd === "CMD,041,SIM,ACTIVATE") {
+      if (!isSimEnabled) {
+        socket.emit("command-warning", "Warning: Please ENABLE the simulation mode first!");
+        return;
+      }
+      isSimActivated = true;
+    }
+
+    else if (cmd === "CMD,041,SIM,DISABLE") {
+      if (!isSimActivated) {
+        socket.emit("command-warning", "Warning: Simulation must be ACTIVATED before it can be disabled!");
+        return;
+      }
+      // Reset states upon successful disable
+      isSimEnabled = false;
+      isSimActivated = false;
+    }
+
+    if (isSimActivated) {
+      socket.emit("sim-command-response", "Simulation Mode Started");
+      const rawSimCommands = getSimulationCommands();
+      let index = 0;
+      if (simInterval) clearInterval(simInterval);
+      simInterval = setInterval(() => {
+        if (index < rawSimCommands.length) {
+          const fullCommand = rawSimCommands[index];
+          //io.emit("sim-command", fullCommand);
+          socket.emit("command-success", fullCommand);
+          const strippedValue = stripSimCommand(fullCommand);
+          serialPort.sendCommand(strippedValue, (err) => {
+            if (err) console.error("Serial Write Error:", err.message);
+          });
+          index++;
+        } else {
+          console.log("Simulation end reached.");
+          clearInterval(simInterval);
+        }
+      }, 1000);
+    }
+
+
     //yaha it will write on serialPort and then echo back to GUI
     serialPort.sendCommand(command, (err) => {
-    if (err) {
+      if (err) {
         console.error(err);
         socket.emit("command-response", "Failed to send command");
         return;
-    }
-   });
-   socket.emit("command-success", cmd);
-   });
-    socket.on("disconnect", () => {
+      }
+    });
+    socket.emit("command-success", cmd);
+  });
+  socket.on("disconnect", () => {
     console.log("GUI Disconnected");
-   }); 
+  });
 
 });
 // on port 3000 the server is running

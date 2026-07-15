@@ -15,39 +15,27 @@
 <body>
   <header class="title-container">
 
-    <!-- TOP ROW -->
+    <!-- TOP ROW (Reordered according to requirements) -->
     <div class="data-details">
 
       <img src="images/indian_flag.png" alt="flag" class="indian-flag" />
 
-      <h3 class="team-id">TEAM ID 041</h3>
-
-      <h3 class="data">
-        Mission Time: <span class="mission-time-value">00:00:00</span>
-      </h3>
-
-      <h1 class="team-name">DJS ARYA</h1>
-
-      <h3 class="data">
-        Packet Count: <span class="packet-count-value">0000</span>
-      </h3>
-
-      <h3 class="data">
-        Mode: <span class="mode-value">Flight</span>
-      </h3>
+      <!-- Team Name and ID grouped dynamically -->
+      <div class="team-branding-box">
+        <h1 class="team-name">DJS ARYA</h1>
+        <h3 class="team-id">TEAM ID: 2026-INSPACe-CAN-7USAT-041</h3>
+      </div>
 
       <img src="images/team_logo.png" alt="team-logo" class="team-logo" />
 
     </div>
 
     <!-- NAV ROW -->
-    <!-- <div class="nav-tabs"> -->
     <div class="tabs-options">
-      <button class="page-button telemetry-btn--home">HOME</button>
-      <button class="page-button telemetry-btn--graph">GRAPHS</button>
-      <button class="page-button telemetry-btn--csv">CSV</button>
+      <button class="page-button telemetry-btn--home"><i class="fa fa-home"></i>HOME</button>
+      <button class="page-button telemetry-btn--graph"><i class="fa fa-line-chart"></i>GRAPHS</button>
+      <button class="page-button telemetry-btn--csv"><i class="fa fa-table"></i>CSV</button>
     </div>
-    <!-- </div> -->
 
   </header>
 
@@ -59,43 +47,39 @@
       <!--Yahan se Flight state aur command section-->
       <div class="flight-state-command-section">
         <div class="flight-stage">
-
           <div class="stage-box">
             BOOT
           </div>
-
           <div class="arrow">→</div>
-
           <div class="stage-box">
             LAUNCH_PAD
           </div>
-
-
           <div class="arrow">→</div>
-
           <div class="stage-box">
             ASCENT
           </div>
-
-
           <div class="arrow">→</div>
-
           <div class="stage-box">
             DESCENT
           </div>
-
           <div class="arrow">→</div>
-
           <div class="stage-box">
             PARAGLIDER_DEPLOYMENT
           </div>
-
           <div class="arrow">→</div>
-
           <div class="stage-box">
             LANDED
           </div>
-
+          <div class="time-panel-row">
+            <div class="time-data-box">
+              <span class="time-label">Mission Time</span>
+              <span class="time-value mission-time-value">00:00:00</span>
+            </div>
+            <div class="time-data-box">
+              <span class="time-label">GNSS Time</span>
+              <span class="time-value sidebar-gnss-time-value">00:00:00</span>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -186,9 +170,14 @@
               <span class="label">GNSS Latitude</span>
               <span class="value sidebar-gnss-latitude-value">--</span>
             </div>
-            <div class="field">
-              <span class="label">GNSS Time</span>
-              <span class="value sidebar-gnss-time-value">--</span>
+            <div class="field text-highlight-cell">
+              <span class="label">Packet Count</span>
+              <span class="value packet-count-value">0000</span>
+            </div>
+
+            <div class="field text-highlight-cell">
+              <span class="label">Mode</span>
+              <span class="value mode-value">Flight</span>
             </div>
           </div>
 
