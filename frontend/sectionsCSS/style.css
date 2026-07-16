@@ -23,7 +23,6 @@ body {
   padding: 0 30px;
   height: 80px;
   background: #cfd0f2;
-  border-bottom: 1px solid black;
   justify-content: space-between;
 }
 
@@ -307,15 +306,18 @@ body {
   padding: 8px 4px;
   font-weight: 600;
   font-size: 20px;
+  margin-left: 0.4rem;
 }
 
 .send-btn {
-  background: #b4e6a0;
-  border: 2px solid black;
-  border-radius: 8px;
-  padding: 6px 6px;
+  background: #75df4c;
+  border-radius: 10px;
+  padding: 10px 9px;
   font-weight: bold;
   cursor: pointer;
+  width: 8rem;
+  font-size: 16px;
+  margin-right: 0.2rem;
 }
 
 .sidebar-sub-section {
@@ -377,7 +379,8 @@ body {
 }
 
 .send-btn:hover {
-  background-color: #88fd5d;
+  background-color: #60d436;
+  transform: translateY(-2px);
 }
 
 .switch:focus-visible {
@@ -825,7 +828,6 @@ body {
   width: 100%;
   padding: 15px 10px;
   background-color: #eaebfb;
-  border-top: 1px dashed #8f82b2;
 }
 
 .pyramid-row {
