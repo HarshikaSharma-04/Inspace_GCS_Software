@@ -119,7 +119,14 @@
         <div id="telemetry-table" class="telemetry-csv-container"></div>
         <div class="telemetry-graph-container"></div>
         <div class="telemetry-map-container"></div>
-        <div id="map"></div>
+        <div class="map-wrapper">
+          <div id="map"></div>
+
+          <div class="map-controls">
+            <input type="checkbox" id="autoPanToggle" checked />
+            <label for="autoPanToggle">LOCK CAMERA TO CANSAT</label>
+          </div>
+        </div>
       </div>
     </div>
 

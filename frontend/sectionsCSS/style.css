@@ -646,13 +646,51 @@ body {
   height: 100%;
 }
 
+.map-wrapper {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+}
+
 /* MAP RIGHT */
 #map {
+  flex: 1;
   min-height: 20rem;
   background-color: #eeeeee00;
   grid-column: 2;
   grid-row: 1;
   border-radius: 10px;
+}
+
+.map-controls {
+  background: #ffffff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  width: fit-content;
+  /* Keeps it tight to the text, or remove for full width */
+}
+
+.map-controls label {
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+}
+
+.map-controls input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
 }
 
 /* GRAPHS BELOW FULL WIDTH */
@@ -822,6 +860,7 @@ body {
 /* Buttons logic */
 /* Pyramid Button Layout Container */
 .pyramid-command-container {
+  margin-top: 25px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -842,7 +881,7 @@ body {
   flex: 1;
   padding: 8px 4px;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 18px;
   border: 2px solid #333;
   border-radius: 6px;
   background-color: #ffffff;
@@ -858,7 +897,6 @@ body {
   transform: translateY(-1px);
 }
 
-/* Style for when toggle states are active/pressed */
 .cmd-btn.btn-active {
   background-color: #6750a4 !important;
   color: #ffffff !important;
@@ -919,14 +957,10 @@ text-highlight-cell {
   align-items: center;
   justify-content: flex-end;
   border-left: 2px solid #cbd5e1;
-  /* A neat light-gray divider */
   padding-left: 20px;
-  /* Generous spacing inside the divider */
   margin-left: 20px;
-  /* Spacing outside the divider */
 }
 
-/* Individual time box adjustment to ensure consistency */
 .time-data-box {
   margin-right: 0.5rem;
   background: #d8d3ff;
@@ -935,14 +969,12 @@ text-highlight-cell {
   padding: 6px 14px;
   display: flex;
   flex-direction: column;
-  /* Keeps label on top, value below inside the box */
   align-items: center;
   justify-content: center;
   min-width: 120px;
   text-align: center;
 }
 
-/* Small, clear header label formatting inside the box */
 .time-label {
   font-size: 20px;
   font-weight: bold;
@@ -952,7 +984,6 @@ text-highlight-cell {
   letter-spacing: 0.02em;
 }
 
-/* Large, high-visibility monospaced digital clock readout */
 .time-value {
   font-family: monospace;
   font-size: 20px;
