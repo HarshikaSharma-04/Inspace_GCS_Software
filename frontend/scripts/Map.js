@@ -3,7 +3,7 @@ let currentMarker = null;
 let initialMarker = null;
 let flightPathPolyline = null;
 let trajectoryCoordinates = [];
-
+let circle = null;
 const cansatLocation = [19.2243, 72.8680];
 const greenIcon = new L.Icon({
     iconUrl: 'images/launch_pad.png',
@@ -34,12 +34,18 @@ export function Map() {
         return;
     }
 
-    map = L.map('map').setView(cansatLocation, 13);
+    map = L.map('map').setView(cansatLocation, 17);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
     }).addTo(map);
     trajectoryCoordinates = [[cansatLocation[0], cansatLocation[1]]];
 
+    circle = L.circle([19.2243, 72.8680], {
+        color: 'green',
+        fillColor: 'rgb(17, 255, 0)',
+        fillOpacity: 0.4,
+        radius: 100 // 100 meters
+    }).addTo(map);
     flightPathPolyline = L.polyline([], {
         color: '#0c05e9',
         weight: 4,

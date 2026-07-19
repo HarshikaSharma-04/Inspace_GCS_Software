@@ -33,6 +33,7 @@ const simDisableBtn = document.getElementById("btn-sim-disable");
 const gyroBtn = document.getElementById("btn-gyro");
 const servoBtn = document.getElementById("btn-servo");
 
+const mapCamControl = document.querySelector(".map-wrapper")
 document.querySelectorAll(".cmd-btn").forEach(button => {
   button.addEventListener("click", () => {
     const commandToFill = button.getAttribute("data-cmd");
@@ -45,22 +46,11 @@ document.querySelectorAll(".cmd-btn").forEach(button => {
 
 
 // GNS & Specialized Sidebar Elements
-const sidebarGNSSTimeEls =
-  document.querySelectorAll(".sidebar-gnss-time-value");
-
-const sidebarGNSSAltitudeEls =
-  document.querySelectorAll(".sidebar-gnss-altitude-value");
-
-const sidebarGNSSLatitudeEls =
-  document.querySelectorAll(".sidebar-gnss-latitude-value");
-
-const sidebarGNSSLongitudeEls =
-  document.querySelectorAll(".sidebar-gnss-longitude-value");
-
-const sidebarGNSSSatsEls =
-  document.querySelectorAll(".sidebar-gnss-sats-value");
-
-
+const sidebarGNSSTimeEls = document.querySelectorAll(".sidebar-gnss-time-value");
+const sidebarGNSSAltitudeEls = document.querySelectorAll(".sidebar-gnss-altitude-value");
+const sidebarGNSSLatitudeEls = document.querySelectorAll(".sidebar-gnss-latitude-value");
+const sidebarGNSSLongitudeEls = document.querySelectorAll(".sidebar-gnss-longitude-value");
+const sidebarGNSSSatsEls = document.querySelectorAll(".sidebar-gnss-sats-value");
 const GNSSContainer = document.querySelector(".gnss-container");
 
 //send button and command input
@@ -431,7 +421,7 @@ function showCSVView() {
   if (sidebar) sidebar.style.display = "none";
   if (GNSSContainer) GNSSContainer.style.display = "none";
   if (flightState) flightState.style.display = "none";
-
+  if (mapCamControl) mapCamControl.style.display = "none"
   const cmdArea = document.querySelector(".cmd-bottom-container");
   if (cmdArea) cmdArea.style.display = "none";
 
@@ -447,7 +437,7 @@ function showGraphView() {
   csvContainer.style.display = "none";
   graphContainer.style.display = "block";
   mapDiv.style.display = "block";
-
+  if (mapCamControl) mapCamControl.style.display = "block";
   resizeMap();
   if (is3DMapInitialized) {
     Plotly.Plots.resize(document.getElementById("GNSS-3d-plot"));

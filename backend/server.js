@@ -6,11 +6,11 @@ const app = express();
 const server = http.createServer(app);
 const fs = require("fs");
 const io = new Server(server, { cors: { origin: "*" } });
-const { filterGarbage } = require("./filterGarbage");
-const serialPort = require("./serialPort");
+const { filterGarbage } = require("./pipeline/filtergarbage");
+const serialPort = require("./pipeline/serialPort");
 // importing functions from telemetryWriter.js file
-const { initTelemetryCSV, writeTelemetryRow, deleteTelemetryCSV, } = require("./telemetryWriter");
-const { getSimulationCommands, stripSimCommand } = require("./readSimValues");
+const { initTelemetryCSV, writeTelemetryRow, deleteTelemetryCSV, } = require("./pipeline/telemetrywriter");
+const { getSimulationCommands, stripSimCommand } = require("./pipeline/readSimValues");
 
 const PORT = 3000;
 //let TELEMETRY_QUEUE = [];
