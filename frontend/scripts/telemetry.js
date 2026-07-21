@@ -383,8 +383,17 @@ function processTelemetryData(data, shouldRenderDashboard) {
   }
 }
 
-Map();
-initTabulator();
+try {
+  Map();
+} catch (err) {
+  console.error("Map initialization failed:", err);
+}
+
+try {
+  initTabulator();
+} catch (err) {
+  console.error("Tabulator initialization failed:", err);
+}
 
 // hide-unhide functions
 function setActiveButton(activeBtn) {
@@ -648,8 +657,13 @@ function update3DMap(row) {
 }
 
 window.addEventListener("resize", () => {
-  if (is3DMapInitialized)
-    Plotly.Plots.resize(document.getElementById("GNSS-3d-plot"));
+  try {
+    if (is3DMapInitialized) {
+      Plotly.Plots.resize(document.getElementById("GNSS-3d-plot"));
+    }
+  } catch (err) {
+    console.error("3D Plot resize failed:", err);
+  }
 });
 
 // graph logic
@@ -852,5 +866,18 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowDown") window.scrollBy(0, 50);
 });
 
-if (!chartInitialized) loadGraphs();
-if (!is3DMapInitialized) init3DMap();
+try {
+  if (!chartInitialized) {
+    loadGraphs();
+  }
+} catch (err) {
+  console.error("Graph initialization failed:", err);
+}
+
+try {
+  if (!is3DMapInitialized) {
+    init3DMap();
+  }
+} catch (err) {
+  console.error("3D Map initialization failed:", err);
+}
