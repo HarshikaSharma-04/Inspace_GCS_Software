@@ -9,7 +9,7 @@ const graphBtn = document.querySelector(".telemetry-btn--graph");
 const csvBtn = document.querySelector(".telemetry-btn--csv");
 const graphContainer = document.querySelector(".telemetry-graph-container");
 const mapContainer = document.querySelector(".telemetry-map-container");
-const csvContainer =document.querySelector(".telemetry-csv-container");
+const csvContainer = document.querySelector(".telemetry-csv-container");
 const cmdEchoList = document.getElementById("cmd-echo-list");
 const modeValue = document.querySelector(".mode-value");
 
@@ -19,7 +19,7 @@ const packetEl = document.querySelector(".packet-count-value");
 
 // Sidebar Elements
 const sidebar = document.querySelector(".sidebar");
-const sidebar3DMap =document.querySelector(".plot-3d-section");
+const sidebar3DMap = document.querySelector(".plot-3d-section");
 const sidebarTempEl = document.querySelector(".sidebar-temp-value");
 const sidebarVoltageEl = document.querySelector(".sidebar-voltage-value");
 const sidebarPressureEl = document.querySelector(".sidebar-pressure-value");
@@ -33,6 +33,7 @@ const simDisableBtn = document.getElementById("btn-sim-disable");
 const gyroBtn = document.getElementById("btn-gyro");
 const servoBtn = document.getElementById("btn-servo");
 
+const mapCamControl = document.querySelector(".map-wrapper")
 document.querySelectorAll(".cmd-btn").forEach(button => {
   button.addEventListener("click", () => {
     const commandToFill = button.getAttribute("data-cmd");
@@ -41,26 +42,15 @@ document.querySelectorAll(".cmd-btn").forEach(button => {
       commandInput.focus();
     }
   });
-});       
+});
 
 
 // GNS & Specialized Sidebar Elements
-const sidebarGNSSTimeEls =
-  document.querySelectorAll(".sidebar-gnss-time-value");
-
-const sidebarGNSSAltitudeEls =
-  document.querySelectorAll(".sidebar-gnss-altitude-value");
-
-const sidebarGNSSLatitudeEls =
-  document.querySelectorAll(".sidebar-gnss-latitude-value");
-
-const sidebarGNSSLongitudeEls =
-  document.querySelectorAll(".sidebar-gnss-longitude-value");
-
-const sidebarGNSSSatsEls =
-  document.querySelectorAll(".sidebar-gnss-sats-value");
-
-
+const sidebarGNSSTimeEls = document.querySelectorAll(".sidebar-gnss-time-value");
+const sidebarGNSSAltitudeEls = document.querySelectorAll(".sidebar-gnss-altitude-value");
+const sidebarGNSSLatitudeEls = document.querySelectorAll(".sidebar-gnss-latitude-value");
+const sidebarGNSSLongitudeEls = document.querySelectorAll(".sidebar-gnss-longitude-value");
+const sidebarGNSSSatsEls = document.querySelectorAll(".sidebar-gnss-sats-value");
 const GNSSContainer = document.querySelector(".gnss-container");
 
 //send button and command input
@@ -68,10 +58,10 @@ const sendBtn = document.querySelector(".send-btn");
 const commandInput = document.querySelector("#commandInput");
 
 commandInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-        e.preventDefault();
-        sendBtn.click();
-    }
+  if (e.key === "Enter") {
+    e.preventDefault();
+    sendBtn.click();
+  }
 });
 
 function handleButtonStateUI(cmd) {
@@ -107,39 +97,39 @@ function handleButtonStateUI(cmd) {
 }
 
 sendBtn.addEventListener("click", () => {
-    const command = commandInput.value.trim();
+  const command = commandInput.value.trim();
 
-    if (!command) return;
-    //addCommandEcho(command); 
-    handleButtonStateUI(command);
-    socket.emit("send-command", command);
-   
-    commandInput.value = "";
-    commandInput.focus();
+  if (!command) return;
+  //addCommandEcho(command); 
+  handleButtonStateUI(command);
+  socket.emit("send-command", command);
+
+  commandInput.value = "";
+  commandInput.focus();
 });
 
 let commandHistory = [];
 
 function addCommandEcho(cmd) {
-    if (!cmdEchoList) return;
-    const empty = cmdEchoList.querySelector(".cmd-echo-empty");
-    if (empty) empty.remove();
-    commandHistory.push(cmd);
-    if (commandHistory.length > 3) {
-        commandHistory.shift(); 
-    }
-    const div = document.createElement("div");
-    div.className = "cmd-echo-item";
-    div.textContent = cmd;
-    cmdEchoList.appendChild(div);
-    if (cmdEchoList.children.length > 3) {
-        cmdEchoList.removeChild(cmdEchoList.firstElementChild);
-    }
+  if (!cmdEchoList) return;
+  const empty = cmdEchoList.querySelector(".cmd-echo-empty");
+  if (empty) empty.remove();
+  commandHistory.push(cmd);
+  if (commandHistory.length > 3) {
+    commandHistory.shift();
+  }
+  const div = document.createElement("div");
+  div.className = "cmd-echo-item";
+  div.textContent = cmd;
+  cmdEchoList.appendChild(div);
+  if (cmdEchoList.children.length > 3) {
+    cmdEchoList.removeChild(cmdEchoList.firstElementChild);
+  }
 }
 
 // Controls & Visuals
 const mapDiv =
-document.getElementById("map");
+  document.getElementById("map");
 const flightState = document.querySelector(".flight-state-command-section");
 
 // Global Variables
@@ -220,7 +210,7 @@ function resetAllTelemetryData() {
 
   if (missionTimeEl) missionTimeEl.innerText = "00:00:00";
   if (packetEl) packetEl.innerText = "00";
-  
+
 
   [
     sidebarTempEl,
@@ -243,29 +233,39 @@ function resetAllTelemetryData() {
 
   updateStageIndicators(1);
 }
- // Simulation state tracking
+// Simulation state tracking
 
 
 let simEnabled = false;
+
+
+socket.on("sim-command-response", (response) => {
+  console.log("Simulation Command Response:", response);
+  // clear the plots, charts, everything and just add the the new command to echo list
+  if (response === "Simulation Mode Started") {
+    resetAllTelemetryData();
+  }
+});
+
 socket.on("command-success", (verifiedCommand) => {
-    addCommandEcho(verifiedCommand);
+  addCommandEcho(verifiedCommand);
 });
 socket.on("command-warning", (warningMessage) => {
-    if (commandInput) {
-        commandInput.value = warningMessage;
-        commandInput.style.color = "red";
-        commandInput.style.fontWeight = "bold";
-        const clearWarning = () => {
-            commandInput.value = "";
-            commandInput.style.color = "";
-            commandInput.style.fontWeight = "";
-            commandInput.removeEventListener("focus", clearWarning);
-            commandInput.removeEventListener("input", clearWarning);
-        };
+  if (commandInput) {
+    commandInput.value = warningMessage;
+    commandInput.style.color = "red";
+    commandInput.style.fontWeight = "bold";
+    const clearWarning = () => {
+      commandInput.value = "";
+      commandInput.style.color = "";
+      commandInput.style.fontWeight = "";
+      commandInput.removeEventListener("focus", clearWarning);
+      commandInput.removeEventListener("input", clearWarning);
+    };
 
-        commandInput.addEventListener("focus", clearWarning);
-        commandInput.addEventListener("input", clearWarning);
-    }
+    commandInput.addEventListener("focus", clearWarning);
+    commandInput.addEventListener("input", clearWarning);
+  }
 });
 socket.on("command-response", (response) => {
   switch (response) {
@@ -306,12 +306,12 @@ socket.on("clear-data", () => {
 });
 
 socket.on("telemetry-update", (data) => {
-    telemetryQueue.push(data);
-    
-    if (!telemetryFlushScheduled) {
-        telemetryFlushScheduled = true;
-        requestAnimationFrame(flushTelemetryQueue);
-    }
+  telemetryQueue.push(data);
+
+  if (!telemetryFlushScheduled) {
+    telemetryFlushScheduled = true;
+    requestAnimationFrame(flushTelemetryQueue);
+  }
 });
 
 function flushTelemetryQueue() {
@@ -328,15 +328,15 @@ function flushTelemetryQueue() {
     const data = telemetryQueue.shift();
 
     processTelemetryData(
-        data,
-        shouldRenderDashboard
+      data,
+      shouldRenderDashboard
     );
     console.log(data.FLIGHT_SOFTWARE_STATE);
-console.log(stateToNum(data.FLIGHT_SOFTWARE_STATE));
-     updateStageIndicators(stateToNum(data.FLIGHT_SOFTWARE_STATE));
+    console.log(stateToNum(data.FLIGHT_SOFTWARE_STATE));
+    updateStageIndicators(stateToNum(data.FLIGHT_SOFTWARE_STATE));
 
     newRows.push(data);
-}
+  }
 
   if (table && newRows.length > 0) {
     table.blockRedraw();
@@ -364,7 +364,7 @@ function processTelemetryData(data, shouldRenderDashboard) {
 
 
   allRows.push(data);
-  if (allRows.length > MAX_BUFFERED_ROWS){
+  if (allRows.length > MAX_BUFFERED_ROWS) {
     allRows.shift();
   }
   updateTopTelemetry(data);
@@ -383,8 +383,17 @@ function processTelemetryData(data, shouldRenderDashboard) {
   }
 }
 
-Map();
-initTabulator();
+try {
+  Map();
+} catch (err) {
+  console.error("Map initialization failed:", err);
+}
+
+try {
+  initTabulator();
+} catch (err) {
+  console.error("Tabulator initialization failed:", err);
+}
 
 // hide-unhide functions
 function setActiveButton(activeBtn) {
@@ -421,7 +430,7 @@ function showCSVView() {
   if (sidebar) sidebar.style.display = "none";
   if (GNSSContainer) GNSSContainer.style.display = "none";
   if (flightState) flightState.style.display = "none";
-
+  if (mapCamControl) mapCamControl.style.display = "none"
   const cmdArea = document.querySelector(".cmd-bottom-container");
   if (cmdArea) cmdArea.style.display = "none";
 
@@ -437,7 +446,7 @@ function showGraphView() {
   csvContainer.style.display = "none";
   graphContainer.style.display = "block";
   mapDiv.style.display = "block";
-
+  if (mapCamControl) mapCamControl.style.display = "block";
   resizeMap();
   if (is3DMapInitialized) {
     Plotly.Plots.resize(document.getElementById("GNSS-3d-plot"));
@@ -491,12 +500,15 @@ function stateToNum(state) {
 
 function updateTopTelemetry(row) {
   if (!row) return;
-
   missionTimeEl.innerText = row["TIME_STAMP"];
-  packetEl.innerText = row["PACKET_COUNT"];
-  updateStageIndicators(
-      stateToNum(row["FLIGHT_SOFTWARE_STATE"])
-  );
+  document.querySelectorAll(".sidebar-gnss-time-value").forEach(el => {
+    el.innerText = row["GNSS_TIME"];
+  });
+  document.querySelectorAll(".packet-count-value").forEach(el => {
+    el.innerText = row["PACKET_COUNT"];
+  });
+
+  updateStageIndicators(stateToNum(row["FLIGHT_SOFTWARE_STATE"]));
 }
 
 function updateStageIndicators(currentState) {
@@ -517,7 +529,7 @@ function updateStageIndicators(currentState) {
 
 function updateSidebarTelemetry(row) {
   if (!row) return;
-    const state = row["FLIGHT_SOFTWARE_STATE"];
+  const state = row["FLIGHT_SOFTWARE_STATE"];
 
   levelDisplays.forEach((levelEl) => {
     const s = levelEl.querySelector(".level-value");
@@ -529,17 +541,17 @@ function updateSidebarTelemetry(row) {
   if (sidebarPressureEl) sidebarPressureEl.innerText = row["PRESSURE"] + " Pa";
   if (sidebarAltitudeEl) sidebarAltitudeEl.innerText = row["ALTITUDE"] + " m";
 
-document.querySelector(".sidebar-gyro-r").innerText = row.GYRO_R;
-document.querySelector(".sidebar-gyro-p").innerText = row.GYRO_P;
-document.querySelector(".sidebar-gyro-y").innerText = row.GYRO_Y;
+  document.querySelector(".sidebar-gyro-r").innerText = row.GYRO_R;
+  document.querySelector(".sidebar-gyro-p").innerText = row.GYRO_P;
+  document.querySelector(".sidebar-gyro-y").innerText = row.GYRO_Y;
 
-document.querySelector(".sidebar-accel-r").innerText = row.ACCEL_R;
-document.querySelector(".sidebar-accel-p").innerText = row.ACCEL_P;
-document.querySelector(".sidebar-accel-y").innerText = row.ACCEL_Y;
-  
-  
+  document.querySelector(".sidebar-accel-r").innerText = row.ACCEL_R;
+  document.querySelector(".sidebar-accel-p").innerText = row.ACCEL_P;
+  document.querySelector(".sidebar-accel-y").innerText = row.ACCEL_Y;
 
-  
+
+
+
 
   sidebarGNSSTimeEls.forEach((el) => (el.innerText = `${row["GNSS_TIME"]}`));
   sidebarGNSSAltitudeEls.forEach(
@@ -645,8 +657,13 @@ function update3DMap(row) {
 }
 
 window.addEventListener("resize", () => {
-  if (is3DMapInitialized)
-    Plotly.Plots.resize(document.getElementById("GNSS-3d-plot"));
+  try {
+    if (is3DMapInitialized) {
+      Plotly.Plots.resize(document.getElementById("GNSS-3d-plot"));
+    }
+  } catch (err) {
+    console.error("3D Plot resize failed:", err);
+  }
 });
 
 // graph logic
@@ -662,11 +679,11 @@ const UNIT_MAP = {
 };
 
 const GRAPH_LAYOUT = [
-  
+
   { id: "ALTITUDE", title: "ALTITUDE", units: "ALTITUDE" },
   { id: "PRESSURE", title: "PRESSURE", units: "PRESSURE" },
   { id: "TEMPERATURE", title: "TEMPERATURE", units: "TEMPERATURE" },
-  
+
   {
     id: "ACCEL_COMBINED",
     title: "ACCELERATION",
@@ -689,11 +706,11 @@ function loadGraphs() {
   graphContainer.innerHTML = `
     <div class="telemtry-data-container-graph" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
       ${GRAPH_LAYOUT.map(
-        (g) => `
+    (g) => `
         <div class="telemetry-grid-item">
           <canvas id="${g.id}_chart"></canvas>
         </div>`,
-      ).join("")}
+  ).join("")}
     </div>`;
 
   charts = {};
@@ -724,13 +741,13 @@ function loadGraphs() {
           display: true,
           text: "Packet Count",
           color: "#1a1a1a",
-          font: { weight: "bold" ,size:16},
+          font: { weight: "bold", size: 16 },
         },
         grid: { display: false },
       },
       y: {
         beginAtZero: true,
-        title: { display: true, color: "#1a1a1a", font: { weight: "bold" ,size:16} },
+        title: { display: true, color: "#1a1a1a", font: { weight: "bold", size: 16 } },
         grid: { color: "rgba(0,0,0,0.05)" },
       },
     },
@@ -849,5 +866,18 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowDown") window.scrollBy(0, 50);
 });
 
-if (!chartInitialized) loadGraphs();
-if (!is3DMapInitialized) init3DMap();
+try {
+  if (!chartInitialized) {
+    loadGraphs();
+  }
+} catch (err) {
+  console.error("Graph initialization failed:", err);
+}
+
+try {
+  if (!is3DMapInitialized) {
+    init3DMap();
+  }
+} catch (err) {
+  console.error("3D Map initialization failed:", err);
+}
