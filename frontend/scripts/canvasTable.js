@@ -24,9 +24,9 @@
       width: 100%;
       box-sizing: border-box;
       background: #ffffff;
-      overflow: auto;
-      max-height: calc(100vh - 360px);
-      min-height: 200px;
+      overflow-y: auto;
+      overflow-x: none;
+      max-height: 100vh;
       border: 1px solid #d8cff0;
       border-radius: 4px;
       scrollbar-width: thin;
@@ -107,23 +107,23 @@ class CanvasTable {
     // Scroll: repaint + track user position.
     // _pendingScroll guard: if scroll fires while we're programmatically
     // scrolling, don't update _autoScroll (it was us, not the user).
-   this._wrap.addEventListener(
-  "scroll",
-  () => {
-    this._dirty = true;
+    this._wrap.addEventListener(
+      "scroll",
+      () => {
+        this._dirty = true;
 
-    clearTimeout(this._scrollStopTimer);
+        clearTimeout(this._scrollStopTimer);
 
-    // pause while user is actively scrolling
-    this._autoScroll = false;
+        // pause while user is actively scrolling
+        this._autoScroll = false;
 
-    // resume auto-scroll shortly after user stops scrolling
-    this._scrollStopTimer = setTimeout(() => {
-      this._autoScroll = true;
-    }, 800);
-  },
-  { passive: true },
-);
+        // resume auto-scroll shortly after user stops scrolling
+        this._scrollStopTimer = setTimeout(() => {
+          this._autoScroll = true;
+        }, 800);
+      },
+      { passive: true },
+    );
 
     // User-initiated scroll → pause auto-scroll
     this._wrap.addEventListener(
@@ -161,15 +161,15 @@ class CanvasTable {
     const scale = available / this._baseW;
 
     return this.cols.map(c => Math.round(c.w * scale));
-}
+  }
 
   _syncSize() {
     this._ew = this._effectiveCols();
     this._totalW = this._ew.reduce((s, w) => s + w, 0);
 
     const logW = this._wrap.clientWidth;
-    const viewH = this._wrap.clientHeight || 400; 
-    
+    const viewH = this._wrap.clientHeight || 400;
+
     // Only update canvas if container dimensions actually changed
     if (this._logW !== logW || this._logH !== viewH) {
       this._logW = logW;
@@ -184,10 +184,10 @@ class CanvasTable {
 
     // Update spacer to maintain total scroll height (this does NOT clear canvas)
     const totalH =
-  this.HEAD_H + this.rows.length * this.ROW_H;
+      this.HEAD_H + this.rows.length * this.ROW_H;
 
-this._spacer.style.height =
-  Math.max(0, totalH - this._logH) + "px";
+    this._spacer.style.height =
+      Math.max(0, totalH - this._logH) + "px";
   }
 
   _loop() {
@@ -320,43 +320,43 @@ this._spacer.style.height =
     this._dirty = true;
   }
 
-  blockRedraw() {} // no-op — compat
-  restoreRedraw() {} // no-op
+  blockRedraw() { } // no-op — compat
+  restoreRedraw() { } // no-op
 
   addData(rowsArr, atTop) {
-  if (atTop) this.rows.unshift(...rowsArr);
-  else this.rows.push(...rowsArr);
+    if (atTop) this.rows.unshift(...rowsArr);
+    else this.rows.push(...rowsArr);
 
-  const totalH = this.HEAD_H + this.rows.length * this.ROW_H;
+    const totalH = this.HEAD_H + this.rows.length * this.ROW_H;
 
-  this._spacer.style.height =
-  Math.max(0, totalH - this._wrap.clientHeight) + "px";
+    this._spacer.style.height =
+      Math.max(0, totalH - this._wrap.clientHeight) + "px";
 
-  this._dirty = true;
+    this._dirty = true;
 
-  if (this._autoScroll && !atTop) {
-    requestAnimationFrame(() => {
-      this._wrap.scrollTop = this._wrap.scrollHeight;
-    });
+    if (this._autoScroll && !atTop) {
+      requestAnimationFrame(() => {
+        this._wrap.scrollTop = this._wrap.scrollHeight;
+      });
+    }
   }
-}
 
   deleteFirstRow() {
     if (this.rows.length > 0) {
       // Check if user is NOT at bottom before deleting
       const isAtBottom = this._wrap.scrollTop + this._wrap.clientHeight >= this._wrap.scrollHeight - 4;
-      
+
       this.rows.shift();
       // Update spacer height for scrolling, but DON'T resize canvas (no flicker!)
       const totalH = this.HEAD_H + this.rows.length * this.ROW_H;
       this._spacer.style.height = totalH + "px";
-      
+
       // Compensate for row deletion: if user is not at bottom, subtract ROW_H from scrollTop
       // This keeps them viewing the same historical data despite the row shift
       if (!isAtBottom) {
         this._wrap.scrollTop = Math.max(0, this._wrap.scrollTop - this.ROW_H);
       }
-      
+
       this._dirty = true;
     }
   }
@@ -368,24 +368,24 @@ this._spacer.style.height =
 
   // Called when the CSV tab becomes visible (wrapper was display:none at init)
   onShow() {
-  this._syncSize();
+    this._syncSize();
 
-  const totalH =
-    this.HEAD_H + Math.max(1, this.rows.length) * this.ROW_H;
+    const totalH =
+      this.HEAD_H + Math.max(1, this.rows.length) * this.ROW_H;
 
-  this._spacer.style.height =
-  Math.max(0, totalH - this._wrap.clientHeight) + "px";
+    this._spacer.style.height =
+      Math.max(0, totalH - this._wrap.clientHeight) + "px";
 
-  this._dirty = true;
+    this._dirty = true;
 
-  this._autoScroll = true;
+    this._autoScroll = true;
 
-  // wait till browser fully renders visible tab
-  setTimeout(() => {
-    this._wrap.scrollTop =
-      this._wrap.scrollHeight;
-  }, 0);
-}
+    // wait till browser fully renders visible tab
+    setTimeout(() => {
+      this._wrap.scrollTop =
+        this._wrap.scrollHeight;
+    }, 0);
+  }
 }
 
 export default CanvasTable;

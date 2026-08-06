@@ -255,6 +255,7 @@ socket.on("command-warning", (warningMessage) => {
     commandInput.value = warningMessage;
     commandInput.style.color = "red";
     commandInput.style.fontWeight = "bold";
+    commandInput.style.fontSize = "22px"
     const clearWarning = () => {
       commandInput.value = "";
       commandInput.style.color = "";
