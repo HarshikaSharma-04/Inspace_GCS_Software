@@ -28,31 +28,39 @@ def run_sender():
             if ser.in_waiting > 0:
                 # Read command from Node.js
                 command = ser.readline().decode("utf-8").strip().upper()
-                print(f"Command Received: {command}")
+                #print(f"Command Received: {command}")
                 #print(command)
                 if command == "1N":
+                    print(f"Command Received: CXON")
                     print("Action: Starting Telemetry Stream...")
                     stream_csv_data(ser, TELEMETRY_CSV)
                 if command == "2N":
-                    print("CX_OFF") 
+                    print(f"Command Received: CXOFF")
+                    #print("CX_OFF") 
                 if command == "3N":
+                    print(f"Command Received: SIM ENABLE")
                     print("Action: Simulation ENABLED")
                 if command == "4N":
+                    print(f"Command Received: SIM ACTIVE")
                     print("Action: Simulation Mode Active")
                 if command == "5N":
+                    print(f"Command Received: SIM DISABLE")
                     print("Action: Simulation DISABLED")
-                
                 if command == "7N":
-                    
+                    print(f"Command Received: CAL")
                     print("Action: Calibrating altitude...")
                 if command == "8N":
+                    print(f"Command Received: SERVO ON")
                     print("Action: Servo ON")
                 if command == "9N":
+                    print(f"Command Received: SERVO OFF")
                     print("Action: Servo OFF")
                 if command == "10N": 
+                    print(f"Command Received: GYRO ON")
                     print("Action: GYRO ON") 
                     ser.write("")
                 if command == "11N":
+                    print(f"Command Received: GYRO OFF")
                     print("Action: GYRO OFF")
                 
                 
@@ -86,7 +94,7 @@ def stream_csv_data(ser, file_path,simulated_H = None,simulated_P = None):
                 if ser.in_waiting > 0:
                     interrupt = ser.readline().decode("utf-8").strip().upper()
                     if interrupt == "2N":
-                        print(f"Stream interrupted by: {interrupt}")
+                        print(f"Stream stopped by: CXOFF")
                         return
                     elif interrupt == "3N":
                         IS_SIM_ENABLED = True
@@ -120,7 +128,7 @@ def stream_csv_data(ser, file_path,simulated_H = None,simulated_P = None):
                 # Send the data row
                 data_line = ",".join(row) + "\n"
                 ser.write(data_line.encode("utf-8"))
-                # print(f"Sending Data: {data_line.strip()}")
+                print(f"Sending Data: {data_line.strip()}")
                 TOTAL_PKT_COUNT += 1
                 # print(f"Total Packet sent from CanSat:{TOTAL_PKT_COUNT}")
                 # Telemetry rate (0.02 second)
