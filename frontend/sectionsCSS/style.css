@@ -576,7 +576,7 @@ body {
 .flight-stage {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 15px;
 }
 
 .stage-box {
@@ -955,7 +955,7 @@ text-highlight-cell {
   margin-left: 4rem;
   display: flex !important;
   flex-direction: row !important;
-  gap: 40px;
+  gap: 3rem;
   align-items: center;
   justify-content: flex-end;
   border-left: 2px solid #cbd5e1;

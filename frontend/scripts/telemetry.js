@@ -489,12 +489,11 @@ function stateToNum(state) {
   if (!state) return 0;
   if (!isNaN(state) && state !== "") return parseInt(state);
   const mapping = {
-    BOOT: 1,
-    LAUNCH_PAD: 2,
-    ASCENT: 3,
-    DESCENT: 4,
-    PARAGLIDER_DEPLOYMENT: 5,
-    LANDED: 6,
+    LAUNCH_PAD: 1,
+    ASCENT: 2,
+    DESCENT: 3,
+    GLIDER_DEPLOYMENT: 4,
+    LANDED: 5,
   };
   return mapping[state.toString().toUpperCase()] || 0;
 }
