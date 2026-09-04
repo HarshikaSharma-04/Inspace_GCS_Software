@@ -39,7 +39,6 @@ export function Map() {
         maxZoom: 19,
     }).addTo(map);
     trajectoryCoordinates = [[cansatLocation[0], cansatLocation[1]]];
-
     circle = L.circle([19.2243, 72.8680], {
         color: 'green',
         fillColor: 'rgb(17, 255, 0)',
