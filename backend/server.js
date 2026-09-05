@@ -189,6 +189,10 @@ io.on("connection", (socket) => {
       // Reset states upon successful disable
       isSimEnabled = false;
       isSimActivated = false;
+      if (simInterval) {
+        clearInterval(simInterval);
+        simInterval = null;
+      }
     }
 
     if (isSimActivated) {
@@ -220,6 +224,15 @@ io.on("connection", (socket) => {
         console.error(err);
         socket.emit("command-response", "Failed to send command");
         return;
+      }
+      if (cmd === "CMD,041,SIM,ENABLE") {
+        socket.emit("command-response", "Simulation Enabled");
+      }
+      else if (cmd === "CMD,041,SIM,ACTIVATE") {
+        socket.emit("command-response", "Simulation Started");
+      }
+      else if (cmd === "CMD,041,SIM,DISABLE") {
+        socket.emit("command-response", "Simulation Stopped");
       }
     });
     socket.emit("command-success", cmd);

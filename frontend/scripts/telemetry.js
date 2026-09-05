@@ -243,6 +243,9 @@ socket.on("sim-command-response", (response) => {
   console.log("Simulation Command Response:", response);
   // clear the plots, charts, everything and just add the the new command to echo list
   if (response === "Simulation Mode Started") {
+    simEnabled = true;
+    modeValue.textContent = "Simulation";
+    modeValue.classList.add("simulation");
     resetAllTelemetryData();
   }
 });
