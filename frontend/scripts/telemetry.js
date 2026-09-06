@@ -101,7 +101,6 @@ sendBtn.addEventListener("click", () => {
 
   if (!command) return;
   //addCommandEcho(command); 
-  handleButtonStateUI(command);
   socket.emit("send-command", command);
 
   commandInput.value = "";
@@ -251,6 +250,7 @@ socket.on("sim-command-response", (response) => {
 });
 
 socket.on("command-success", (verifiedCommand) => {
+  handleButtonStateUI(verifiedCommand);
   addCommandEcho(verifiedCommand);
 });
 socket.on("command-warning", (warningMessage) => {
