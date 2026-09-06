@@ -162,6 +162,10 @@ io.on("connection", (socket) => {
       return;
     }
     if (cmd === "CMD,041,CX,ON") {
+      if (isSimActivated) {
+        socket.emit("command-warning", "Warning: Cannot enable Flight Mode while in Simulation Mode!");
+        return;
+      }
       isCxSent = true;
     }
     // handling simulation commands:
@@ -193,6 +197,7 @@ io.on("connection", (socket) => {
         clearInterval(simInterval);
         simInterval = null;
       }
+      socket.emit("command-response", "Simulation Stopped");
     }
 
     if (isSimActivated) {
@@ -230,9 +235,6 @@ io.on("connection", (socket) => {
       }
       else if (cmd === "CMD,041,SIM,ACTIVATE") {
         socket.emit("command-response", "Simulation Started");
-      }
-      else if (cmd === "CMD,041,SIM,DISABLE") {
-        socket.emit("command-response", "Simulation Stopped");
       }
     });
     socket.emit("command-success", cmd);
