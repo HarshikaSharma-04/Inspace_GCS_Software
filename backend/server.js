@@ -242,10 +242,21 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("GUI Disconnected");
   });
-
 });
+
+// an attempt to graceful shutdown of ports
+function shutdown() {
+  console.log("Closing server and serial connections...");
+  serialPort.close(() => {
+    server.close(() => {
+      process.exit(0);
+    });
+  });
+}
+process.on("SIGINT", shutdown);  // Catches Ctrl+C
+process.on("SIGTERM", shutdown); // Catches termination signals
 // on port 3000 the server is running
-server.listen(PORT, async () => {
+server.listen(PORT, "127.0.0.1", async () => {
   await initTelemetryCSV();
   console.log(`Server running at http://localhost:${PORT}`);
 });

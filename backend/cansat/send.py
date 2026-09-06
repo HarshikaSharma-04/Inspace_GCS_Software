@@ -7,7 +7,7 @@ import os
 PORT = "COM1" #/dev/cu.SLAB_USBtoUART
 BAUD = 115200
 
-TELEMETRY_CSV = "test_csv.csv"
+TELEMETRY_CSV = "stress_csv.csv"
 
 SIMULATION_CSV = "sim.txt"  # Create this file or point to your SIM path
 H = 0.0

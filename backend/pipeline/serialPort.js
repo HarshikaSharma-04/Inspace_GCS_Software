@@ -29,17 +29,18 @@ class SerialService extends EventEmitter {
   }
   sendCommand(cmd, callback) {
     if (!this.port.isOpen) {
-        return callback(new Error("Serial port is not open"));
+      return callback(new Error("Serial port is not open"));
     }
 
     this.port.write(`${cmd}\n`, (err) => {
-        if (err) {
-            console.error("Serial Write Error:", err);
-            return callback(err);
-        }
+      if (err) {
+        console.error("Serial Write Error:", err);
+        return callback(err);
+      }
 
-        
+
     });
+  }
 }
-}
+
 module.exports = new SerialService();
