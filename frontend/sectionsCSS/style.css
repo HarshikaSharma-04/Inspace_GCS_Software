@@ -24,21 +24,21 @@ body,
   --color-stage-completed-border: #5c4cc4;
 
   /* Status / Green Colors */
-  --color-stage-circle-active: #6ddf6d;
-  --color-stage-current: #2e7d32;
-  --color-stage-current-border: #1b5e20;
-  --color-send-btn: #75df4c;
-  --color-send-btn-hover: #60d436;
-  --color-switch-bg: #b4e6a0;
-  --color-switch-hover: #88fd5d;
-  --color-switch-off: #d1d5db;
 
-  /* Animation / Blink Colors */
-  --color-blink-start: #d1c262;
-  --color-blink-mid: #d6c343;
-  --color-blink-end: #dac32d;
+  --color-stage-circle-active: #6ddf6d;
+  /* Completed */
+  --color-stage-current: #2e7d32;
+  /* Current */
+  --color-stage-current-border: #1b5e20;
+
+  /* Current State Blink */
+
+  --color-blink-start: #6ddf6d;
+  --color-blink-mid: #2e7d32;
+  --color-blink-end: #6ddf6d;
 
   /* Borders & Dividers */
+
   --border-black: #000000;
   --border-btn: #777777;
   --border-stage-circle: #b9b8e3;
@@ -690,13 +690,18 @@ body {
   font-weight: bold;
 }
 
-.stage-box.current+.arrow+.stage-box {
+.stage-box.current {
   animation: slowBlink 2.5s infinite ease-in-out;
+  background-color: var(--color-stage-current);
+}
+
+.stage-box.completed {
+  background-color: var(--color-stage-circle-active);
 }
 
 @keyframes slowBlink {
   0% {
-    opacity: 1.0;
+    opacity: 1;
     background-color: var(--color-blink-start);
   }
 
@@ -706,7 +711,7 @@ body {
   }
 
   100% {
-    opacity: 1.0;
+    opacity: 1;
     background-color: var(--color-blink-end);
   }
 }
