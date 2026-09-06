@@ -34,7 +34,7 @@ export function Map() {
         return;
     }
 
-    map = L.map('map').setView(cansatLocation, 17);
+    map = L.map('map', { preferCanvas: true }).setView(cansatLocation, 17);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
     }).addTo(map);
