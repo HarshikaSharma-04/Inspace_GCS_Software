@@ -16,6 +16,8 @@ body,
   --bg-cmd-btn-hover: #f0f0ff;
   --bg-transparent: #eeeeee00;
 
+  --color-send-btn: #0ab415;
+  --color-send-btn-hover: #32a53a;
   /* Primary & Accent Colors */
   --color-primary: #6750a4;
   --m-3syslightprimary: #6750a4;
@@ -389,6 +391,8 @@ body {
 
 .send-btn {
   background: var(--color-send-btn);
+  color: var(--color-white);
+  border: 1px solid var(--color-stage-current-border);
   border-radius: 10px;
   padding: 10px 9px;
   font-weight: bold;
@@ -474,7 +478,7 @@ body {
 
 
 .switch[aria-checked="true"] {
-  background-color: var(--color-primary, #6750a4);
+  background-color: var(--color-primary, #1d4ed8);
 }
 
 .switch[aria-checked="false"] {
@@ -690,18 +694,13 @@ body {
   font-weight: bold;
 }
 
-.stage-box.current {
+.stage-box.current+.arrow+.stage-box {
   animation: slowBlink 2.5s infinite ease-in-out;
-  background-color: var(--color-stage-current);
-}
-
-.stage-box.completed {
-  background-color: var(--color-stage-circle-active);
 }
 
 @keyframes slowBlink {
   0% {
-    opacity: 1;
+    opacity: 1.0;
     background-color: var(--color-blink-start);
   }
 
@@ -711,7 +710,7 @@ body {
   }
 
   100% {
-    opacity: 1;
+    opacity: 1.0;
     background-color: var(--color-blink-end);
   }
 }
@@ -872,7 +871,7 @@ body {
 .sensor-grid .field,
 .field.column {
   background: var(--bg-stage-box);
-  border: 1px solid var(--bg-stage-box);
+  border: 1px solid var(--border-stage-box);
   border-radius: 4px;
   display: flex;
   flex-direction: column;

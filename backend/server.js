@@ -16,9 +16,6 @@ const PORT = 3000;
 //let TELEMETRY_QUEUE = [];
 let isSimEnabled = false;
 let isSimActivated = false;
-let isSimDisabled = false;
-let inFlightMode = true;
-let inSimMode = false;
 let isCxSent = false;
 let simInterval = null;
 //6N:SIMP
@@ -128,9 +125,10 @@ async function handleCanSatData(rawString) {
   }
   let cleanedData = data; // Temporary variable to hold filtered data
   try {
+    /*
     writeTelemetryRow(cleanedData).catch((err) =>
       console.error("CSV write failed:", err.message),
-    );
+    );*/
     const result = await filterGarbage(data);
     if (result != null) {
       cleanedData = result;
@@ -257,6 +255,6 @@ process.on("SIGINT", shutdown);  // Catches Ctrl+C
 process.on("SIGTERM", shutdown); // Catches termination signals
 // on port 3000 the server is running
 server.listen(PORT, "127.0.0.1", async () => {
-  await initTelemetryCSV();
+  //await initTelemetryCSV();
   console.log(`Server running at http://localhost:${PORT}`);
 });
