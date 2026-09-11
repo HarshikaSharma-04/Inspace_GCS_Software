@@ -18,9 +18,9 @@ toggleSwitch.addEventListener('click', function(){
   simulationModeActive = !isChecked;
 
   if(simulationModeActive){
-    console.log("Simulation mode enabled & active");
+    //console.log("Simulation mode enabled & active");
   } else{
-    console.log("Simulation mode disabled");
+    //console.log("Simulation mode disabled");
   }
   simulationModeListeners.forEach(callback => callback(simulationModeActive));
 });

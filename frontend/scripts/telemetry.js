@@ -255,7 +255,7 @@ let simEnabled = false;
 
 
 socket.on("sim-command-response", (response) => {
-  console.log("Simulation Command Response:", response);
+  //console.log("Simulation Command Response:", response);
   // clear the plots, charts, everything and just add the the new command to echo list
   if (response === "Simulation Mode Started") {
     simEnabled = true;
@@ -351,8 +351,8 @@ function flushTelemetryQueue() {
       data,
       shouldRenderDashboard
     );
-    console.log(data.FLIGHT_SOFTWARE_STATE);
-    console.log(stateToNum(data.FLIGHT_SOFTWARE_STATE));
+    //console.log(data.FLIGHT_SOFTWARE_STATE);
+    //console.log(stateToNum(data.FLIGHT_SOFTWARE_STATE));
     updateStageIndicators(stateToNum(data.FLIGHT_SOFTWARE_STATE));
 
     newRows.push(data);
@@ -406,13 +406,13 @@ function processTelemetryData(data, shouldRenderDashboard) {
 try {
   Map();
 } catch (err) {
-  console.error("Map initialization failed:", err);
+  //console.error("Map initialization failed:", err);
 }
 
 try {
   initTabulator();
 } catch (err) {
-  console.error("Tabulator initialization failed:", err);
+  //console.error("Tabulator initialization failed:", err);
 }
 
 // hide-unhide functions
@@ -697,7 +697,7 @@ window.addEventListener("resize", () => {
       Plotly.Plots.resize(document.getElementById("GNSS-3d-plot"));
     }
   } catch (err) {
-    console.error("3D Plot resize failed:", err);
+    //console.error("3D Plot resize failed:", err);
   }
 });
 
@@ -906,7 +906,7 @@ try {
     loadGraphs();
   }
 } catch (err) {
-  console.error("Graph initialization failed:", err);
+  //console.error("Graph initialization failed:", err);
 }
 
 try {
@@ -914,5 +914,5 @@ try {
     init3DMap();
   }
 } catch (err) {
-  console.error("3D Map initialization failed:", err);
+  //console.error("3D Map initialization failed:", err);
 }

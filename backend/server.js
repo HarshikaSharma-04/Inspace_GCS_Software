@@ -119,10 +119,10 @@ async function handleCanSatData(rawString) {
     };
 
   } catch (parseError) {
-    console.error(
-      "Parse failed — dropping packet:",
-      parseError.message,
-    );
+    // //console.error(
+    //   "Parse failed — dropping packet:",
+    //   parseError.message,
+    // );
     socket.emit("telemetry-warning", {
       stage: "parse",
       reason: parseError.message,
@@ -133,17 +133,17 @@ async function handleCanSatData(rawString) {
   try {
     /*
     writeTelemetryRow(cleanedData).catch((err) =>
-      console.error("CSV write failed:", err.message),
+      //console.error("CSV write failed:", err.message),
     );*/
     const result = await filterGarbage(data);
     if (result != null) {
       cleanedData = result;
     }
   } catch (filterError) {
-    console.error(
-      "filter function crashed-sending unfiltered data",
-      filterError.message,
-    );
+    // console.error(
+    //   "filter function crashed-sending unfiltered data",
+    //   filterError.message,
+    // );
   }
   // final emit....this is independent
   io.emit("telemetry-update", cleanedData);
@@ -156,7 +156,7 @@ serialPort.on("telemetry", (packet) => {
 
 io.on("connection", (socket) => {
 
-  console.log("GUI Connected");
+  //console.log("GUI Connected");
 
   socket.on("send-command", (cmd) => {
     const command = validCommands[cmd];
@@ -220,7 +220,7 @@ io.on("connection", (socket) => {
           });
           index++;
         } else {
-          console.log("Simulation end reached.");
+          //console.log("Simulation end reached.");
           clearInterval(simInterval);
         }
       }, 1000);
@@ -230,7 +230,7 @@ io.on("connection", (socket) => {
     //yaha it will write on serialPort and then echo back to GUI
     serialPort.sendCommand(command, (err) => {
       if (err) {
-        console.error(err);
+        //console.error(err);
         socket.emit("command-response", "Failed to send command");
         return;
       }
