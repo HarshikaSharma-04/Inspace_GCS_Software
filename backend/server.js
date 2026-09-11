@@ -33,6 +33,12 @@ const validCommands = {
   "CMD,041,MEC,GYRO,OFF": "11N",
 };
 
+//for offline
+app.use(
+    "/node_modules",
+    express.static(path.join(__dirname, "node_modules"))
+);
+
 // Serve static files from the frontend directory
 app.use(express.static(path.join(__dirname, "..", "frontend")));
 
