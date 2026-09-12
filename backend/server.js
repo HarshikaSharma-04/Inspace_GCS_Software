@@ -16,9 +16,6 @@ const PORT = 3000;
 //let TELEMETRY_QUEUE = [];
 let isSimEnabled = false;
 let isSimActivated = false;
-let isSimDisabled = false;
-let inFlightMode = true;
-let inSimMode = false;
 let isCxSent = false;
 let simInterval = null;
 //6N:SIMP
@@ -35,6 +32,12 @@ const validCommands = {
   "CMD,041,MEC,GYRO,ON": "10N",
   "CMD,041,MEC,GYRO,OFF": "11N",
 };
+
+//for offline
+app.use(
+    "/node_modules",
+    express.static(path.join(__dirname, "node_modules"))
+);
 
 // Serve static files from the frontend directory
 app.use(express.static(path.join(__dirname, "..", "frontend")));
@@ -116,10 +119,10 @@ async function handleCanSatData(rawString) {
     };
 
   } catch (parseError) {
-    console.error(
-      "Parse failed — dropping packet:",
-      parseError.message,
-    );
+    // //console.error(
+    //   "Parse failed — dropping packet:",
+    //   parseError.message,
+    // );
     socket.emit("telemetry-warning", {
       stage: "parse",
       reason: parseError.message,
@@ -128,18 +131,19 @@ async function handleCanSatData(rawString) {
   }
   let cleanedData = data; // Temporary variable to hold filtered data
   try {
+    /*
     writeTelemetryRow(cleanedData).catch((err) =>
-      console.error("CSV write failed:", err.message),
-    );
+      //console.error("CSV write failed:", err.message),
+    );*/
     const result = await filterGarbage(data);
     if (result != null) {
       cleanedData = result;
     }
   } catch (filterError) {
-    console.error(
-      "filter function crashed-sending unfiltered data",
-      filterError.message,
-    );
+    // console.error(
+    //   "filter function crashed-sending unfiltered data",
+    //   filterError.message,
+    // );
   }
   // final emit....this is independent
   io.emit("telemetry-update", cleanedData);
@@ -152,7 +156,7 @@ serialPort.on("telemetry", (packet) => {
 
 io.on("connection", (socket) => {
 
-  console.log("GUI Connected");
+  //console.log("GUI Connected");
 
   socket.on("send-command", (cmd) => {
     const command = validCommands[cmd];
@@ -216,7 +220,7 @@ io.on("connection", (socket) => {
           });
           index++;
         } else {
-          console.log("Simulation end reached.");
+          //console.log("Simulation end reached.");
           clearInterval(simInterval);
         }
       }, 1000);
@@ -226,7 +230,7 @@ io.on("connection", (socket) => {
     //yaha it will write on serialPort and then echo back to GUI
     serialPort.sendCommand(command, (err) => {
       if (err) {
-        console.error(err);
+        //console.error(err);
         socket.emit("command-response", "Failed to send command");
         return;
       }
@@ -242,10 +246,21 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("GUI Disconnected");
   });
-
 });
+
+// an attempt to graceful shutdown of ports
+function shutdown() {
+  console.log("Closing server and serial connections...");
+  serialPort.close(() => {
+    server.close(() => {
+      process.exit(0);
+    });
+  });
+}
+process.on("SIGINT", shutdown);  // Catches Ctrl+C
+process.on("SIGTERM", shutdown); // Catches termination signals
 // on port 3000 the server is running
-server.listen(PORT, async () => {
-  await initTelemetryCSV();
+server.listen(PORT, "127.0.0.1", async () => {
+  //await initTelemetryCSV();
   console.log(`Server running at http://localhost:${PORT}`);
 });

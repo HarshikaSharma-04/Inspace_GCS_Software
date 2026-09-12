@@ -33,6 +33,13 @@ const simDisableBtn = document.getElementById("btn-sim-disable");
 const gyroBtn = document.getElementById("btn-gyro");
 const servoBtn = document.getElementById("btn-servo");
 
+// buffer 
+const MAX_3D_POINTS = 900;
+let xBuffer = new Float32Array(MAX_3D_POINTS);
+let yBuffer = new Float32Array(MAX_3D_POINTS);
+let zBuffer = new Float32Array(MAX_3D_POINTS);
+let bufferIndex = 0;
+
 const mapCamControl = document.querySelector(".map-wrapper")
 document.querySelectorAll(".cmd-btn").forEach(button => {
   button.addEventListener("click", () => {
@@ -119,7 +126,9 @@ function addCommandEcho(cmd) {
   }
   const div = document.createElement("div");
   div.className = "cmd-echo-item";
-  div.textContent = cmd;
+  //const missionTime = missionTimeEl?.innerText || "00:00:00";
+  const currentTime = new Date().toTimeString().slice(0, 8);
+  div.textContent = `[${currentTime}] ${cmd}`;
   cmdEchoList.appendChild(div);
   if (cmdEchoList.children.length > 3) {
     cmdEchoList.removeChild(cmdEchoList.firstElementChild);
@@ -136,13 +145,13 @@ let is3DMapInitialized = false;
 let charts = {};
 let chartInitialized = false;
 let csvData = [];
-let MAX_POINTS = 10000;
+let MAX_POINTS = 900;
 let allRows = [];
 let table;
 let count = 0;
 let currentView = "graph";
 let lastRenderedState = null;
-const MAX_BUFFERED_ROWS = 10000;
+const MAX_BUFFERED_ROWS = 900;
 const telemetryQueue = [];
 let telemetryFlushScheduled = false;
 const stageBoxes = document.querySelectorAll(".stage-box");
@@ -185,12 +194,21 @@ function resetAllTelemetryData() {
   csvData = [];
   allRows = [];
   count = 0;
+  bufferIndex = 0;
   lastRenderedState = null;
 
   if (table) table.clearData();
 
   if (is3DMapInitialized) {
-    Plotly.restyle("gnss-3d-plot", { x: [[]], y: [[]], z: [[]] }, [0]);
+    Plotly.restyle(
+      "GNSS-3d-plot",
+      {
+        x: [xBuffer.subarray(0, 0)],
+        y: [yBuffer.subarray(0, 0)],
+        z: [zBuffer.subarray(0, 0)],
+      },
+      [0]
+    );
   }
 
   if (chartInitialized && charts) {
@@ -239,7 +257,7 @@ let simEnabled = false;
 
 
 socket.on("sim-command-response", (response) => {
-  console.log("Simulation Command Response:", response);
+  //console.log("Simulation Command Response:", response);
   // clear the plots, charts, everything and just add the the new command to echo list
   if (response === "Simulation Mode Started") {
     simEnabled = true;
@@ -335,8 +353,8 @@ function flushTelemetryQueue() {
       data,
       shouldRenderDashboard
     );
-    console.log(data.FLIGHT_SOFTWARE_STATE);
-    console.log(stateToNum(data.FLIGHT_SOFTWARE_STATE));
+    //console.log(data.FLIGHT_SOFTWARE_STATE);
+    //console.log(stateToNum(data.FLIGHT_SOFTWARE_STATE));
     updateStageIndicators(stateToNum(data.FLIGHT_SOFTWARE_STATE));
 
     newRows.push(data);
@@ -390,13 +408,13 @@ function processTelemetryData(data, shouldRenderDashboard) {
 try {
   Map();
 } catch (err) {
-  console.error("Map initialization failed:", err);
+  //console.error("Map initialization failed:", err);
 }
 
 try {
   initTabulator();
 } catch (err) {
-  console.error("Tabulator initialization failed:", err);
+  //console.error("Tabulator initialization failed:", err);
 }
 
 // hide-unhide functions
@@ -577,6 +595,7 @@ function init3DMap() {
     woodDarkText = "#131313",
     woodPath = "#2E7D32";
   const layout = {
+    hovermode: false,
     autosize: true,
     margin: { l: 0, r: 40, b: 40, t: 0 },
     paper_bgcolor: "transparent",
@@ -585,6 +604,7 @@ function init3DMap() {
       aspectmode: "manual",
       aspectratio: { x: 1.0, y: 0.8, z: 1.5 },
       bgcolor: woodMain,
+      showbackground: false,
       camera: {
         eye: { x: 2.0, y: -2.0, z: 1.2 },
         center: { x: 0, y: 0, z: 0 },
@@ -624,24 +644,20 @@ function init3DMap() {
     font: { family: "monospace", size: 14, color: woodDarkText },
     showlegend: false,
   };
-  Plotly.newPlot(
-    "GNSS-3d-plot",
-    [
-      {
-        type: "scatter3d",
-        mode: "lines",
-        name: "Flight Path",
-        x: [],
-        y: [],
-        z: [],
-        line: { width: 8, color: woodPath },
-        hovertemplate:
-          "<b>Lat:</b> %{x:.4f}<br><b>Long:</b> %{y:.4f}<br><b>Alt:</b> %{z:.1f}m<extra></extra>",
-      },
-    ],
-    layout,
-    { displayModeBar: false, responsive: true },
-  );
+  const trace = {
+    type: "scatter3d",
+    mode: "lines",
+    name: "Flight Path",
+    // Pass initial typed array views
+    x: xBuffer.subarray(0, 0),
+    y: yBuffer.subarray(0, 0),
+    z: zBuffer.subarray(0, 0),
+    line: { width: 6, color: woodPath },
+  };
+  Plotly.newPlot("GNSS-3d-plot", [trace], layout, {
+    displayModeBar: false,
+    responsive: true,
+  });
   is3DMapInitialized = true;
 }
 
@@ -651,11 +667,29 @@ function update3DMap(row) {
   const alt = parseFloat(row["GNSS_ALTITUDE"]);
   if (isNaN(lat) || isNaN(long) || isNaN(alt)) return;
   if (!is3DMapInitialized) init3DMap();
-  Plotly.extendTraces(
+  // buffer size management
+  if (bufferIndex < MAX_3D_POINTS) {
+    xBuffer[bufferIndex] = lat;
+    yBuffer[bufferIndex] = long;
+    zBuffer[bufferIndex] = alt;
+    bufferIndex++;
+  } else {
+    // Shift elements left by 1 position
+    xBuffer.copyWithin(0, 1);
+    yBuffer.copyWithin(0, 1);
+    zBuffer.copyWithin(0, 1);
+    xBuffer[MAX_3D_POINTS - 1] = lat;
+    yBuffer[MAX_3D_POINTS - 1] = long;
+    zBuffer[MAX_3D_POINTS - 1] = alt;
+  }
+  Plotly.restyle(
     "GNSS-3d-plot",
-    { x: [[lat]], y: [[long]], z: [[alt]] },
-    [0],
-    MAX_POINTS,
+    {
+      x: [xBuffer.subarray(0, bufferIndex)],
+      y: [yBuffer.subarray(0, bufferIndex)],
+      z: [zBuffer.subarray(0, bufferIndex)],
+    },
+    [0]
   );
 }
 
@@ -665,7 +699,7 @@ window.addEventListener("resize", () => {
       Plotly.Plots.resize(document.getElementById("GNSS-3d-plot"));
     }
   } catch (err) {
-    console.error("3D Plot resize failed:", err);
+    //console.error("3D Plot resize failed:", err);
   }
 });
 
@@ -874,7 +908,7 @@ try {
     loadGraphs();
   }
 } catch (err) {
-  console.error("Graph initialization failed:", err);
+  //console.error("Graph initialization failed:", err);
 }
 
 try {
@@ -882,5 +916,5 @@ try {
     init3DMap();
   }
 } catch (err) {
-  console.error("3D Map initialization failed:", err);
+  //console.error("3D Map initialization failed:", err);
 }

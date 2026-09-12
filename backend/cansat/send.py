@@ -7,7 +7,7 @@ import os
 PORT = "COM1" #/dev/cu.SLAB_USBtoUART
 BAUD = 115200
 
-TELEMETRY_CSV = "test_csv.csv"
+TELEMETRY_CSV = "stress_csv.csv"
 
 SIMULATION_CSV = "sim.txt"  # Create this file or point to your SIM path
 H = 0.0
@@ -125,10 +125,11 @@ def stream_csv_data(ser, file_path,simulated_H = None,simulated_P = None):
                 # Apply calibration if enabled
                 if is_calibrated:
                     row[3] = "0.0"
+                    continue
                 # Send the data row
                 data_line = ",".join(row) + "\n"
                 ser.write(data_line.encode("utf-8"))
-                print(f"Sending Data: {data_line.strip()}")
+                #print(f"Sending Data: {data_line.strip()}")
                 TOTAL_PKT_COUNT += 1
                 # print(f"Total Packet sent from CanSat:{TOTAL_PKT_COUNT}")
                 # Telemetry rate (0.02 second)
