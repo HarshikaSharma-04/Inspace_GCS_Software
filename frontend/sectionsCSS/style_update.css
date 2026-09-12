@@ -690,7 +690,7 @@ body {
     font-weight: bold;
 }
 
-.stage-box.current+.arrow+.stage-box {
+.stage-box.current {
     animation: slowBlink 2.5s infinite ease-in-out;
 }
 

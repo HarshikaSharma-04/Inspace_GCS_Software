@@ -126,7 +126,9 @@ function addCommandEcho(cmd) {
   }
   const div = document.createElement("div");
   div.className = "cmd-echo-item";
-  div.textContent = cmd;
+  //const missionTime = missionTimeEl?.innerText || "00:00:00";
+  const currentTime = new Date().toTimeString().slice(0, 8);
+  div.textContent = `[${currentTime}] ${cmd}`;
   cmdEchoList.appendChild(div);
   if (cmdEchoList.children.length > 3) {
     cmdEchoList.removeChild(cmdEchoList.firstElementChild);
@@ -146,7 +148,6 @@ let csvData = [];
 let MAX_POINTS = 900;
 let allRows = [];
 let table;
-let count = 0;
 let currentView = "graph";
 let lastRenderedState = null;
 const MAX_BUFFERED_ROWS = 900;
@@ -191,7 +192,6 @@ showGraphView();
 function resetAllTelemetryData() {
   csvData = [];
   allRows = [];
-  count = 0;
   bufferIndex = 0;
   lastRenderedState = null;
 
@@ -361,13 +361,6 @@ function flushTelemetryQueue() {
   if (table && newRows.length > 0) {
     table.blockRedraw();
     table.addData(newRows, false);
-
-    count += newRows.length;
-
-    while (count > 10000) {
-      table.deleteFirstRow();
-      count--;
-    }
     table.restoreRedraw();
   }
 
