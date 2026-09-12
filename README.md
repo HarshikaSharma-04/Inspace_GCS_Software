@@ -99,5 +99,8 @@ cd backend/cansat
 python send.py  
 ```
 
+# ARCHITECTURE DIAGRAM  
+![Architecture Diagram](frontend/diagrams/architecture.png "Current Project Structure")  
+
 ## TEAM  
 Built by the **Software Department @ DJS Arya**.  
