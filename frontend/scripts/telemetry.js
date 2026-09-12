@@ -148,6 +148,7 @@ let csvData = [];
 let MAX_POINTS = 900;
 let allRows = [];
 let table;
+let count = 0;
 let currentView = "graph";
 let lastRenderedState = null;
 const MAX_BUFFERED_ROWS = 900;
@@ -192,6 +193,7 @@ showGraphView();
 function resetAllTelemetryData() {
   csvData = [];
   allRows = [];
+  count = 0;
   bufferIndex = 0;
   lastRenderedState = null;
 
@@ -361,6 +363,13 @@ function flushTelemetryQueue() {
   if (table && newRows.length > 0) {
     table.blockRedraw();
     table.addData(newRows, false);
+
+    count += newRows.length;
+
+    while (count > 10000) {
+      table.deleteFirstRow();
+      count--;
+    }
     table.restoreRedraw();
   }
 
