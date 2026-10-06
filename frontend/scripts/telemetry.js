@@ -24,6 +24,9 @@ const sidebarTempEl = document.querySelector(".sidebar-temp-value");
 const sidebarVoltageEl = document.querySelector(".sidebar-voltage-value");
 const sidebarPressureEl = document.querySelector(".sidebar-pressure-value");
 const sidebarAltitudeEl = document.querySelector(".sidebar-altitude-value");
+const sidebarVelocityEl = document.querySelector(".sidebar-velocity-value");
+const sidebarTimeToImpactEl = document.querySelector(".sidebar-time-to-impact-value");
+
 // command buttons:
 const cxBtn = document.getElementById("btn-cx");
 const calBtn = document.getElementById("btn-cal");
@@ -151,6 +154,8 @@ let table;
 let count = 0;
 let currentView = "graph";
 let lastRenderedState = null;
+let prevAltForVel = null;
+let prevPacketForVel = null;
 const MAX_BUFFERED_ROWS = 900;
 const telemetryQueue = [];
 let telemetryFlushScheduled = false;
@@ -196,6 +201,8 @@ function resetAllTelemetryData() {
   count = 0;
   bufferIndex = 0;
   lastRenderedState = null;
+  prevAltForVel = null;
+  prevPacketForVel = null;
 
   if (table) table.clearData();
 
@@ -227,7 +234,6 @@ function resetAllTelemetryData() {
 
   if (missionTimeEl) missionTimeEl.innerText = "00:00:00";
   if (packetEl) packetEl.innerText = "00";
-
 
   [
     sidebarTempEl,
@@ -717,7 +723,12 @@ const UNIT_MAP = {
 
 const GRAPH_LAYOUT = [
 
-  { id: "ALTITUDE", title: "ALTITUDE", units: "ALTITUDE" },
+  {
+    id: "ALTITUDE_VELOCITY",
+    title: "ALTITUDE/VELOCITY",
+    units: "ALTITUDE/VELOCITY",
+    combined: ["ALTITUDE", "VELOCITY"],
+  },
   { id: "PRESSURE", title: "PRESSURE", units: "PRESSURE" },
   { id: "TEMPERATURE", title: "TEMPERATURE", units: "TEMPERATURE" },
 
@@ -809,13 +820,14 @@ function loadGraphs() {
         "rgba(0,129,215,1)",
         "rgba(28,93,2,1)",
       ];
-      datasets = graph.combined.map((label, i) => ({
-        label,
+        datasets = graph.combined.map((label, i) => ({
+        label: label === "VELOCITY" ? "VELOCITY (m/s)" : label,
         data: [],
         borderColor: colors[i],
         backgroundColor: getGradient(ctx, colors[i]),
-        fill: true,
+        fill: graph.id === "ALTITUDE_VELOCITY" ? i === 0 : true,
         borderWidth: 2,
+        yAxisID: graph.id === "ALTITUDE_VELOCITY" && label === "VELOCITY" ? "y1" : "y",
       }));
     } else {
       datasets = [
@@ -840,16 +852,54 @@ function loadGraphs() {
           title: { ...sharedOptions.plugins.title, text: graph.title },
           legend: { display: !!graph.combined },
         },
-        scales: {
-          ...sharedOptions.scales,
-          y: {
-            ...sharedOptions.scales.y,
-            title: {
-              ...sharedOptions.scales.y.title,
-              text: `${graph.title}${unit}`,
+           scales: {
+  ...sharedOptions.scales,
+
+  y: {
+    ...sharedOptions.scales.y,
+
+    ticks: {
+      color: "#000000",
+    },
+
+    title: {
+      ...sharedOptions.scales.y.title,
+      display: true,
+      color: "#000000",
+      text:
+        graph.id === "ALTITUDE_VELOCITY"
+          ? "ALTITUDE (m)"
+          : `${graph.title}${unit}`,
+    },
+  },
+
+  ...(graph.id === "ALTITUDE_VELOCITY"
+    ? {
+        y1: {
+          position: "right",
+          beginAtZero: false,
+
+          grid: {
+            drawOnChartArea: false,
+          },
+
+          ticks: {
+            color: "#000000",
+          },
+
+          title: {
+            display: true,
+            text: "VELOCITY (m/s)",
+            color: "#000000",
+            font: {
+              weight: "bold",
+              size: 16,
             },
           },
         },
+      }
+    : {}),
+},
       },
     });
   });
@@ -860,7 +910,24 @@ function loadGraphs() {
 
 function updateGraphs(row) {
   if (!row || !chartInitialized) return;
-  const packet = Number(row["PACKET_COUNT"]);
+    const packet = Number(row["PACKET_COUNT"]);
+
+  // Velocity (m/s) = altitude change per packet (1 packet = 1 s)
+  const altNow = Number(row["ALTITUDE"]);
+  let velocity = 0;
+  if (row["VELOCITY"] !== undefined && !isNaN(Number(row["VELOCITY"]))) {
+    velocity = Number(row["VELOCITY"]);
+  } else if (
+    prevAltForVel !== null &&
+    !isNaN(altNow) &&
+    packet > prevPacketForVel
+  ) {
+    velocity = (altNow - prevAltForVel) / (packet - prevPacketForVel);
+  }
+  if (!isNaN(altNow)) {
+    prevAltForVel = altNow;
+    prevPacketForVel = packet;
+  }
 
   for (let id in charts) {
     const chart = charts[id];
@@ -868,7 +935,8 @@ function updateGraphs(row) {
 
     if (config?.combined) {
       config.combined.forEach((col, i) => {
-        chart.data.datasets[i].data.push({ x: packet, y: Number(row[col]) });
+        const y = col === "VELOCITY" ? velocity : Number(row[col]);
+        chart.data.datasets[i].data.push({ x: packet, y });
       });
     } else {
       const val = Number(row[id]);
