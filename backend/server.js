@@ -35,8 +35,8 @@ const validCommands = {
 
 //for offline
 app.use(
-    "/node_modules",
-    express.static(path.join(__dirname, "node_modules"))
+  "/node_modules",
+  express.static(path.join(__dirname, "node_modules"))
 );
 
 // Serve static files from the frontend directory
@@ -85,7 +85,8 @@ async function handleCanSatData(rawString) {
       GYRO_P,
       GYRO_Y,
       FLIGHT_SOFTWARE_STATE,
-      CMD_ECHO
+      CMD_ECHO,
+      DESC_VELOCITY
     ] = parts;
 
 
@@ -115,7 +116,8 @@ async function handleCanSatData(rawString) {
 
       FLIGHT_SOFTWARE_STATE,
 
-      CMD_ECHO: CMD_ECHO ? CMD_ECHO.replace(/"/g, "") : ""
+      CMD_ECHO: CMD_ECHO ? CMD_ECHO.replace(/"/g, "") : "",
+      DESC_VELOCITY: DESC_VELOCITY ? DESC_VELOCITY.replace(/"/g, "") : ""
     };
 
   } catch (parseError) {

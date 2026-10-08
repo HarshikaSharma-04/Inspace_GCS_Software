@@ -26,6 +26,7 @@ const sidebarPressureEl = document.querySelector(".sidebar-pressure-value");
 const sidebarAltitudeEl = document.querySelector(".sidebar-altitude-value");
 const sidebarVelocityEl = document.querySelector(".sidebar-velocity-value");
 const sidebarTimeToImpactEl = document.querySelector(".sidebar-time-to-impact-value");
+const sidebarVelocity = document.querySelector("value sidebar-velocity-value")
 
 // command buttons:
 const cxBtn = document.getElementById("btn-cx");
@@ -186,7 +187,8 @@ const _CT_COLS = [
   { title: "GYRO_Y", field: "GYRO_Y", w: 60 },
 
   { title: "STATE", field: "FLIGHT_SOFTWARE_STATE", w: 110 },
-  { title: "CMD", field: "CMD_ECHO", w: 70 }
+  { title: "CMD", field: "CMD_ECHO", w: 60 },
+  { title: "DESC_VELOCITY", field: "DESC_VELOCITY", w: 70 }
 ];
 // initialization and default view setup
 setActiveButton(homeBtn);
@@ -240,6 +242,7 @@ function resetAllTelemetryData() {
     sidebarVoltageEl,
     sidebarPressureEl,
     sidebarAltitudeEl,
+    sidebarVelocityEl
   ].forEach((el) => {
     if (el) el.innerText = "0";
   });
@@ -567,6 +570,7 @@ function updateSidebarTelemetry(row) {
   if (sidebarVoltageEl) sidebarVoltageEl.innerText = row["VOLTAGE"] + " V";
   if (sidebarPressureEl) sidebarPressureEl.innerText = row["PRESSURE"] + " Pa";
   if (sidebarAltitudeEl) sidebarAltitudeEl.innerText = row["ALTITUDE"] + " m";
+  if (sidebarVelocityEl) sidebarVelocityEl.innerText = row["DESC_VELOCITY"] + " m/s";
 
   document.querySelector(".sidebar-gyro-r").innerText = row.GYRO_R;
   document.querySelector(".sidebar-gyro-p").innerText = row.GYRO_P;
@@ -727,7 +731,7 @@ const GRAPH_LAYOUT = [
     id: "ALTITUDE_VELOCITY",
     title: "ALTITUDE/VELOCITY",
     units: "ALTITUDE/VELOCITY",
-    combined: ["ALTITUDE", "VELOCITY"],
+    combined: ["ALTITUDE", "DESC_VELOCITY"],
   },
   { id: "PRESSURE", title: "PRESSURE", units: "PRESSURE" },
   { id: "TEMPERATURE", title: "TEMPERATURE", units: "TEMPERATURE" },
@@ -820,14 +824,14 @@ function loadGraphs() {
         "rgba(0,129,215,1)",
         "rgba(28,93,2,1)",
       ];
-        datasets = graph.combined.map((label, i) => ({
-        label: label === "VELOCITY" ? "VELOCITY (m/s)" : label,
+      datasets = graph.combined.map((label, i) => ({
+        label: label === "DESC_VELOCITY" ? "DESC_VELOCITY (m/s)" : label,
         data: [],
         borderColor: colors[i],
         backgroundColor: getGradient(ctx, colors[i]),
         fill: graph.id === "ALTITUDE_VELOCITY" ? i === 0 : true,
         borderWidth: 2,
-        yAxisID: graph.id === "ALTITUDE_VELOCITY" && label === "VELOCITY" ? "y1" : "y",
+        yAxisID: label === "DESC_VELOCITY" ? "y1" : "y",
       }));
     } else {
       datasets = [
@@ -852,54 +856,54 @@ function loadGraphs() {
           title: { ...sharedOptions.plugins.title, text: graph.title },
           legend: { display: !!graph.combined },
         },
-           scales: {
-  ...sharedOptions.scales,
+        scales: {
+          ...sharedOptions.scales,
 
-  y: {
-    ...sharedOptions.scales.y,
+          y: {
+            ...sharedOptions.scales.y,
 
-    ticks: {
-      color: "#000000",
-    },
+            ticks: {
+              color: "#000000",
+            },
 
-    title: {
-      ...sharedOptions.scales.y.title,
-      display: true,
-      color: "#000000",
-      text:
-        graph.id === "ALTITUDE_VELOCITY"
-          ? "ALTITUDE (m)"
-          : `${graph.title}${unit}`,
-    },
-  },
-
-  ...(graph.id === "ALTITUDE_VELOCITY"
-    ? {
-        y1: {
-          position: "right",
-          beginAtZero: false,
-
-          grid: {
-            drawOnChartArea: false,
-          },
-
-          ticks: {
-            color: "#000000",
-          },
-
-          title: {
-            display: true,
-            text: "VELOCITY (m/s)",
-            color: "#000000",
-            font: {
-              weight: "bold",
-              size: 16,
+            title: {
+              ...sharedOptions.scales.y.title,
+              display: true,
+              color: "#000000",
+              text:
+                graph.id === "ALTITUDE_VELOCITY"
+                  ? "ALTITUDE (m)"
+                  : `${graph.title}${unit}`,
             },
           },
+
+          ...(graph.combined?.includes("DESC_VELOCITY")
+            ? {
+              y1: {
+                position: "right",
+                beginAtZero: true,
+
+                grid: {
+                  drawOnChartArea: false,
+                },
+
+                ticks: {
+                  color: "#000000",
+                },
+
+                title: {
+                  display: true,
+                  text: "DESC_VELOCITY (m/s)",
+                  color: "#000000",
+                  font: {
+                    weight: "bold",
+                    size: 16,
+                  },
+                },
+              },
+            }
+            : {}),
         },
-      }
-    : {}),
-},
       },
     });
   });
@@ -910,24 +914,7 @@ function loadGraphs() {
 
 function updateGraphs(row) {
   if (!row || !chartInitialized) return;
-    const packet = Number(row["PACKET_COUNT"]);
-
-  // Velocity (m/s) = altitude change per packet (1 packet = 1 s)
-  const altNow = Number(row["ALTITUDE"]);
-  let velocity = 0;
-  if (row["VELOCITY"] !== undefined && !isNaN(Number(row["VELOCITY"]))) {
-    velocity = Number(row["VELOCITY"]);
-  } else if (
-    prevAltForVel !== null &&
-    !isNaN(altNow) &&
-    packet > prevPacketForVel
-  ) {
-    velocity = (altNow - prevAltForVel) / (packet - prevPacketForVel);
-  }
-  if (!isNaN(altNow)) {
-    prevAltForVel = altNow;
-    prevPacketForVel = packet;
-  }
+  const packet = Number(row["PACKET_COUNT"]);
 
   for (let id in charts) {
     const chart = charts[id];
@@ -935,7 +922,7 @@ function updateGraphs(row) {
 
     if (config?.combined) {
       config.combined.forEach((col, i) => {
-        const y = col === "VELOCITY" ? velocity : Number(row[col]);
+        const y = Number(row[col]);
         chart.data.datasets[i].data.push({ x: packet, y });
       });
     } else {

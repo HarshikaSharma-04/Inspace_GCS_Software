@@ -112,7 +112,7 @@ def stream_csv_data(ser, file_path,simulated_H = None,simulated_P = None):
                     elif interrupt == "7N":
                         is_calibrated = True
                         print("Action: Calibrating...")
-                        
+                        row[3] = "0.0"
                     elif interrupt == "8N":
                          print("Action: Servo ON")
                     elif interrupt == "9N":
@@ -121,11 +121,6 @@ def stream_csv_data(ser, file_path,simulated_H = None,simulated_P = None):
                          print("Action: GYRO ON")   
                     elif interrupt == "11N":
                         print("GYRO OFF")
-
-                # Apply calibration if enabled
-                if is_calibrated:
-                    row[3] = "0.0"
-                    continue
                 # Send the data row
                 data_line = ",".join(row) + "\n"
                 ser.write(data_line.encode("utf-8"))
