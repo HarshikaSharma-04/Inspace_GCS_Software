@@ -174,6 +174,9 @@ io.on("connection", (socket) => {
       }
       isCxSent = true;
     }
+    else if (cmd === "CMD,041,CX,OFF") {
+      isCxSent = false;
+    }
     // handling simulation commands:
     if (cmd === "CMD,041,SIM,ENABLE") {
       if (isCxSent) {

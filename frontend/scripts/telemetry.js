@@ -1,5 +1,6 @@
 import { Map, resizeMap, updateMapLocation } from "./Map.js";
 import CanvasTable from "./canvasTable.js";
+import { initializeSimulationMode } from "./SimulationMode.js";
 // the main line that connects the backend with the frontend
 export const socket = io("http://localhost:3000");
 
@@ -247,6 +248,8 @@ function resetAllTelemetryData() {
     if (el) el.innerText = "0";
   });
 
+  if (sidebarTimeToImpactEl) sidebarTimeToImpactEl.innerText = "00";
+
   [
     ...sidebarGNSSTimeEls,
     ...sidebarGNSSAltitudeEls,
@@ -257,24 +260,31 @@ function resetAllTelemetryData() {
     el.innerText = "---";
   });
 
+  [
+    ".sidebar-gyro-r",
+    ".sidebar-gyro-p",
+    ".sidebar-gyro-y",
+    ".sidebar-accel-r",
+    ".sidebar-accel-p",
+    ".sidebar-accel-y",
+  ].forEach((selector) => {
+    const el = document.querySelector(selector);
+    if (el) el.innerText = "---";
+  });
+
+  levelDisplays.forEach((levelEl) => {
+    const value = levelEl.querySelector(".level-value");
+    if (value) value.innerText = "---";
+  });
+
+  commandHistory = [];
+  if (cmdEchoList) {
+    cmdEchoList.innerHTML = '<span class="cmd-echo-empty">No commands sent</span>';
+  }
+
   updateStageIndicators(1);
 }
-// Simulation state tracking
-
-
-let simEnabled = false;
-
-
-socket.on("sim-command-response", (response) => {
-  //console.log("Simulation Command Response:", response);
-  // clear the plots, charts, everything and just add the the new command to echo list
-  if (response === "Simulation Mode Started") {
-    simEnabled = true;
-    modeValue.textContent = "Simulation";
-    modeValue.classList.add("simulation");
-    resetAllTelemetryData();
-  }
-});
+initializeSimulationMode({ socket, modeValue, resetAllTelemetryData });
 
 socket.on("command-success", (verifiedCommand) => {
   handleButtonStateUI(verifiedCommand);
@@ -298,28 +308,6 @@ socket.on("command-warning", (warningMessage) => {
     commandInput.addEventListener("input", clearWarning);
   }
 });
-socket.on("command-response", (response) => {
-  switch (response) {
-    case "Simulation Enabled":
-      simEnabled = true;
-      break;
-
-    case "Simulation Started":
-      if (simEnabled) {
-        modeValue.textContent = "Simulation";
-        modeValue.classList.add("simulation");
-        resetAllTelemetryData();
-      }
-      break;
-
-    case "Simulation Stopped":
-      simEnabled = false;
-      modeValue.textContent = "Flight";
-      modeValue.classList.remove("simulation");
-      break;
-  }
-});
-
 // clear data
 socket.on("clear-data", () => {
   csvData = [];
