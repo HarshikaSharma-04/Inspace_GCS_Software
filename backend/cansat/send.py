@@ -2,7 +2,6 @@ import csv
 import serial
 import time
 import os
-
 # --- CONFIGURATION ---
 PORT = "COM1" #/dev/cu.SLAB_USBtoUART
 BAUD = 115200
@@ -11,8 +10,40 @@ TELEMETRY_CSV = "stress_csv.csv"
 
 SIMULATION_CSV = "sim.txt"  # Create this file or point to your SIM path
 H = 0.0
+IS_SIM_ENABLED = False
+IS_SIM_ACTIVATED = False
+
+def calculate_tti(desc_velocity,altitude):
+    adjustment_factor = 0.000001 # avoid dividing by 0
+    tti = float(altitude) / (float(desc_velocity) + adjustment_factor)
+    return tti
+
+def calculate_alt_from_pressure(command_str):
+    parts = command_str.split(",")
+    pressure_str = parts[-1].strip().removesuffix("N")
+    pressure = float(pressure_str)
+    if pressure <= 0:
+        return None, None
+    P0 = 101325.0
+    exponent = 1 / 5.255
+    altitude = 44330 * (1 - (pressure / P0) ** exponent)
+    return altitude, pressure
+
+
+def is_pressure_command(command):
+    if not command.endswith("N") or command in {
+        "1N", "2N", "3N", "4N", "5N", "6N", "7N", "8N", "9N", "10N", "11N"
+    }:
+        return False
+    try:
+        float(command[:-1])
+    except ValueError:
+        return False
+    return True
+
 
 def run_sender():
+    global IS_SIM_ENABLED; global IS_SIM_ACTIVATED
     try:
         ser = serial.Serial(port=PORT, baudrate=BAUD, timeout=0.1)
         print(f"Serial port opened: {ser.name}")
@@ -24,11 +55,12 @@ def run_sender():
     print("Waiting for commands...")
 
     try:
+        # command reception loop
         while True:
             if ser.in_waiting > 0:
                 # Read command from Node.js
                 command = ser.readline().decode("utf-8").strip().upper()
-                #print(f"Command Received: {command}")
+                print(f"Command Received: {command}")
                 #print(command)
                 if command == "1N":
                     print(f"Command Received: CXON")
@@ -62,10 +94,7 @@ def run_sender():
                 if command == "11N":
                     print(f"Command Received: GYRO OFF")
                     print("Action: GYRO OFF")
-                
-                
             time.sleep(0.1)
-
     except KeyboardInterrupt:
         print("\nSender stopped by user.")
     finally:
@@ -73,26 +102,24 @@ def run_sender():
             ser.close()
             print("Serial port closed.")
 
-def stream_csv_data(ser, file_path,simulated_H = None,simulated_P = None):
+
+    
+def stream_csv_data(ser, file_path, simulated_H = None, simulated_P = None):
     """Generic function to stream any CSV until finished or stopped by GCS."""
-    TOTAL_PKT_COUNT = 0  # this will act as teensy's internal count for the packet
-    IS_SIM_ENABLED = False
+    TOTAL_PKT_COUNT = 0 
+    global IS_SIM_ENABLED;global IS_SIM_ACTIVATED
     if not os.path.exists(file_path):
         print(f"Error: File {file_path} not found.")
         return
-
     try:
         with open(file_path, "r") as file:
             reader = csv.reader(file)
-            header = next(reader) 
-
-            is_calibrated = False
-
-            
+            header = next(reader)
             for row in reader:
-                # Check for INTERRUPT commands while streaming
-                if ser.in_waiting > 0:
+                # Use 'while' instead of 'if' to read ALL waiting commands and prevent lagging
+                while ser.in_waiting > 0:
                     interrupt = ser.readline().decode("utf-8").strip().upper()
+                    print("Interrupt: ",interrupt)
                     if interrupt == "2N":
                         print(f"Stream stopped by: CXOFF")
                         return
@@ -101,33 +128,53 @@ def stream_csv_data(ser, file_path,simulated_H = None,simulated_P = None):
                         print("Action: Simulation ENABLED")
                     elif interrupt == "4N":
                         if IS_SIM_ENABLED:
-                            print("SIMUALTION MODE ACTIVATED....")    
+                            print("SIMULATION MODE ACTIVATED....")  
+                            IS_SIM_ACTIVATED = True 
                         else:
                             print("ERROR: SIMULATION MODE NOT ENABLED") 
                     elif interrupt == "5N":
                         if IS_SIM_ENABLED:
                             print("SIMULATION MODE DEACTIVATED...")
+                            IS_SIM_ACTIVATED = False
                         else:
-                            print("ERROR: SIMUALTION MODE NOT ACTIVATED..")  
+                            print("ERROR: SIMULATION MODE NOT ACTIVATED..")  
                     elif interrupt == "7N":
-                        is_calibrated = True
                         print("Action: Calibrating...")
                         row[3] = "0.0"
                     elif interrupt == "8N":
                          print("Action: Servo ON")
                     elif interrupt == "9N":
-                           print("Action: Servo Off")   
+                         print("Action: Servo Off")   
                     elif interrupt == "10N":
                          print("Action: GYRO ON")   
                     elif interrupt == "11N":
                         print("GYRO OFF")
+                    elif is_pressure_command(interrupt):
+                        try:
+                            new_altitude, new_pressure = calculate_alt_from_pressure(interrupt)
+                        except ValueError as e:
+                            print(f"Invalid pressure command {interrupt}: {e}")
+                        else:
+                            if new_altitude is None:
+                                print(f"Invalid pressure value in command: {interrupt}")
+                            else:
+                                row[3] = str(new_altitude)
+                                row[4] = str(new_pressure)
+                                print(
+                                    f"Pressure received: {new_pressure}; "
+                                    f"calculated altitude: {new_altitude}"
+                                )
+
+                # append the new data
+                current_tti = calculate_tti(row[20],row[3])
+                #print(current_tti)
+                row.append(str(current_tti))
                 # Send the data row
                 data_line = ",".join(row) + "\n"
                 ser.write(data_line.encode("utf-8"))
-                #print(f"Sending Data: {data_line.strip()}")
                 TOTAL_PKT_COUNT += 1
-                # print(f"Total Packet sent from CanSat:{TOTAL_PKT_COUNT}")
-                # Telemetry rate (0.02 second)
+                
+                # Telemetry rate (1 second)
                 time.sleep(1)
             
             print("End of file reached.")

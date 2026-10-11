@@ -27,7 +27,7 @@ const sidebarPressureEl = document.querySelector(".sidebar-pressure-value");
 const sidebarAltitudeEl = document.querySelector(".sidebar-altitude-value");
 const sidebarVelocityEl = document.querySelector(".sidebar-velocity-value");
 const sidebarTimeToImpactEl = document.querySelector(".sidebar-time-to-impact-value");
-const sidebarVelocity = document.querySelector("value sidebar-velocity-value")
+const time2impact = document.querySelector(".sidebar-time-to-impact-value");
 
 // command buttons:
 const cxBtn = document.getElementById("btn-cx");
@@ -189,7 +189,8 @@ const _CT_COLS = [
 
   { title: "STATE", field: "FLIGHT_SOFTWARE_STATE", w: 110 },
   { title: "CMD", field: "CMD_ECHO", w: 60 },
-  { title: "DESC_VELOCITY", field: "DESC_VELOCITY", w: 70 }
+  { title: "DESC_VELOCITY", field: "DESC_VELOCITY", w: 70 },
+  { title: "TIME2IMPACT", field: "TIME2IMPACT", w: 70 }
 ];
 // initialization and default view setup
 setActiveButton(homeBtn);
@@ -243,7 +244,8 @@ function resetAllTelemetryData() {
     sidebarVoltageEl,
     sidebarPressureEl,
     sidebarAltitudeEl,
-    sidebarVelocityEl
+    sidebarVelocityEl,
+    time2impact
   ].forEach((el) => {
     if (el) el.innerText = "0";
   });
@@ -559,6 +561,7 @@ function updateSidebarTelemetry(row) {
   if (sidebarPressureEl) sidebarPressureEl.innerText = row["PRESSURE"] + " Pa";
   if (sidebarAltitudeEl) sidebarAltitudeEl.innerText = row["ALTITUDE"] + " m";
   if (sidebarVelocityEl) sidebarVelocityEl.innerText = row["DESC_VELOCITY"] + " m/s";
+  if (time2impact) time2impact.innerText = row["TIME2IMPACT"] + " s";
 
   document.querySelector(".sidebar-gyro-r").innerText = row.GYRO_R;
   document.querySelector(".sidebar-gyro-p").innerText = row.GYRO_P;
@@ -591,26 +594,26 @@ function updateSidebarTelemetry(row) {
 function init3DMap() {
   const woodMain = "#ffffff",
     woodDarkText = "#131313",
-    woodPath = "#2E7D32";
+    woodPath = "#4c2e7d";
   const layout = {
     hovermode: false,
     autosize: true,
-    margin: { l: 0, r: 40, b: 40, t: 0 },
+    margin: { l: 0, r: 0, b: 50, t: 0, pad: 0 },
     paper_bgcolor: "transparent",
     plot_bgcolor: "white",
     scene: {
       aspectmode: "manual",
-      aspectratio: { x: 1.0, y: 0.8, z: 1.5 },
+      aspectratio: { x: 1.0, y: 1.0, z: 2.0 },
       bgcolor: woodMain,
       showbackground: false,
       camera: {
-        eye: { x: 2.0, y: -2.0, z: 1.2 },
+        eye: { x: 2.0, y: -2.0, z: 1.7 },
         center: { x: 0, y: 0, z: 0 },
-        up: { x: 0, y: 0, z: 1 },
+        up: { x: 0, y: 0, z: 1.0 },
       },
       xaxis: {
         title: {
-          text: "Latitude",
+          text: "GNSS_LAT",
           font: { color: woodDarkText, weight: "bold" },
         },
         backgroundcolor: woodMain,
@@ -620,7 +623,7 @@ function init3DMap() {
       },
       yaxis: {
         title: {
-          text: "Longitude",
+          text: "GNSS_LON",
           font: { color: woodDarkText, weight: "bold" },
         },
         backgroundcolor: woodMain,
@@ -630,7 +633,7 @@ function init3DMap() {
       },
       zaxis: {
         title: {
-          text: "Altitude",
+          text: "GNSS_ALT",
           font: { color: woodDarkText, weight: "bold", size: 16 },
         },
         backgroundcolor: woodMain,
@@ -639,7 +642,7 @@ function init3DMap() {
         tickfont: { color: woodDarkText },
       },
     },
-    font: { family: "monospace", size: 14, color: woodDarkText },
+    font: { family: "monospace", size: 13, color: woodDarkText },
     showlegend: false,
   };
   const trace = {
@@ -650,7 +653,7 @@ function init3DMap() {
     x: xBuffer.subarray(0, 0),
     y: yBuffer.subarray(0, 0),
     z: zBuffer.subarray(0, 0),
-    line: { width: 6, color: woodPath },
+    line: { width: 6, color: woodPath, dash: "solid" },
   };
   Plotly.newPlot("GNSS-3d-plot", [trace], layout, {
     displayModeBar: false,
