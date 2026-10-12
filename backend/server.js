@@ -13,7 +13,6 @@ const { initTelemetryCSV, writeTelemetryRow, deleteTelemetryCSV, } = require("./
 const { getSimulationCommands, stripSimCommand } = require("./pipeline/readSimValues");
 
 const PORT = 3000;
-//let TELEMETRY_QUEUE = [];
 let isSimEnabled = false;
 let isSimActivated = false;
 let isCxSent = false;
@@ -135,10 +134,9 @@ async function handleCanSatData(rawString) {
   }
   let cleanedData = data; // Temporary variable to hold filtered data
   try {
-    /*
-    writeTelemetryRow(cleanedData).catch((err) =>
-      //console.error("CSV write failed:", err.message),
-    );*/
+    writeTelemetryRow(cleanedData).catch((err) => {
+      // console.error("CSV write failed:", err.message);
+    });
     const result = await filterGarbage(data);
     if (result != null) {
       cleanedData = result;
@@ -159,12 +157,8 @@ serialPort.on("telemetry", (packet) => {
 
 
 io.on("connection", (socket) => {
-
-  //console.log("GUI Connected");
-
   socket.on("send-command", (cmd) => {
     const command = validCommands[cmd];
-
     if (!command) {
       socket.emit("command-response", "Invalid Command");
       return;
@@ -187,7 +181,6 @@ io.on("connection", (socket) => {
       }
       isSimEnabled = true;
     }
-
     else if (cmd === "CMD,041,SIM,ACTIVATE") {
       if (!isSimEnabled) {
         socket.emit("command-warning", "Warning: Please ENABLE the simulation mode first!");
@@ -195,7 +188,6 @@ io.on("connection", (socket) => {
       }
       isSimActivated = true;
     }
-
     else if (cmd === "CMD,041,SIM,DISABLE") {
       if (!isSimActivated) {
         socket.emit("command-warning", "Warning: Simulation must be ACTIVATED before it can be disabled!");
@@ -210,7 +202,6 @@ io.on("connection", (socket) => {
       }
       socket.emit("command-response", "Simulation Stopped");
     }
-
     if (isSimActivated) {
       socket.emit("sim-command-response", "Simulation Mode Started");
       const rawSimCommands = getSimulationCommands();
@@ -227,17 +218,14 @@ io.on("connection", (socket) => {
           });
           index++;
         } else {
-          //console.log("Simulation end reached.");
           clearInterval(simInterval);
         }
       }, 1000);
     }
 
-
-    //yaha it will write on serialPort and then echo back to GUI
+    // write on port
     serialPort.sendCommand(command, (err) => {
       if (err) {
-        //console.error(err);
         socket.emit("command-response", "Failed to send command");
         return;
       }
@@ -255,7 +243,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// an attempt to graceful shutdown of ports
+
 function shutdown() {
   console.log("Closing server and serial connections...");
   serialPort.close(() => {
@@ -264,9 +252,8 @@ function shutdown() {
     });
   });
 }
-process.on("SIGINT", shutdown);  // Catches Ctrl+C
-process.on("SIGTERM", shutdown); // Catches termination signals
-// on port 3000 the server is running
+process.on("SIGINT", shutdown);  
+process.on("SIGTERM", shutdown); 
 server.listen(PORT, "127.0.0.1", async () => {
   //await initTelemetryCSV();
   console.log(`Server running at http://localhost:${PORT}`);

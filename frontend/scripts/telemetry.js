@@ -156,8 +156,6 @@ let table;
 let count = 0;
 let currentView = "graph";
 let lastRenderedState = null;
-let prevAltForVel = null;
-let prevPacketForVel = null;
 const MAX_BUFFERED_ROWS = 900;
 const telemetryQueue = [];
 let telemetryFlushScheduled = false;
@@ -205,9 +203,6 @@ function resetAllTelemetryData() {
   count = 0;
   bufferIndex = 0;
   lastRenderedState = null;
-  prevAltForVel = null;
-  prevPacketForVel = null;
-
   if (table) table.clearData();
 
   if (is3DMapInitialized) {
@@ -279,10 +274,8 @@ function resetAllTelemetryData() {
     if (value) value.innerText = "---";
   });
 
-  commandHistory = [];
-  if (cmdEchoList) {
-    cmdEchoList.innerHTML = '<span class="cmd-echo-empty">No commands sent</span>';
-  }
+  //commandHistory = [];
+
 
   updateStageIndicators(1);
 }

@@ -64,7 +64,7 @@ export function initializeSimulationMode({ socket, modeValue, resetAllTelemetryD
 
       case "Simulation Started":
         if (activateSimulation()) {
-          modeValue.textContent = "Simulation";
+          modeValue.textContent = "SIMULATION";
           modeValue.classList.add("simulation");
           resetAllTelemetryData();
         }
@@ -72,7 +72,7 @@ export function initializeSimulationMode({ socket, modeValue, resetAllTelemetryD
 
       case "Simulation Stopped":
         disableSimulation();
-        modeValue.textContent = "Flight";
+        modeValue.textContent = "FLIGHT";
         modeValue.classList.remove("simulation");
         break;
     }
