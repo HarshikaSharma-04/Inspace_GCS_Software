@@ -314,7 +314,7 @@ body {
 }
 
 .sidebar {
-  width: 22%;
+  width: 23%;
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-black);
   border-radius: 5px;
@@ -801,57 +801,26 @@ body {
   grid-row: 1 / span 2;
   height: 100%;
 }
-
 .map-wrapper {
-  grid-column: 2;
-  grid-row: 1;
+  grid-column: 1 / -1;
+  grid-row: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
   height: 100%;
-}
-
-/* MAP RIGHT */
-#map {
-  flex: 1;
-  min-height: 20rem;
-  background-color: var(--bg-transparent);
-  grid-column: 2;
-  grid-row: 1;
+  border: 5px solid #666666;
   border-radius: 10px;
 }
 
-.map-controls {
-  background: var(--bg-card);
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--border-light-gray);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: var(--shadow-controls);
-  width: fit-content;
-  /* Keeps it tight to the text, or remove for full width */
-}
-
-.map-controls label {
-  font-weight: bold;
-  font-family: monospace;
-  font-size: 14px;
-  color: var(--color-text-dark);
-  cursor: pointer;
-  letter-spacing: 0.02em;
-}
-
-.map-controls input[type="checkbox"] {
-  cursor: pointer;
-  width: 16px;
-  height: 16px;
-}
-
-/* GRAPHS BELOW FULL WIDTH */
-.telemetry-graph-container {
-  grid-column: 1 / span 2;
+/* MAP */
+#map {
+  flex: 1;
+  min-height: 40rem;
+  width: 70%;
+  background-color: var(--bg-transparent);
+  grid-column: 1 / -1;
+  grid-row: auto;
+  border-radius: 10px;
 }
 
 .cmd-echo-section {
@@ -1110,11 +1079,11 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 11rem;
-  height: 65px;
+  min-width: 9.7rem;
+  height: 59px;
   text-align: center;
-  margin: 0;
-  gap: 2px;
+  margin: 0 -6px 0 -6px;
+  gap: 1.4px;
 }
 
 /* Labels */
@@ -1136,4 +1105,80 @@ body {
   font-weight: 700;
   margin: 0;
   line-height: 1.2;
+}
+.telemetry-visualization-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 15px;
+  align-items: start;
+}
+
+/* Command section */
+.gnss-container {
+  grid-column: 1;
+  grid-row: 1;
+  height: 100%;
+  box-sizing: border-box;
+}
+/* Outer white box */
+.derived-values {
+  grid-column: 2;
+  grid-row: 1;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+   background-color: #e8e4fb;
+  border: 1px solid var(--border-black);
+  border-radius: 5px;
+  display: flex;
+  align-items: stretch;      /* let inner fill the height */
+  justify-content: center;
+   font-weight: bold;
+  font-size: 1.2rem;
+   font-family: monospace;
+}
+
+/* Inner purple area */
+.derived-values-inner {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  background-color: white;
+   /* same lavender as your telemetry panel */
+  border: 1px solid var(--border-black);
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+}
+
+.derived-values-title {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+  font-family: monospace;
+}
+
+.derived-values-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Cards: slightly lighter purple with a soft border, like telemetry cards */
+.derived-value-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+   background-color: #e8e4fb;
+  border: 1px solid #c9c3f0;
+  border-radius: 5px;
+  text-align: center;
+}
+/* Graphs below both sections */
+.telemetry-graph-container {
+  grid-column: 1 / -1;
+  grid-row: 2;
 }
