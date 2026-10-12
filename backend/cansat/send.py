@@ -2,6 +2,7 @@ import csv
 import serial
 import time
 import os
+from transmit_sim import SimulationMode
 # --- CONFIGURATION ---
 PORT = "COM1" #/dev/cu.SLAB_USBtoUART
 BAUD = 115200
@@ -12,23 +13,13 @@ SIMULATION_CSV = "sim.txt"  # Create this file or point to your SIM path
 H = 0.0
 IS_SIM_ENABLED = False
 IS_SIM_ACTIVATED = False
+sim = SimulationMode()
+
 
 def calculate_tti(desc_velocity,altitude):
     adjustment_factor = 0.000001 # avoid dividing by 0
     tti = float(altitude) / (float(desc_velocity) + adjustment_factor)
     return tti
-
-def calculate_alt_from_pressure(command_str):
-    parts = command_str.split(",")
-    pressure_str = parts[-1].strip().removesuffix("N")
-    pressure = float(pressure_str)
-    if pressure <= 0:
-        return None, None
-    P0 = 101325.0
-    exponent = 1 / 5.255
-    altitude = 44330 * (1 - (pressure / P0) ** exponent)
-    return altitude, pressure
-
 
 def is_pressure_command(command):
     if not command.endswith("N") or command in {
@@ -61,7 +52,7 @@ def run_sender():
                 # Read command from Node.js
                 command = ser.readline().decode("utf-8").strip().upper()
                 print(f"Command Received: {command}")
-                #print(command)
+                print(command)
                 if command == "1N":
                     print(f"Command Received: CXON")
                     print("Action: Starting Telemetry Stream...")
@@ -75,9 +66,11 @@ def run_sender():
                 if command == "4N":
                     print(f"Command Received: SIM ACTIVE")
                     print("Action: Simulation Mode Active")
+                    sim.read_csv(ser,command)
                 if command == "5N":
                     print(f"Command Received: SIM DISABLE")
                     print("Action: Simulation DISABLED")
+                    return
                 if command == "7N":
                     print(f"Command Received: CAL")
                     print("Action: Calibrating altitude...")
@@ -149,22 +142,6 @@ def stream_csv_data(ser, file_path, simulated_H = None, simulated_P = None):
                          print("Action: GYRO ON")   
                     elif interrupt == "11N":
                         print("GYRO OFF")
-                    elif is_pressure_command(interrupt):
-                        try:
-                            new_altitude, new_pressure = calculate_alt_from_pressure(interrupt)
-                        except ValueError as e:
-                            print(f"Invalid pressure command {interrupt}: {e}")
-                        else:
-                            if new_altitude is None:
-                                print(f"Invalid pressure value in command: {interrupt}")
-                            else:
-                                row[3] = str(new_altitude)
-                                row[4] = str(new_pressure)
-                                print(
-                                    f"Pressure received: {new_pressure}; "
-                                    f"calculated altitude: {new_altitude}"
-                                )
-
                 # append the new data
                 current_tti = calculate_tti(row[20],row[3])
                 print(current_tti)

@@ -50,7 +50,7 @@ export function initializeSimulationMode({ socket, modeValue, resetAllTelemetryD
     if (response === "Simulation Mode Started") {
       enableSimulation();
       activateSimulation();
-      modeValue.textContent = "Simulation";
+      modeValue.textContent = "SIMULATION";
       modeValue.classList.add("simulation");
       resetAllTelemetryData();
     }

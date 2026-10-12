@@ -97,6 +97,7 @@ body {
   display: flex;
   flex-direction: column;
 }
+
 /* MAIN HEADER */
 /* MAIN HEADER CONTAINER */
 .title-container {
@@ -723,6 +724,7 @@ body {
   gap: 5px;
   margin-left: 5px;
 }
+
 .stage-box {
   background: var(--bg-stage-box);
   padding: 12px 18px;
@@ -1086,6 +1088,7 @@ body {
   padding-left: 15px;
   border-left: 2px solid var(--color-arrow);
 }
+
 .time-panel-row {
   display: flex;
   flex-direction: row;
@@ -1098,7 +1101,7 @@ body {
 
 /* Packet Count and Mode boxes */
 .time-panel-row .text-highlight-cell {
-  background: #abacdc;
+  background: #cacbfb;
   border: 1px solid var(--border-stage-box);
   color: var(--color-black);
   border-radius: 6px;
