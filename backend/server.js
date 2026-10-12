@@ -86,7 +86,8 @@ async function handleCanSatData(rawString) {
       GYRO_Y,
       FLIGHT_SOFTWARE_STATE,
       CMD_ECHO,
-      DESC_VELOCITY
+      DESC_VELOCITY,
+      TIME2IMPACT
     ] = parts;
 
 
@@ -117,7 +118,8 @@ async function handleCanSatData(rawString) {
       FLIGHT_SOFTWARE_STATE,
 
       CMD_ECHO: CMD_ECHO ? CMD_ECHO.replace(/"/g, "") : "",
-      DESC_VELOCITY: DESC_VELOCITY ? DESC_VELOCITY.replace(/"/g, "") : ""
+      DESC_VELOCITY: DESC_VELOCITY ? DESC_VELOCITY.replace(/"/g, "") : "",
+      TIME2IMPACT: resolveDecimal(TIME2IMPACT, 2)
     };
 
   } catch (parseError) {

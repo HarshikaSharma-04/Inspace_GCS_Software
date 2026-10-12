@@ -159,6 +159,7 @@ body {
 
 /* MISSION TIME AND GNSS TIME */
 .time-details {
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -168,6 +169,7 @@ body {
 }
 
 .time-data-box {
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -177,11 +179,11 @@ body {
   background-color: var(--bg-primary);
   border: 1px solid var(--border-stage-box);
   border-radius: 6px;
-  padding: 4px 12px;
+  padding: 8px 16px;
 }
 
 .time-label {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   color: var(--color-text-time-label);
   text-transform: uppercase;
@@ -191,7 +193,7 @@ body {
 
 .time-value {
   font-family: monospace;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--color-text-primary);
 }
@@ -311,11 +313,11 @@ body {
 }
 
 .sidebar {
-  width: 25%;
+  width: 22%;
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-black);
   border-radius: 5px;
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-x: hidden;
   margin: 5px;
   margin-top: 5px;
@@ -482,7 +484,7 @@ body {
   flex-direction: column;
   background-color: var(--bg-card);
   color: var(--color-black);
-  padding: 10px;
+  padding: 5px;
   margin: 5px;
   gap: 10px;
 }
@@ -998,13 +1000,12 @@ body {
   display: flex;
   align-items: center;
   flex-direction: column;
+  margin-top: 10px;
 }
 
 .plot-3d-title {
   font-size: 20px;
   font-weight: bold;
-  margin: 10px 0 10px 0;
-  /* text-align: center; */
 }
 
 /* Buttons logic */
@@ -1090,15 +1091,14 @@ body {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-left: auto;
-  padding-left: 15px;
+  gap: 30px;
+  padding-left: 0;
   flex-shrink: 0;
 }
 
 /* Packet Count and Mode boxes */
 .time-panel-row .text-highlight-cell {
-  background:  #abacdc;
+  background: #abacdc;
   border: 1px solid var(--border-stage-box);
   color: var(--color-black);
   border-radius: 6px;
@@ -1107,7 +1107,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 150px;
+  min-width: 11rem;
   height: 65px;
   text-align: center;
   margin: 0;
@@ -1123,7 +1123,7 @@ body {
 }
 
 .time-panel-row .label.p {
-  color:var(--color-black);
+  color: var(--color-black);
 }
 
 /* Values */
