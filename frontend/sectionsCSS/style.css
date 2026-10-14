@@ -1105,15 +1105,15 @@ body {
   border: 1px solid var(--border-stage-box);
   color: var(--color-black);
   border-radius: 6px;
-  padding: 4px 12px;
+  padding: 4px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 11rem;
+  min-width: 10rem;
   height: 65px;
   text-align: center;
-  margin: 0;
+  margin: 0 -2px 0 0;
   gap: 2px;
 }
 

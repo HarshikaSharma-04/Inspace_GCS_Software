@@ -163,32 +163,34 @@ const stageBoxes = document.querySelectorAll(".stage-box");
 const levelDisplays = document.querySelectorAll(".level-display");
 
 const _CT_COLS = [
-  { title: "TEAM_ID", field: "TEAM_ID", w: 60 },
+  { title: "TEAM_ID", field: "TEAM_ID", w: 42 },
   { title: "TIME", field: "TIME_STAMP", w: 75 },
-  { title: "PACKET", field: "PACKET_COUNT", w: 60 },
-  { title: "ALTITUDE", field: "ALTITUDE", w: 60 },
-  { title: "PRESSURE", field: "PRESSURE", w: 70 },
-  { title: "TEMP", field: "TEMPERATURE", w: 55 },
-  { title: "VOLTAGE", field: "VOLTAGE", w: 60 },
+  { title: "PACKET", field: "PACKET_COUNT", w: 42 },
+  { title: "ALTITUDE", field: "ALTITUDE", w: 46 },
+  { title: "PRESSURE", field: "PRESSURE", w: 52 },
+  { title: "TEMP", field: "TEMPERATURE", w: 35 },
+  { title: "VOLTAGE", field: "VOLTAGE", w: 45 },
 
-  { title: "GNSS_TIME", field: "GNSS_TIME", w: 80 },
-  { title: "GNSS_LAT", field: "GNSS_LATITUDE", w: 80 },
-  { title: "GNSS_LONG", field: "GNSS_LONGITUDE", w: 80 },
-  { title: "GNSS_ALT", field: "GNSS_ALTITUDE", w: 75 },
-  { title: "GNSS_SATS", field: "GNSS_SATS", w: 65 },
+  { title: "GNSS_TIME", field: "GNSS_TIME", w: 70 },
+  { title: "GNSS_LAT", field: "GNSS_LATITUDE", w: 70 },
+  { title: "GNSS_LONG", field: "GNSS_LONGITUDE", w: 70 },
+  { title: "GNSS_ALT", field: "GNSS_ALTITUDE", w: 70 },
+  { title: "GNSS_SATS", field: "GNSS_SATS", w: 55 },
 
   { title: "ACCEL_R", field: "ACCEL_R", w: 60 },
   { title: "ACCEL_P", field: "ACCEL_P", w: 60 },
   { title: "ACCEL_Y", field: "ACCEL_Y", w: 60 },
 
-  { title: "GYRO_R", field: "GYRO_R", w: 60 },
-  { title: "GYRO_P", field: "GYRO_P", w: 60 },
-  { title: "GYRO_Y", field: "GYRO_Y", w: 60 },
+  { title: "GYRO_R", field: "GYRO_R", w: 52 },
+  { title: "GYRO_P", field: "GYRO_P", w: 52 },
+  { title: "GYRO_Y", field: "GYRO_Y", w: 52  },
 
-  { title: "STATE", field: "FLIGHT_SOFTWARE_STATE", w: 110 },
+  { title: "STATE", field: "FLIGHT_SOFTWARE_STATE", w: 96 },
   { title: "CMD", field: "CMD_ECHO", w: 60 },
-  { title: "DESC_VELOCITY", field: "DESC_VELOCITY", w: 70 },
-  { title: "TIME2IMPACT", field: "TIME2IMPACT", w: 70 }
+  { title: "GLIDE_RATIO", field: "GLIDE_RATIO", w: 60 },
+  { title: "TILT", field: "TILT", w: 26 },
+  { title: "SERVO_ANGLE", field: "SERVO_ANGLE", w: 40 },
+  { title: "HEADING_ERROR", field: "HEADING_ERROR", w: 75 }
 ];
 // initialization and default view setup
 setActiveButton(homeBtn);
@@ -809,7 +811,7 @@ function loadGraphs() {
         "rgba(28,93,2,1)",
       ];
       datasets = graph.combined.map((label, i) => ({
-        label: label === "DESC_VELOCITY" ? "DESC_VELOCITY (m/s)" : label,
+        
         data: [],
         borderColor: colors[i],
         backgroundColor: getGradient(ctx, colors[i]),
@@ -861,32 +863,7 @@ function loadGraphs() {
             },
           },
 
-          ...(graph.combined?.includes("DESC_VELOCITY")
-            ? {
-              y1: {
-                position: "right",
-                beginAtZero: true,
-
-                grid: {
-                  drawOnChartArea: false,
-                },
-
-                ticks: {
-                  color: "#000000",
-                },
-
-                title: {
-                  display: true,
-                  text: "DESC_VELOCITY (m/s)",
-                  color: "#000000",
-                  font: {
-                    weight: "bold",
-                    size: 16,
-                  },
-                },
-              },
-            }
-            : {}),
+          
         },
       },
     });
