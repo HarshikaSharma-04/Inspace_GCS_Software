@@ -109,7 +109,7 @@ function handleButtonStateUI(cmd) {
 }
 
 sendBtn.addEventListener("click", () => {
-  const command = commandInput.value.trim();
+  const command = commandInput.value.trim().toUpperCase();
 
   if (!command) return;
   addCommandEcho(command);

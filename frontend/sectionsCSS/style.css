@@ -458,7 +458,7 @@ body {
   background-color: var(--bg-command);
   border: 2px solid var(--border-black);
   border-radius: 8px;
-  padding: 8px 4px;
+  padding: 0 4px;
   font-weight: 600;
   font-size: 20px;
   margin-left: 0.4rem;
@@ -473,7 +473,7 @@ body {
   font-weight: bold;
   cursor: pointer;
   width: 8rem;
-  font-size: 16px;
+  font-size: 19px;
   margin-right: 0.2rem;
 }
 
@@ -537,7 +537,7 @@ body {
 
 .send-btn:hover {
   background-color: var(--color-send-btn-hover);
-  transform: translateY(-2px);
+  /* transform: translateY(-2px); */
 }
 
 .switch:focus-visible {
@@ -934,7 +934,6 @@ body {
   margin: 0;
   padding: 0 16px;
   height: 100%;
-  font-size: 15px;
   font-weight: 700;
   border-radius: 0 4px 4px 0;
   border: none;
@@ -989,7 +988,7 @@ body {
   max-height: 28px;
   overflow: hidden;
   display: flex;
-  align-items: center;
+  /* align-items: center; */
 }
 
 .cmd-bottom-container .cmd-echo-item {
@@ -1018,7 +1017,7 @@ body {
 }
 
 .cmd-echo-title {
-  font-size: 10px;
+  font-size: 13px;
   font-weight: bold;
   color: var(--color-text-label);
   letter-spacing: 0.04em;
@@ -1027,13 +1026,13 @@ body {
 .cmd-echo-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   min-height: 0;
   overflow: hidden;
 }
 
 .cmd-echo-empty {
-  font-size: 12px;
+  font-size: 16px;
   color: var(--color-text-placeholder);
   font-style: italic;
 }
