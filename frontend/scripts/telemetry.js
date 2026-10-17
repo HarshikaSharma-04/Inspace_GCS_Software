@@ -1,6 +1,7 @@
 import { Map, resizeMap, updateMapLocation } from "./Map.js";
 import CanvasTable from "./canvasTable.js";
 import { initializeSimulationMode } from "./SimulationMode.js";
+import { initTilt } from "./Tilt.js";
 // the main line that connects the backend with the frontend
 export const socket = io("http://localhost:3000");
 
@@ -270,6 +271,7 @@ function resetAllTelemetryData() {
   updateStageIndicators(1);
 }
 initializeSimulationMode({ socket, modeValue, resetAllTelemetryData });
+initTilt(socket);
 
 socket.on("command-success", (verifiedCommand) => {
   handleButtonStateUI(verifiedCommand);
