@@ -2,154 +2,159 @@ import { Map, resizeMap, updateMapLocation } from "./Map.js";
 import CanvasTable from "./canvasTable.js";
 import { initializeSimulationMode } from "./SimulationMode.js";
 import { initTilt } from "./Tilt.js";
-// the main line that connects the backend with the frontend
-export const socket = io("http://localhost:3000");
+import { initHeadingBearingPlot, updateHeadingBearing } from "./polar.js";
 
-// Navigation & Main Containers
+
+// --- Navigation & main containers ---
 const homeBtn = document.querySelector(".telemetry-btn--home");
 const graphBtn = document.querySelector(".telemetry-btn--graph");
 const csvBtn = document.querySelector(".telemetry-btn--csv");
 const graphContainer = document.querySelector(".telemetry-graph-container");
 const mapContainer = document.querySelector(".telemetry-map-container");
 const csvContainer = document.querySelector(".telemetry-csv-container");
-const cmdEchoList = document.getElementById("cmd-echo-list");
+const mapDiv = document.getElementById("map");
+const mapCamControl = document.querySelector(".map-wrapper");
+const flightState = document.querySelector(".flight-state-command-section");
+const cmdBottomContainer = document.querySelector(".cmd-bottom-container");
 const modeValue = document.querySelector(".mode-value");
 
-// Top Dashboard Elements
+// --- Top dashboard ---
 const missionTimeEl = document.querySelector(".mission-time-value");
 const packetEl = document.querySelector(".packet-count-value");
+const stageBoxes = document.querySelectorAll(".stage-box");
+const levelDisplays = document.querySelectorAll(".level-display");
 
-// Sidebar Elements
+// --- Sidebar ---
 const sidebar = document.querySelector(".sidebar");
 const sidebar3DMap = document.querySelector(".plot-3d-section");
+const GNSSContainer = document.querySelector(".gnss-container");
 const sidebarTempEl = document.querySelector(".sidebar-temp-value");
 const sidebarVoltageEl = document.querySelector(".sidebar-voltage-value");
 const sidebarPressureEl = document.querySelector(".sidebar-pressure-value");
 const sidebarAltitudeEl = document.querySelector(".sidebar-altitude-value");
 const sidebarVelocityEl = document.querySelector(".sidebar-velocity-value");
 const sidebarTimeToImpactEl = document.querySelector(".sidebar-time-to-impact-value");
-const time2impact = document.querySelector(".sidebar-time-to-impact-value");
+const sidebarHeadingErrorEl = document.querySelector(".sidebar-heading-error-value");
+const sidebarGlideRatioEl = document.querySelector(".sidebar-glide-ratio-value");
 
-// command buttons:
-const cxBtn = document.getElementById("btn-cx");
-const calBtn = document.getElementById("btn-cal");
-const simEnableBtn = document.getElementById("btn-sim-enable");
-const simActivateBtn = document.getElementById("btn-sim-activate");
-const simDisableBtn = document.getElementById("btn-sim-disable");
-const gyroBtn = document.getElementById("btn-gyro");
-const servoBtn = document.getElementById("btn-servo");
-
-// buffer 
-const MAX_3D_POINTS = 900;
-let xBuffer = new Float32Array(MAX_3D_POINTS);
-let yBuffer = new Float32Array(MAX_3D_POINTS);
-let zBuffer = new Float32Array(MAX_3D_POINTS);
-let bufferIndex = 0;
-
-const mapCamControl = document.querySelector(".map-wrapper")
-document.querySelectorAll(".cmd-btn").forEach(button => {
-  button.addEventListener("click", () => {
-    const commandToFill = button.getAttribute("data-cmd");
-    if (commandInput) {
-      commandInput.value = commandToFill;
-      commandInput.focus();
-    }
-  });
-});
-
-
-// GNS & Specialized Sidebar Elements
 const sidebarGNSSTimeEls = document.querySelectorAll(".sidebar-gnss-time-value");
 const sidebarGNSSAltitudeEls = document.querySelectorAll(".sidebar-gnss-altitude-value");
 const sidebarGNSSLatitudeEls = document.querySelectorAll(".sidebar-gnss-latitude-value");
 const sidebarGNSSLongitudeEls = document.querySelectorAll(".sidebar-gnss-longitude-value");
 const sidebarGNSSSatsEls = document.querySelectorAll(".sidebar-gnss-sats-value");
-const GNSSContainer = document.querySelector(".gnss-container");
 
-//send button and command input
+const RPY_SELECTORS = [
+  ".sidebar-gyro-r", ".sidebar-gyro-p", ".sidebar-gyro-y",
+  ".sidebar-accel-r", ".sidebar-accel-p", ".sidebar-accel-y",
+];
+
+// --- Commands ---
 const sendBtn = document.querySelector(".send-btn");
 const commandInput = document.querySelector("#commandInput");
+const cmdEchoList = document.getElementById("cmd-echo-list");
+const cxBtn = document.getElementById("btn-cx");
+const gyroBtn = document.getElementById("btn-gyro");
+const servoBtn = document.getElementById("btn-servo");
 
-commandInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    sendBtn.click();
-  }
-});
+// --- Plot / chart element ids ---
+const HB_PLOT_ID = "heading-bearing-plot";
+const GNSS_PLOT_ID = "GNSS-3d-plot";
 
-function handleButtonStateUI(cmd) {
-  if (cmd === "CMD,041,CX,ON") {
-    cxBtn.textContent = "CXOFF";
-    cxBtn.classList.add("btn-active");
-    cxBtn.setAttribute("data-cmd", "CMD,041,CX,OFF");
-  } else if (cmd === "CMD,041,CX,OFF") {
-    cxBtn.textContent = "CXON";
-    cxBtn.classList.remove("btn-active");
-    cxBtn.setAttribute("data-cmd", "CMD,041,CX,ON");
-  }
+// --- Global state ---
+const MAX_3D_POINTS = 900;
+const MAX_BUFFERED_ROWS = 900;
+const MAX_TABLE_ROWS = 10000;
+let MAX_POINTS = 900;
 
-  if (cmd === "CMD,041,MEC,GYRO,ON") {
-    gyroBtn.textContent = "GYRO OFF";
-    gyroBtn.classList.add("btn-active");
-    gyroBtn.setAttribute("data-cmd", "CMD,041,MEC,GYRO,OFF");
-  } else if (cmd === "CMD,041,MEC,GYRO,OFF") {
-    gyroBtn.textContent = "GYRO ON";
-    gyroBtn.classList.remove("btn-active");
-    gyroBtn.setAttribute("data-cmd", "CMD,041,MEC,GYRO,ON");
-  }
+const xBuffer = new Float32Array(MAX_3D_POINTS);
+const yBuffer = new Float32Array(MAX_3D_POINTS);
+const zBuffer = new Float32Array(MAX_3D_POINTS);
+let bufferIndex = 0;
 
-  if (cmd === "CMD,041,MEC,SERVO,ON") {
-    servoBtn.textContent = "SERVO OFF";
-    servoBtn.classList.add("btn-active");
-    servoBtn.setAttribute("data-cmd", "CMD,041,MEC,SERVO,OFF");
-  } else if (cmd === "CMD,041,MEC,SERVO,OFF") {
-    servoBtn.textContent = "SERVO ON";
-    servoBtn.classList.remove("btn-active");
-    servoBtn.setAttribute("data-cmd", "CMD,041,MEC,SERVO,ON");
-  }
-}
-
-sendBtn.addEventListener("click", () => {
-  const command = commandInput.value.trim().toUpperCase();
-
-  if (!command) return;
-  addCommandEcho(command);
-  socket.emit("send-command", command);
-
-  commandInput.value = "";
-  commandInput.focus();
-});
-
-function addCommandEcho(cmd) {
-  if (!cmdEchoList) return;
-  const div = document.createElement("div");
-  div.className = "cmd-echo-item";
-  const currentTime = new Date().toTimeString().slice(0, 8);
-  div.textContent = `[${currentTime}] ${cmd}`;
-  cmdEchoList.replaceChildren(div);
-}
-
-// Controls & Visuals
-const mapDiv =
-  document.getElementById("map");
-const flightState = document.querySelector(".flight-state-command-section");
-
-// Global Variables
 let is3DMapInitialized = false;
 let charts = {};
 let chartInitialized = false;
 let csvData = [];
-let MAX_POINTS = 900;
 let allRows = [];
 let table;
 let count = 0;
 let currentView = "graph";
 let lastRenderedState = null;
-const MAX_BUFFERED_ROWS = 900;
 const telemetryQueue = [];
 let telemetryFlushScheduled = false;
-const stageBoxes = document.querySelectorAll(".stage-box");
-const levelDisplays = document.querySelectorAll(".level-display");
+
+// --- Graph config (must be declared before loadGraphs() is called) ---
+const UNIT_MAP = {
+  ALTITUDE: "m",
+  TEMPERATURE: "°C",
+  PRESSURE: "Pa",
+  VOLTAGE: "V",
+  MAGNETOMETER: "μT",
+  GYROSCOPE: "°/s",
+  ACCELERATION: "°/s²",
+};
+
+const GRAPH_LAYOUT = [
+  { id: "ALTITUDE", title: "ALTITUDE", units: "ALTITUDE" },
+  { id: "PRESSURE", title: "PRESSURE", units: "PRESSURE" },
+  { id: "TEMPERATURE", title: "TEMPERATURE", units: "TEMPERATURE" },
+  {
+    id: "ACCEL_COMBINED",
+    title: "ACCELERATION",
+    units: "ACCELERATION",
+    combined: ["ACCEL_R", "ACCEL_P", "ACCEL_Y"],
+  },
+  {
+    id: "GYRO_COMBINED",
+    title: "GYRO SPIN RATE",
+    units: "GYROSCOPE",
+    combined: ["GYRO_R", "GYRO_P", "GYRO_Y"],
+  },
+  { id: "VOLTAGE", title: "VOLTAGE", units: "VOLTAGE" },
+];
+
+// the main line that connects the backend with the frontend
+export const socket = io("http://localhost:3000");
+
+socket.on("telemetry-update", (data) => {
+  telemetryQueue.push(data);
+
+  if (!telemetryFlushScheduled) {
+    telemetryFlushScheduled = true;
+    requestAnimationFrame(flushTelemetryQueue);
+  }
+});
+
+socket.on("command-success", (verifiedCommand) => {
+  handleButtonStateUI(verifiedCommand);
+  addCommandEcho(verifiedCommand);
+});
+
+socket.on("command-warning", (warningMessage) => {
+  if (!commandInput) return;
+  commandInput.value = warningMessage;
+  commandInput.style.color = "red";
+  commandInput.style.fontWeight = "bold";
+  commandInput.style.fontSize = "22px";
+
+  const clearWarning = () => {
+    commandInput.value = "";
+    commandInput.style.color = "";
+    commandInput.style.fontWeight = "";
+    commandInput.style.fontSize = "";
+    commandInput.removeEventListener("focus", clearWarning);
+    commandInput.removeEventListener("input", clearWarning);
+  };
+
+  commandInput.addEventListener("focus", clearWarning);
+  commandInput.addEventListener("input", clearWarning);
+});
+
+socket.on("clear-data", () => {
+  csvData = [];
+  clearChartData();
+});
+
 
 const _CT_COLS = [
   { title: "TEAM_ID", field: "TEAM_ID", w: 42 },
@@ -177,17 +182,332 @@ const _CT_COLS = [
   { title: "STATE", field: "FLIGHT_SOFTWARE_STATE", w: 96 },
   { title: "CMD", field: "CMD_ECHO", w: 60 },
   { title: "GLIDE_RATIO", field: "GLIDE_RATIO", w: 60 },
-  { title: "TILT", field: "TILT", w: 26 },
-  { title: "SERVO_ANGLE", field: "SERVO_ANGLE", w: 40 },
-  { title: "HEADING_ERROR", field: "HEADING_ERROR", w: 75 }
+  { title: "HEADING", field: "HEADING", w: 60 },
+  { title: "BEARING", field: "BEARING", w: 60 },
+  { title: "HEADING_ERROR", field: "HEADING_ERROR", w: 60 }
 ];
-// initialization and default view setup
+
+function initTabulator() {
+  table = new CanvasTable("telemetry-table", _CT_COLS);
+  // CanvasTable internally handles auto-scroll via _autoScroll flag based on scroll position
+}
+
+function safeInit(name, fn) {
+  try {
+    fn();
+  } catch (err) {
+    console.error(`${name} initialization failed:`, err);
+  }
+}
+
+safeInit("Heading/Bearing plot", initHeadingBearingPlot);
+
+// default view
 setActiveButton(homeBtn);
 showSidebarContent();
 showGraphView();
-//loadCSV();
 
-// handling for SIMULATION command
+safeInit("Map", Map);
+safeInit("Table", initTabulator);
+safeInit("Tilt", () => initTilt(socket));
+safeInit("Simulation mode", () =>
+  initializeSimulationMode({ socket, modeValue, resetAllTelemetryData })
+);
+safeInit("Graphs", () => {
+  if (!chartInitialized) loadGraphs();
+});
+safeInit("3D GNSS plot", () => {
+  if (!is3DMapInitialized) init3DMap();
+});
+
+function flushTelemetryQueue() {
+  telemetryFlushScheduled = false;
+  if (!telemetryQueue.length) return;
+
+  const shouldRenderDashboard = currentView !== "csv";
+  const newRows = [];
+
+  while (telemetryQueue.length) {
+    const data = telemetryQueue.shift();
+    processTelemetryData(data, shouldRenderDashboard);
+    newRows.push(data);
+  }
+
+  if (table && newRows.length > 0) {
+    table.blockRedraw();
+    table.addData(newRows, false);
+
+    count += newRows.length;
+    while (count > MAX_TABLE_ROWS) {
+      table.deleteFirstRow();
+      count--;
+    }
+    table.restoreRedraw();
+  }
+
+  if (shouldRenderDashboard) {
+    redrawAllCharts();
+  }
+}
+
+function processTelemetryData(data, shouldRenderDashboard) {
+  csvData.push(data);
+  if (csvData.length > MAX_BUFFERED_ROWS) csvData.shift();
+
+  allRows.push(data);
+  if (allRows.length > MAX_BUFFERED_ROWS) allRows.shift();
+
+  updateTopTelemetry(data); // also updates the flight-stage indicators
+
+  if (shouldRenderDashboard) {
+    updateSidebarTelemetry(data);
+  }
+
+  updateGraphs(data);
+
+  if (shouldRenderDashboard) {
+    const lat = parseFloat(data["GNSS_LATITUDE"]);
+    const lng = parseFloat(data["GNSS_LONGITUDE"]);
+    if (!isNaN(lat) && !isNaN(lng)) updateMapLocation(lat, lng);
+  }
+}
+
+function stateToNum(state) {
+  if (!state) return 0;
+  if (!isNaN(state) && state !== "") return parseInt(state);
+  const mapping = {
+    LAUNCH_PAD: 1,
+    ASCENT: 2,
+    DESCENT: 3,
+    GLIDER_DEPLOYMENT: 4,
+    LANDED: 5,
+  };
+  return mapping[state.toString().toUpperCase()] || 0;
+}
+
+function updateTopTelemetry(row) {
+  if (!row) return;
+  if (missionTimeEl) missionTimeEl.innerText = row["TIME_STAMP"];
+
+  sidebarGNSSTimeEls.forEach((el) => (el.innerText = row["GNSS_TIME"]));
+  document.querySelectorAll(".packet-count-value").forEach((el) => {
+    el.innerText = row["PACKET_COUNT"];
+  });
+
+  updateStageIndicators(stateToNum(row["FLIGHT_SOFTWARE_STATE"]));
+}
+
+function updateStageIndicators(currentState) {
+  if (currentState === lastRenderedState) return;
+  lastRenderedState = currentState;
+
+  stageBoxes.forEach((box, index) => {
+    const stageNumber = index + 1;
+    box.classList.remove("current", "completed");
+    if (stageNumber === currentState) {
+      box.classList.add("current");
+    } else if (stageNumber < currentState) {
+      box.classList.add("completed");
+    }
+  });
+}
+
+function setText(selector, value) {
+  const el = document.querySelector(selector);
+  if (el) el.innerText = value;
+}
+
+function updateSidebarTelemetry(row) {
+  if (!row) return;
+  const state = row["FLIGHT_SOFTWARE_STATE"];
+
+  levelDisplays.forEach((levelEl) => {
+    const s = levelEl.querySelector(".level-value");
+    if (s) s.innerText = state;
+  });
+
+  // heading & bearing polar plot
+  const heading = parseFloat(row.HEADING);
+  const bearing = parseFloat(row.BEARING);
+  if (!isNaN(heading) && !isNaN(bearing)) {
+    updateHeadingBearing(heading, bearing);
+  }
+  if (sidebarHeadingErrorEl) sidebarHeadingErrorEl.innerText = row["HEADING_ERROR"];
+  if (sidebarGlideRatioEl) sidebarGlideRatioEl.innerText = row["GLIDE_RATIO"];
+
+  // scalar sensor values
+  if (sidebarTempEl) sidebarTempEl.innerText = row["TEMPERATURE"] + " °C";
+  if (sidebarVoltageEl) sidebarVoltageEl.innerText = row["VOLTAGE"] + " V";
+  if (sidebarPressureEl) sidebarPressureEl.innerText = row["PRESSURE"] + " Pa";
+  if (sidebarAltitudeEl) sidebarAltitudeEl.innerText = row["ALTITUDE"] + " m";
+  if (sidebarVelocityEl) sidebarVelocityEl.innerText = row["DESC_VELOCITY"] + " m/s";
+  if (sidebarTimeToImpactEl) sidebarTimeToImpactEl.innerText = row["TIME2IMPACT"] + " s";
+
+  // gyro / accel
+  setText(".sidebar-gyro-r", row.GYRO_R);
+  setText(".sidebar-gyro-p", row.GYRO_P);
+  setText(".sidebar-gyro-y", row.GYRO_Y);
+  setText(".sidebar-accel-r", row.ACCEL_R);
+  setText(".sidebar-accel-p", row.ACCEL_P);
+  setText(".sidebar-accel-y", row.ACCEL_Y);
+
+  // GNSS
+  sidebarGNSSTimeEls.forEach((el) => (el.innerText = `${row["GNSS_TIME"]}`));
+  sidebarGNSSAltitudeEls.forEach((el) => (el.innerText = `${row["GNSS_ALTITUDE"]} m`));
+  sidebarGNSSLatitudeEls.forEach((el) => (el.innerText = `${row["GNSS_LATITUDE"]}°`));
+  sidebarGNSSLongitudeEls.forEach((el) => (el.innerText = `${row["GNSS_LONGITUDE"]}°`));
+  sidebarGNSSSatsEls.forEach((el) => (el.innerText = row["GNSS_SATS"]));
+
+  update3DMap(row);
+}
+
+function update3DMap(row) {
+  const lat = parseFloat(row["GNSS_LATITUDE"]);
+  const long = parseFloat(row["GNSS_LONGITUDE"]);
+  const alt = parseFloat(row["GNSS_ALTITUDE"]);
+  if (isNaN(lat) || isNaN(long) || isNaN(alt)) return;
+  if (!is3DMapInitialized) init3DMap();
+
+  if (bufferIndex < MAX_3D_POINTS) {
+    xBuffer[bufferIndex] = lat;
+    yBuffer[bufferIndex] = long;
+    zBuffer[bufferIndex] = alt;
+    bufferIndex++;
+  } else {
+    // shift elements left by 1 position
+    xBuffer.copyWithin(0, 1);
+    yBuffer.copyWithin(0, 1);
+    zBuffer.copyWithin(0, 1);
+    xBuffer[MAX_3D_POINTS - 1] = lat;
+    yBuffer[MAX_3D_POINTS - 1] = long;
+    zBuffer[MAX_3D_POINTS - 1] = alt;
+  }
+
+  Plotly.restyle(
+    GNSS_PLOT_ID,
+    {
+      x: [xBuffer.subarray(0, bufferIndex)],
+      y: [yBuffer.subarray(0, bufferIndex)],
+      z: [zBuffer.subarray(0, bufferIndex)],
+    },
+    [0]
+  );
+}
+
+function updateGraphs(row) {
+  if (!row || !chartInitialized) return;
+  const packet = Number(row["PACKET_COUNT"]);
+
+  for (let id in charts) {
+    const chart = charts[id];
+    const config = GRAPH_LAYOUT.find((g) => g.id === id);
+
+    if (config?.combined) {
+      config.combined.forEach((col, i) => {
+        const y = Number(row[col]);
+        chart.data.datasets[i].data.push({ x: packet, y });
+      });
+    } else {
+      const val = Number(row[id]);
+      if (!isNaN(val)) chart.data.datasets[0].data.push({ x: packet, y: val });
+    }
+
+    if (chart.data.datasets[0].data.length > MAX_POINTS) {
+      chart.data.datasets.forEach((d) => d.data.shift());
+    }
+
+    chart.options.scales.x.max = packet + 2;
+    chart.options.scales.x.min = Math.max(0, packet - MAX_POINTS);
+  }
+}
+
+function redrawAllCharts() {
+  if (!chartInitialized || !charts) return;
+  for (let id in charts) {
+    charts[id].update("none");
+  }
+}
+
+function clearChartData() {
+  if (!chartInitialized || !charts) return;
+  for (let id in charts) {
+    const chart = charts[id];
+    if (chart?.data?.datasets) {
+      chart.data.datasets.forEach((d) => {
+        d.data = [];
+      });
+      chart.update("none");
+    }
+  }
+}
+
+
+// ---------- View switching ----------
+function setActiveButton(activeBtn) {
+  document
+    .querySelectorAll(".page-button")
+    .forEach((btn) => btn.classList.remove("active-btn"));
+  if (activeBtn) activeBtn.classList.add("active-btn");
+}
+
+function showSidebarContent() {
+  if (sidebar) sidebar.style.display = "flex";
+  if (sidebar3DMap) sidebar3DMap.style.display = "flex";
+  if (GNSSContainer) GNSSContainer.style.display = "flex";
+  if (flightState) flightState.style.display = "flex";
+  if (cmdBottomContainer) cmdBottomContainer.style.display = "flex";
+}
+
+function showCSVView() {
+  currentView = "csv";
+
+  csvContainer.style.display = "block";
+
+  // hide graphs & map
+  graphContainer.style.display = "none";
+  mapContainer.style.display = "none";
+  mapDiv.style.display = "none";
+
+  // hide dashboard sections
+  if (sidebar) sidebar.style.display = "none";
+  if (GNSSContainer) GNSSContainer.style.display = "none";
+  if (flightState) flightState.style.display = "none";
+  if (mapCamControl) mapCamControl.style.display = "none";
+  if (cmdBottomContainer) cmdBottomContainer.style.display = "none";
+
+  // refresh table
+  if (table) {
+    requestAnimationFrame(() => table.onShow());
+  }
+}
+
+function showGraphView() {
+  currentView = "graph";
+  csvContainer.style.display = "none";
+  if (cmdBottomContainer) cmdBottomContainer.style.display = "flex";
+  graphContainer.style.display = "block";
+  mapContainer.style.display = "flex";
+  mapDiv.style.display = "block";
+  if (mapCamControl) mapCamControl.style.display = "block";
+
+  resizeMap();
+  resizePlots();
+  redrawAllCharts();
+}
+
+function resizePlots() {
+  try {
+    if (is3DMapInitialized) {
+      Plotly.Plots.resize(document.getElementById(GNSS_PLOT_ID));
+    }
+    const hbDiv = document.getElementById(HB_PLOT_ID);
+    if (hbDiv && hbDiv.data) Plotly.Plots.resize(hbDiv);
+  } catch (err) {
+    console.error("Plot resize failed:", err);
+  }
+}
+
+// ---------- Simulation reset ----------
 function resetAllTelemetryData() {
   csvData = [];
   allRows = [];
@@ -198,7 +518,7 @@ function resetAllTelemetryData() {
 
   if (is3DMapInitialized) {
     Plotly.restyle(
-      "GNSS-3d-plot",
+      GNSS_PLOT_ID,
       {
         x: [xBuffer.subarray(0, 0)],
         y: [yBuffer.subarray(0, 0)],
@@ -231,12 +551,13 @@ function resetAllTelemetryData() {
     sidebarPressureEl,
     sidebarAltitudeEl,
     sidebarVelocityEl,
-    time2impact
   ].forEach((el) => {
     if (el) el.innerText = "0";
   });
 
   if (sidebarTimeToImpactEl) sidebarTimeToImpactEl.innerText = "00";
+  if (sidebarHeadingErrorEl) sidebarHeadingErrorEl.innerText = "--";
+  if (sidebarGlideRatioEl) sidebarGlideRatioEl.innerText = "--";
 
   [
     ...sidebarGNSSTimeEls,
@@ -248,341 +569,134 @@ function resetAllTelemetryData() {
     el.innerText = "---";
   });
 
-  [
-    ".sidebar-gyro-r",
-    ".sidebar-gyro-p",
-    ".sidebar-gyro-y",
-    ".sidebar-accel-r",
-    ".sidebar-accel-p",
-    ".sidebar-accel-y",
-  ].forEach((selector) => {
-    const el = document.querySelector(selector);
-    if (el) el.innerText = "---";
-  });
+  RPY_SELECTORS.forEach((selector) => setText(selector, "---"));
 
   levelDisplays.forEach((levelEl) => {
     const value = levelEl.querySelector(".level-value");
     if (value) value.innerText = "---";
   });
 
-  //commandHistory = [];
-
-
   updateStageIndicators(1);
-}
-initializeSimulationMode({ socket, modeValue, resetAllTelemetryData });
-initTilt(socket);
-
-socket.on("command-success", (verifiedCommand) => {
-  handleButtonStateUI(verifiedCommand);
-  addCommandEcho(verifiedCommand);
-});
-socket.on("command-warning", (warningMessage) => {
-  if (commandInput) {
-    commandInput.value = warningMessage;
-    commandInput.style.color = "red";
-    commandInput.style.fontWeight = "bold";
-    commandInput.style.fontSize = "22px"
-    const clearWarning = () => {
-      commandInput.value = "";
-      commandInput.style.color = "";
-      commandInput.style.fontWeight = "";
-      commandInput.removeEventListener("focus", clearWarning);
-      commandInput.removeEventListener("input", clearWarning);
-    };
-
-    commandInput.addEventListener("focus", clearWarning);
-    commandInput.addEventListener("input", clearWarning);
+  try {
+    updateHeadingBearing(0, 0);
+  } catch (err) {
+    console.error("Heading/Bearing reset failed:", err);
   }
-});
-// clear data
-socket.on("clear-data", () => {
-  csvData = [];
-  if (chartInitialized && charts) {
-    for (let id in charts) {
-      const chart = charts[id];
-      if (chart?.data?.datasets) {
-        chart.data.datasets.forEach((d) => {
-          d.data = [];
-        });
-        chart.update("none");
-      }
+}
+
+// ---------- Command UI ----------
+function handleButtonStateUI(cmd) {
+  if (cxBtn) {
+    if (cmd === "CMD,041,CX,ON") {
+      cxBtn.textContent = "CXOFF";
+      cxBtn.classList.add("btn-active");
+      cxBtn.setAttribute("data-cmd", "CMD,041,CX,OFF");
+    } else if (cmd === "CMD,041,CX,OFF") {
+      cxBtn.textContent = "CXON";
+      cxBtn.classList.remove("btn-active");
+      cxBtn.setAttribute("data-cmd", "CMD,041,CX,ON");
     }
   }
-});
 
-socket.on("telemetry-update", (data) => {
-  telemetryQueue.push(data);
-
-  if (!telemetryFlushScheduled) {
-    telemetryFlushScheduled = true;
-    requestAnimationFrame(flushTelemetryQueue);
-  }
-});
-
-function flushTelemetryQueue() {
-  telemetryFlushScheduled = false;
-  if (!telemetryQueue.length) {
-    return
-  }
-
-  const shouldRenderDashboard = currentView !== "csv";
-  const newRows = [];
-
-  while (telemetryQueue.length) {
-
-    const data = telemetryQueue.shift();
-
-    processTelemetryData(
-      data,
-      shouldRenderDashboard
-    );
-    //console.log(data.FLIGHT_SOFTWARE_STATE);
-    //console.log(stateToNum(data.FLIGHT_SOFTWARE_STATE));
-    updateStageIndicators(stateToNum(data.FLIGHT_SOFTWARE_STATE));
-
-    newRows.push(data);
-  }
-
-  if (table && newRows.length > 0) {
-    table.blockRedraw();
-    table.addData(newRows, false);
-
-    count += newRows.length;
-
-    while (count > 10000) {
-      table.deleteFirstRow();
-      count--;
+  if (gyroBtn) {
+    if (cmd === "CMD,041,MEC,GYRO,ON") {
+      gyroBtn.textContent = "GYRO OFF";
+      gyroBtn.classList.add("btn-active");
+      gyroBtn.setAttribute("data-cmd", "CMD,041,MEC,GYRO,OFF");
+    } else if (cmd === "CMD,041,MEC,GYRO,OFF") {
+      gyroBtn.textContent = "GYRO ON";
+      gyroBtn.classList.remove("btn-active");
+      gyroBtn.setAttribute("data-cmd", "CMD,041,MEC,GYRO,ON");
     }
-    table.restoreRedraw();
   }
 
-  if (shouldRenderDashboard) {
-    redrawAllCharts();
-  }
-}
-
-function processTelemetryData(data, shouldRenderDashboard) {
-  csvData.push(data);
-  if (csvData.length > MAX_BUFFERED_ROWS) {
-    csvData.shift();
-  }
-
-
-  allRows.push(data);
-  if (allRows.length > MAX_BUFFERED_ROWS) {
-    allRows.shift();
-  }
-  updateTopTelemetry(data);
-
-  if (shouldRenderDashboard) {
-    updateTopTelemetry(data);
-    updateSidebarTelemetry(data);
-  }
-
-  updateGraphs(data);
-
-  if (shouldRenderDashboard) {
-    const lat = parseFloat(data["GNSS_LATITUDE"]);
-    const lng = parseFloat(data["GNSS_LONGITUDE"]);
-    if (!isNaN(lat) && !isNaN(lng)) updateMapLocation(lat, lng);
+  if (servoBtn) {
+    if (cmd === "CMD,041,MEC,SERVO,ON") {
+      servoBtn.textContent = "SERVO OFF";
+      servoBtn.classList.add("btn-active");
+      servoBtn.setAttribute("data-cmd", "CMD,041,MEC,SERVO,OFF");
+    } else if (cmd === "CMD,041,MEC,SERVO,OFF") {
+      servoBtn.textContent = "SERVO ON";
+      servoBtn.classList.remove("btn-active");
+      servoBtn.setAttribute("data-cmd", "CMD,041,MEC,SERVO,ON");
+    }
   }
 }
 
-try {
-  Map();
-} catch (err) {
-  //console.error("Map initialization failed:", err);
+function addCommandEcho(cmd) {
+  if (!cmdEchoList) return;
+  const div = document.createElement("div");
+  div.className = "cmd-echo-item";
+  const currentTime = new Date().toTimeString().slice(0, 8);
+  div.textContent = `[${currentTime}] ${cmd}`;
+  cmdEchoList.replaceChildren(div);
 }
 
-try {
-  initTabulator();
-} catch (err) {
-  //console.error("Tabulator initialization failed:", err);
+document.querySelectorAll(".cmd-btn").forEach((button) => {
+  button.addEventListener("click", () => {
+    const commandToFill = button.getAttribute("data-cmd");
+    if (commandInput) {
+      commandInput.value = commandToFill;
+      commandInput.focus();
+    }
+  });
+});
+
+if (commandInput) {
+  commandInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (sendBtn) sendBtn.click();
+    }
+  });
 }
 
-// hide-unhide functions
-function setActiveButton(activeBtn) {
-  document
-    .querySelectorAll(".page-button")
-    .forEach((btn) => btn.classList.remove("active-btn"));
-  activeBtn.classList.add("active-btn");
+if (sendBtn) {
+  sendBtn.addEventListener("click", () => {
+    const command = commandInput.value.trim().toUpperCase();
+    if (!command) return;
+
+    addCommandEcho(command);
+    socket.emit("send-command", command);
+
+    commandInput.value = "";
+    commandInput.focus();
+  });
 }
 
-
-
-function showSidebarContent() {
-  if (sidebar) sidebar.style.display = "flex";
-  if (sidebar3DMap) sidebar3DMap.style.display = "flex";
-  if (GNSSContainer) GNSSContainer.style.display = "flex";
-  if (flightState) flightState.style.display = "flex";
-
-  const cmdArea = document.querySelector(".cmd-bottom-container");
-  if (cmdArea) cmdArea.style.display = "flex";
-}
-
-function showCSVView() {
-  currentView = "csv";
-
-  // Show CSV table
-  csvContainer.style.display = "block";
-
-  // Hide graphs & map
-  graphContainer.style.display = "none";
-  mapContainer.style.display = "none";
-  mapDiv.style.display = "none";
-
-  // Hide dashboard sections
-  if (sidebar) sidebar.style.display = "none";
-  if (GNSSContainer) GNSSContainer.style.display = "none";
-  if (flightState) flightState.style.display = "none";
-  if (mapCamControl) mapCamControl.style.display = "none"
-  const cmdArea = document.querySelector(".cmd-bottom-container");
-  if (cmdArea) cmdArea.style.display = "none";
-
-  // Refresh table
-  if (table) {
-    requestAnimationFrame(() => {
-      table.onShow();
-    });
-  }
-}
-function showGraphView() {
-  currentView = "graph";
-  csvContainer.style.display = "none";
-  const cmdArea = document.querySelector(".cmd-bottom-container");
-  if (cmdArea) cmdArea.style.display = "flex";
-  graphContainer.style.display = "block";
-  mapContainer.style.display = "flex";
-  mapDiv.style.display = "block";
-  if (mapCamControl) mapCamControl.style.display = "block";
-  resizeMap();
-  if (is3DMapInitialized) {
-    Plotly.Plots.resize(document.getElementById("GNSS-3d-plot"));
-  }
-  redrawAllCharts();
-}
-
-// event listeners for navigation buttons
+// ---------- Navigation buttons ----------
 csvBtn.addEventListener("click", () => {
   setActiveButton(csvBtn);
   showCSVView();
-  sidebar.style.display = "none";
-  const cmdCont = document.querySelector(".command-container");
-  if (cmdCont) cmdCont.style.display = "none";
-  // loadCSV();
 });
 
 homeBtn.addEventListener("click", () => {
   setActiveButton(homeBtn);
   showSidebarContent();
   showGraphView();
-  csvContainer.style.display = "none";
 });
 
 graphBtn.addEventListener("click", () => {
   setActiveButton(graphBtn);
   showSidebarContent();
   showGraphView();
-  csvContainer.style.display = "none";
   graphContainer.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
-function initTabulator() {
-  table = new CanvasTable("telemetry-table", _CT_COLS);
-  // CanvasTable internally handles auto-scroll via _autoScroll flag based on scroll position
-}
-
-function stateToNum(state) {
-  if (!state) return 0;
-  if (!isNaN(state) && state !== "") return parseInt(state);
-  const mapping = {
-    LAUNCH_PAD: 1,
-    ASCENT: 2,
-    DESCENT: 3,
-    GLIDER_DEPLOYMENT: 4,
-    LANDED: 5,
-  };
-  return mapping[state.toString().toUpperCase()] || 0;
-}
-
-function updateTopTelemetry(row) {
-  if (!row) return;
-  missionTimeEl.innerText = row["TIME_STAMP"];
-  document.querySelectorAll(".sidebar-gnss-time-value").forEach(el => {
-    el.innerText = row["GNSS_TIME"];
-  });
-  document.querySelectorAll(".packet-count-value").forEach(el => {
-    el.innerText = row["PACKET_COUNT"];
-  });
-
-  updateStageIndicators(stateToNum(row["FLIGHT_SOFTWARE_STATE"]));
-}
-
-function updateStageIndicators(currentState) {
-  if (currentState === lastRenderedState) return;
-  lastRenderedState = currentState;
-
-  stageBoxes.forEach((box, index) => {
-    const stageNumber = index + 1;
-
-    box.classList.remove("current", "completed");
-    if (stageNumber === currentState) {
-      box.classList.add("current");
-    } else if (stageNumber < currentState) {
-      box.classList.add("completed");
-    }
-  });
-}
-
-function updateSidebarTelemetry(row) {
-  if (!row) return;
-  const state = row["FLIGHT_SOFTWARE_STATE"];
-
-  levelDisplays.forEach((levelEl) => {
-    const s = levelEl.querySelector(".level-value");
-    if (s) s.innerText = state;
-  });
-
-  if (sidebarTempEl) sidebarTempEl.innerText = row["TEMPERATURE"] + " °C";
-  if (sidebarVoltageEl) sidebarVoltageEl.innerText = row["VOLTAGE"] + " V";
-  if (sidebarPressureEl) sidebarPressureEl.innerText = row["PRESSURE"] + " Pa";
-  if (sidebarAltitudeEl) sidebarAltitudeEl.innerText = row["ALTITUDE"] + " m";
-  if (sidebarVelocityEl) sidebarVelocityEl.innerText = row["DESC_VELOCITY"] + " m/s";
-  if (time2impact) time2impact.innerText = row["TIME2IMPACT"] + " s";
-
-  document.querySelector(".sidebar-gyro-r").innerText = row.GYRO_R;
-  document.querySelector(".sidebar-gyro-p").innerText = row.GYRO_P;
-  document.querySelector(".sidebar-gyro-y").innerText = row.GYRO_Y;
-
-  document.querySelector(".sidebar-accel-r").innerText = row.ACCEL_R;
-  document.querySelector(".sidebar-accel-p").innerText = row.ACCEL_P;
-  document.querySelector(".sidebar-accel-y").innerText = row.ACCEL_Y;
-
-
-
-
-
-  sidebarGNSSTimeEls.forEach((el) => (el.innerText = `${row["GNSS_TIME"]}`));
-  sidebarGNSSAltitudeEls.forEach(
-    (el) => (el.innerText = `${row["GNSS_ALTITUDE"]} m`),
-  );
-  sidebarGNSSLatitudeEls.forEach(
-    (el) => (el.innerText = `${row["GNSS_LATITUDE"]}°`),
-  );
-  sidebarGNSSLongitudeEls.forEach(
-    (el) => (el.innerText = `${row["GNSS_LONGITUDE"]}°`),
-  );
-  sidebarGNSSSatsEls.forEach((el) => (el.innerText = row["GNSS_SATS"]));
-
-  update3DMap(row);
-}
-
-// 3D plotly map setup
+// ---------- 3D GNSS plot builder ----------
 function init3DMap() {
   const woodMain = "#ffffff",
     woodDarkText = "#131313",
     woodPath = "#4c2e7d";
+
+  const axisStyle = (text, extraFont = {}) => ({
+    title: { text, font: { color: woodDarkText, weight: "bold", ...extraFont } },
+    backgroundcolor: woodMain,
+    gridcolor: woodDarkText,
+    showbackground: true,
+    tickfont: { color: woodDarkText },
+  });
+
   const layout = {
     hovermode: false,
     autosize: true,
@@ -599,136 +713,32 @@ function init3DMap() {
         center: { x: 0, y: 0, z: 0 },
         up: { x: 0, y: 0, z: 1.0 },
       },
-      xaxis: {
-        title: {
-          text: "GNSS_LAT",
-          font: { color: woodDarkText, weight: "bold" },
-        },
-        backgroundcolor: woodMain,
-        gridcolor: woodDarkText,
-        showbackground: true,
-        tickfont: { color: woodDarkText },
-      },
-      yaxis: {
-        title: {
-          text: "GNSS_LON",
-          font: { color: woodDarkText, weight: "bold" },
-        },
-        backgroundcolor: woodMain,
-        gridcolor: woodDarkText,
-        showbackground: true,
-        tickfont: { color: woodDarkText },
-      },
-      zaxis: {
-        title: {
-          text: "GNSS_ALT",
-          font: { color: woodDarkText, weight: "bold", size: 16 },
-        },
-        backgroundcolor: woodMain,
-        gridcolor: woodDarkText,
-        showbackground: true,
-        tickfont: { color: woodDarkText },
-      },
+      xaxis: axisStyle("GNSS_LAT"),
+      yaxis: axisStyle("GNSS_LON"),
+      zaxis: axisStyle("GNSS_ALT", { size: 16 }),
     },
     font: { family: "monospace", size: 13, color: woodDarkText },
     showlegend: false,
   };
+
   const trace = {
     type: "scatter3d",
     mode: "lines",
     name: "Flight Path",
-    // Pass initial typed array views
     x: xBuffer.subarray(0, 0),
     y: yBuffer.subarray(0, 0),
     z: zBuffer.subarray(0, 0),
     line: { width: 6, color: woodPath, dash: "solid" },
   };
-  Plotly.newPlot("GNSS-3d-plot", [trace], layout, {
+
+  Plotly.newPlot(GNSS_PLOT_ID, [trace], layout, {
     displayModeBar: false,
     responsive: true,
   });
   is3DMapInitialized = true;
 }
 
-function update3DMap(row) {
-  const lat = parseFloat(row["GNSS_LATITUDE"]);
-  const long = parseFloat(row["GNSS_LONGITUDE"]);
-  const alt = parseFloat(row["GNSS_ALTITUDE"]);
-  if (isNaN(lat) || isNaN(long) || isNaN(alt)) return;
-  if (!is3DMapInitialized) init3DMap();
-  // buffer size management
-  if (bufferIndex < MAX_3D_POINTS) {
-    xBuffer[bufferIndex] = lat;
-    yBuffer[bufferIndex] = long;
-    zBuffer[bufferIndex] = alt;
-    bufferIndex++;
-  } else {
-    // Shift elements left by 1 position
-    xBuffer.copyWithin(0, 1);
-    yBuffer.copyWithin(0, 1);
-    zBuffer.copyWithin(0, 1);
-    xBuffer[MAX_3D_POINTS - 1] = lat;
-    yBuffer[MAX_3D_POINTS - 1] = long;
-    zBuffer[MAX_3D_POINTS - 1] = alt;
-  }
-  Plotly.restyle(
-    "GNSS-3d-plot",
-    {
-      x: [xBuffer.subarray(0, bufferIndex)],
-      y: [yBuffer.subarray(0, bufferIndex)],
-      z: [zBuffer.subarray(0, bufferIndex)],
-    },
-    [0]
-  );
-}
-
-window.addEventListener("resize", () => {
-  try {
-    if (is3DMapInitialized) {
-      Plotly.Plots.resize(document.getElementById("GNSS-3d-plot"));
-    }
-  } catch (err) {
-    //console.error("3D Plot resize failed:", err);
-  }
-});
-
-// graph logic
-const UNIT_MAP = {
-  ALTITUDE: "m",
-  TEMPERATURE: "°C",
-  PRESSURE: "Pa",
-  VOLTAGE: "V",
-  MAGNETOMETER: "μT",
-  GYROSCOPE: "°/s",
-  ACCELERATION: "°/s²",
-};
-
-const GRAPH_LAYOUT = [
-
-  {
-    id: "ALTITUDE",
-    title: "ALTITUDE",
-    units: "ALTITUDE",
-  },
-  { id: "PRESSURE", title: "PRESSURE", units: "PRESSURE" },
-  { id: "TEMPERATURE", title: "TEMPERATURE", units: "TEMPERATURE" },
-
-  {
-    id: "ACCEL_COMBINED",
-    title: "ACCELERATION",
-    units: "ACCELERATION",
-    combined: ["ACCEL_P", "ACCEL_R", "ACCEL_Y"],
-  },
-  {
-    id: "GYRO_COMBINED",
-    title: "GYRO SPIN RATE",
-    units: "GYROSCOPE",
-    combined: ["GYRO_P", "GYRO_R", "GYRO_Y"],
-  },
-  { id: "VOLTAGE", title: "VOLTAGE", units: "VOLTAGE" },
-  // { id: "CURRENT", title: "CURRENT", units: "CURRENT" },
-];
-
+// ---------- Chart.js graph builder ----------
 function loadGraphs() {
   if (chartInitialized) return;
 
@@ -738,7 +748,7 @@ function loadGraphs() {
     (g) => `
         <div class="telemetry-grid-item">
           <canvas id="${g.id}_chart"></canvas>
-        </div>`,
+        </div>`
   ).join("")}
     </div>`;
 
@@ -802,7 +812,7 @@ function loadGraphs() {
         "rgba(28,93,2,1)",
       ];
       datasets = graph.combined.map((label, i) => ({
-
+        label: label.replace("_", " "),   // "GYRO P", "GYRO R", "GYRO Y"
         data: [],
         borderColor: colors[i],
         backgroundColor: getGradient(ctx, colors[i]),
@@ -834,14 +844,9 @@ function loadGraphs() {
         },
         scales: {
           ...sharedOptions.scales,
-
           y: {
             ...sharedOptions.scales.y,
-
-            ticks: {
-              color: "#000000",
-            },
-
+            ticks: { color: "#000000" },
             title: {
               ...sharedOptions.scales.y.title,
               display: true,
@@ -849,8 +854,6 @@ function loadGraphs() {
               text: `${graph.title}${unit}`,
             },
           },
-
-
         },
       },
     });
@@ -860,64 +863,16 @@ function loadGraphs() {
   chartInitialized = true;
 }
 
-function updateGraphs(row) {
-  if (!row || !chartInitialized) return;
-  const packet = Number(row["PACKET_COUNT"]);
-
-  for (let id in charts) {
-    const chart = charts[id];
-    const config = GRAPH_LAYOUT.find((g) => g.id === id);
-
-    if (config?.combined) {
-      config.combined.forEach((col, i) => {
-        const y = Number(row[col]);
-        chart.data.datasets[i].data.push({ x: packet, y });
-      });
-    } else {
-      const val = Number(row[id]);
-      if (!isNaN(val)) chart.data.datasets[0].data.push({ x: packet, y: val });
-    }
-
-    if (chart.data.datasets[0].data.length > MAX_POINTS) {
-      chart.data.datasets.forEach((d) => d.data.shift());
-    }
-
-    chart.options.scales.x.max = packet + 2;
-    chart.options.scales.x.min = Math.max(0, packet - MAX_POINTS);
-  }
-}
-
-function redrawAllCharts() {
-  if (!chartInitialized || !charts) return;
-  for (let id in charts) {
-    charts[id].update("none");
-  }
-}
+// ---------- Global listeners ----------
+window.addEventListener("resize", resizePlots);
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "/" || event.key === "c") {
-    const input = document.getElementById("commandInput");
-    if (document.activeElement !== input) {
+    if (commandInput && document.activeElement !== commandInput) {
       event.preventDefault();
-      input.focus();
+      commandInput.focus();
     }
   }
   if (event.key === "ArrowUp") window.scrollBy(0, -50);
   if (event.key === "ArrowDown") window.scrollBy(0, 50);
 });
-
-try {
-  if (!chartInitialized) {
-    loadGraphs();
-  }
-} catch (err) {
-  //console.error("Graph initialization failed:", err);
-}
-
-try {
-  if (!is3DMapInitialized) {
-    init3DMap();
-  }
-} catch (err) {
-  //console.error("3D Map initialization failed:", err);
-}

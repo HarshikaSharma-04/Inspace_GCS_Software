@@ -1,5 +1,7 @@
 // Displays live gyro-based CanSat tilt; integrate once with initTilt(socket) in telemetry.js.
-const CANSAT_IMG = "../images/cansat.png";
+// Background = #6750a4, font = monospace.
+const CANSAT_IMG = "../images/model.png";
+const FONT_FAMILY = 'monospace';
 
 let roll = 0;
 let yaw = 0;
@@ -8,6 +10,13 @@ let lastPacketCount = null;
 let cansatImage = null;
 let rollReadout = null;
 let yawReadout = null;
+
+// colors for the #6750a4 background
+const C = {
+  bg: "#e9e6ff",
+  text: "#070707",
+  line: "rgb(0, 2, 74)",
+};
 
 function renderTilt() {
   if (!cansatImage || !rollReadout || !yawReadout) {
@@ -110,13 +119,20 @@ export function initTilt(socket) {
       .tilt-container {
         position: relative;
         overflow: hidden;
+        background: ${C.bg} !important;
+        color: ${C.text};
+        font-family: ${FONT_FAMILY};
+      }
+      .tilt-container .telemetry-panel-heading {
+        color: ${C.text};
+        font-family: ${FONT_FAMILY};
       }
       .tilt-container .tilt-ref {
         position: absolute;
         top: 60px;
         bottom: 50px;
         left: 50%;
-        border-left: 1px dashed rgba(255, 255, 255, .35);
+        border-left: 1px dashed ${C.line};
       }
       .tilt-container .tilt-stage {
         position: absolute;
@@ -142,7 +158,8 @@ export function initTilt(socket) {
         width: 100%;
         display: flex;
         justify-content: space-around;
-        color: white;
+        color: ${C.text};
+        font-family: ${FONT_FAMILY};
         font-weight: bold;
       }
     `;
