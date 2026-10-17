@@ -108,46 +108,43 @@
       </div>
       <!-- Main telemetry visualizations - csv, graphs, map section-->
       <div class="telemetry-visualization-section">
-        <div class="sidebar-sub-section gnss-container">
-          <div class="cmd-bottom-container">
-            <div class="cmd-echo-section">
-              <div class="cmd-echo-title">CMD ECHO</div>
-              <div class="cmd-echo-list" id="cmd-echo-list">
-                <span class="cmd-echo-empty">No commands sent</span>
-              </div>
-            </div>
-            <!--New position for Command section-->
-            <div class="command-area">
-              <div class="command-section">
-                <input type="text" class="command" id="commandInput" placeholder="Enter Command" />
-              </div>
-              <button class="send-btn">SEND</button>
-            </div>
-
-            <div class="pyramid-command-container">
-              <div class="pyramid-row">
-                <button class="cmd-btn" id="btn-cx" data-cmd="CMD,041,CX,ON">CXON</button>
-                <button class="cmd-btn" id="btn-cal" data-cmd="CMD,041,CAL">CAL</button>
-                <button class="cmd-btn" id="btn-sim-enable" data-cmd="CMD,041,SIM,ENABLE">SIM ENABLE</button>
-              </div>
-              <div class="pyramid-row">
-                <button class="cmd-btn" id="btn-sim-activate" data-cmd="CMD,041,SIM,ACTIVATE">SIM ACTIVATE</button>
-                <button class="cmd-btn" id="btn-sim-disable" data-cmd="CMD,041,SIM,DISABLE">SIM DISABLE</button>
-                <button class="cmd-btn" id="btn-gyro" data-cmd="CMD,041,MEC,GYRO,ON">GYRO ON</button>
-                <button class="cmd-btn" id="btn-servo" data-cmd="CMD,041,MEC,SERVO,ON">SERVO ON</button>
-              </div>
-            </div>
-          </div>
-        </div>
         <div id="telemetry-table" class="telemetry-csv-container"></div>
         <div class="telemetry-graph-container"></div>
-        <div class="telemetry-map-container"></div>
+        <div class="telemetry-map-container">
+          <div class="tilt-container">
+            <h2 class="telemetry-panel-heading">Tilt Orientation</h2>
+          </div>
+          <div class="servo-container">
+            <h2 class="telemetry-panel-heading">Actuator Angle</h2>
+          </div>
+        </div>
         <div class="map-wrapper">
-          <div id="map"></div>
-
-          <div class="map-controls">
-            <input type="checkbox" id="autoPanToggle" checked />
-            <label for="autoPanToggle">LOCK CAMERA TO CANSAT</label>
+          <div class="map-split">
+            <div class="map-area">
+              <div id="map">
+                <div class="map-controls">
+                  <input type="checkbox" id="autoPanToggle" checked />
+                  <label for="autoPanToggle">LOCK CAMERA TO CANSAT</label>
+                </div>
+              </div>
+            </div>
+            <div class="cmd-bottom-container">
+              <div class="command-area">
+                <div class="command-section">
+                  <input type="text" class="command" id="commandInput" placeholder="Enter Command" />
+                  <button class="send-btn">SEND</button>
+                </div>
+                <div class="cmd-echo-section">
+                  <div class="cmd-echo-header">
+                    <div class="cmd-echo-title">CMD ECHO</div>
+                    <div class="cmd-echo-divider">────</div>
+                  </div>
+                  <div class="cmd-echo-list" id="cmd-echo-list">
+                    <span class="cmd-echo-empty">No commands sent</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -161,7 +158,7 @@
         <div class="sidebar-fields">
           <!-- Grid wrapper for 1 row, 2 boxes -->
           <div class="sensor-grid">
-           
+
             <div class="field">
               <span class="label">Temperature (°C)</span>
               <span class="value sidebar-temp-value">--</span>
@@ -202,19 +199,9 @@
               <span class="value sidebar-gnss-latitude-value">--</span>
             </div>
 
-             <div class="field">
+            <div class="field">
               <span class="label">Glide Ratio</span>
               <span class="value sidebar-glide-ratio-value">--</span>
-            </div>
-
-            <div class="field">
-              <span class="label">Tilt (°)</span>
-              <span class="value sidebar-tilt-value">--</span>
-            </div>
-
-             <div class="field">
-              <span class="label">Servo Angle (°)</span>
-              <span class="value sidebar-servo-value">--</span>
             </div>
 
             <div class="field">

@@ -112,32 +112,20 @@ sendBtn.addEventListener("click", () => {
   const command = commandInput.value.trim();
 
   if (!command) return;
-  //addCommandEcho(command); 
+  addCommandEcho(command);
   socket.emit("send-command", command);
 
   commandInput.value = "";
   commandInput.focus();
 });
 
-let commandHistory = [];
-
 function addCommandEcho(cmd) {
   if (!cmdEchoList) return;
-  const empty = cmdEchoList.querySelector(".cmd-echo-empty");
-  if (empty) empty.remove();
-  commandHistory.push(cmd);
-  if (commandHistory.length > 3) {
-    commandHistory.shift();
-  }
   const div = document.createElement("div");
   div.className = "cmd-echo-item";
-  //const missionTime = missionTimeEl?.innerText || "00:00:00";
   const currentTime = new Date().toTimeString().slice(0, 8);
   div.textContent = `[${currentTime}] ${cmd}`;
-  cmdEchoList.appendChild(div);
-  if (cmdEchoList.children.length > 3) {
-    cmdEchoList.removeChild(cmdEchoList.firstElementChild);
-  }
+  cmdEchoList.replaceChildren(div);
 }
 
 // Controls & Visuals
@@ -183,7 +171,7 @@ const _CT_COLS = [
 
   { title: "GYRO_R", field: "GYRO_R", w: 52 },
   { title: "GYRO_P", field: "GYRO_P", w: 52 },
-  { title: "GYRO_Y", field: "GYRO_Y", w: 52  },
+  { title: "GYRO_Y", field: "GYRO_Y", w: 52 },
 
   { title: "STATE", field: "FLIGHT_SOFTWARE_STATE", w: 96 },
   { title: "CMD", field: "CMD_ECHO", w: 60 },
@@ -460,7 +448,10 @@ function showCSVView() {
 function showGraphView() {
   currentView = "graph";
   csvContainer.style.display = "none";
+  const cmdArea = document.querySelector(".cmd-bottom-container");
+  if (cmdArea) cmdArea.style.display = "flex";
   graphContainer.style.display = "block";
+  mapContainer.style.display = "flex";
   mapDiv.style.display = "block";
   if (mapCamControl) mapCamControl.style.display = "block";
   resizeMap();
@@ -705,7 +696,6 @@ const UNIT_MAP = {
   TEMPERATURE: "°C",
   PRESSURE: "Pa",
   VOLTAGE: "V",
-  // CURRENT: "A",
   MAGNETOMETER: "μT",
   GYROSCOPE: "°/s",
   ACCELERATION: "°/s²",
@@ -714,10 +704,9 @@ const UNIT_MAP = {
 const GRAPH_LAYOUT = [
 
   {
-    id: "ALTITUDE_VELOCITY",
-    title: "ALTITUDE/VELOCITY",
-    units: "ALTITUDE/VELOCITY",
-    combined: ["ALTITUDE", "DESC_VELOCITY"],
+    id: "ALTITUDE",
+    title: "ALTITUDE",
+    units: "ALTITUDE",
   },
   { id: "PRESSURE", title: "PRESSURE", units: "PRESSURE" },
   { id: "TEMPERATURE", title: "TEMPERATURE", units: "TEMPERATURE" },
@@ -811,13 +800,12 @@ function loadGraphs() {
         "rgba(28,93,2,1)",
       ];
       datasets = graph.combined.map((label, i) => ({
-        
+
         data: [],
         borderColor: colors[i],
         backgroundColor: getGradient(ctx, colors[i]),
-        fill: graph.id === "ALTITUDE_VELOCITY" ? i === 0 : true,
+        fill: true,
         borderWidth: 2,
-        yAxisID: label === "DESC_VELOCITY" ? "y1" : "y",
       }));
     } else {
       datasets = [
@@ -856,14 +844,11 @@ function loadGraphs() {
               ...sharedOptions.scales.y.title,
               display: true,
               color: "#000000",
-              text:
-                graph.id === "ALTITUDE_VELOCITY"
-                  ? "ALTITUDE (m)"
-                  : `${graph.title}${unit}`,
+              text: `${graph.title}${unit}`,
             },
           },
 
-          
+
         },
       },
     });
