@@ -646,7 +646,7 @@ body {
   width: 100%;
   border-collapse: collapse;
   background: var(--bg-card);
-  font-size: 0.55rem;
+  font-size: 0.45rem;
   color: var(--color-text-table);
 }
 
@@ -654,8 +654,8 @@ body {
   color: var(--color-white);
   background: var(--color-primary);
   font-weight: 600;
-  text-align: left;
-  padding: 12px 6px;
+  text-align: center;
+  padding: 12px 4px;
   border-bottom: 1px solid var(--border-light-gray);
   border-right: 0.5px solid var(--border-table-header);
   white-space: nowrap;

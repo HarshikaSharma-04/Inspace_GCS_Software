@@ -21,6 +21,8 @@
     }
     /* Wrapper: overflow+max-height so internal scrollbar appears */
     #telemetry-table {
+      margin: 0;
+      padding: 0;
       width: 100%;
       box-sizing: border-box;
       background: #ffffff;
@@ -120,7 +122,7 @@ class CanvasTable {
         // resume auto-scroll shortly after user stops scrolling
         this._scrollStopTimer = setTimeout(() => {
           this._autoScroll = true;
-        }, 800);
+        }, 100);
       },
       { passive: true },
     );

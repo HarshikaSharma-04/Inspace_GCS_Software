@@ -157,34 +157,34 @@ socket.on("clear-data", () => {
 
 
 const _CT_COLS = [
-  { title: "TEAM_ID", field: "TEAM_ID", w: 42 },
-  { title: "TIME", field: "TIME_STAMP", w: 75 },
-  { title: "PACKET", field: "PACKET_COUNT", w: 42 },
-  { title: "ALTITUDE", field: "ALTITUDE", w: 46 },
-  { title: "PRESSURE", field: "PRESSURE", w: 52 },
+  { title: "TEAM_ID", field: "TEAM_ID", w: 120 },
+  { title: "TIME", field: "TIME_STAMP", w: 50 },
+  { title: "PKT", field: "PACKET_COUNT", w: 40 },
+  { title: "ALT", field: "ALTITUDE", w: 35 },
+  { title: "PRESSURE", field: "PRESSURE", w: 45 },
   { title: "TEMP", field: "TEMPERATURE", w: 35 },
-  { title: "VOLTAGE", field: "VOLTAGE", w: 45 },
+  { title: "VOLT", field: "VOLTAGE", w: 40 },
 
-  { title: "GNSS_TIME", field: "GNSS_TIME", w: 70 },
-  { title: "GNSS_LAT", field: "GNSS_LATITUDE", w: 70 },
-  { title: "GNSS_LONG", field: "GNSS_LONGITUDE", w: 70 },
-  { title: "GNSS_ALT", field: "GNSS_ALTITUDE", w: 70 },
-  { title: "GNSS_SATS", field: "GNSS_SATS", w: 55 },
+  { title: "GNSS_TIME", field: "GNSS_TIME", w: 55 },
+  { title: "GNSS_LAT", field: "GNSS_LATITUDE", w: 55 },
+  { title: "GNSS_LONG", field: "GNSS_LONGITUDE", w: 55 },
+  { title: "GNSS_ALT", field: "GNSS_ALTITUDE", w: 55 },
+  { title: "GNSS_SATS", field: "GNSS_SATS", w: 50 },
 
-  { title: "ACCEL_R", field: "ACCEL_R", w: 60 },
-  { title: "ACCEL_P", field: "ACCEL_P", w: 60 },
-  { title: "ACCEL_Y", field: "ACCEL_Y", w: 60 },
+  { title: "ACCEL_R", field: "ACCEL_R", w: 55 },
+  { title: "ACCEL_P", field: "ACCEL_P", w: 55 },
+  { title: "ACCEL_Y", field: "ACCEL_Y", w: 55 },
 
-  { title: "GYRO_R", field: "GYRO_R", w: 52 },
-  { title: "GYRO_P", field: "GYRO_P", w: 52 },
-  { title: "GYRO_Y", field: "GYRO_Y", w: 52 },
+  { title: "GYRO_R", field: "GYRO_R", w: 50 },
+  { title: "GYRO_P", field: "GYRO_P", w: 50 },
+  { title: "GYRO_Y", field: "GYRO_Y", w: 50 },
 
-  { title: "STATE", field: "FLIGHT_SOFTWARE_STATE", w: 96 },
-  { title: "CMD", field: "CMD_ECHO", w: 60 },
-  { title: "GLIDE_RATIO", field: "GLIDE_RATIO", w: 60 },
-  { title: "HEADING", field: "HEADING", w: 60 },
-  { title: "BEARING", field: "BEARING", w: 60 },
-  { title: "HEADING_ERROR", field: "HEADING_ERROR", w: 60 }
+  { title: "STATE", field: "FLIGHT_SOFTWARE_STATE", w: 90 },
+  { title: "CMD", field: "CMD_ECHO", w: 50 },
+  { title: "G/D_RATIO", field: "GLIDE_RATIO", w: 50 },
+  { title: "HEADING", field: "HEADING", w: 40 },
+  { title: "BEARING", field: "BEARING", w: 40 },
+  { title: "HEADING_ERR", field: "HEADING_ERROR", w: 50 }
 ];
 
 function initTabulator() {
