@@ -214,8 +214,8 @@ const SMOOTHING = 8;            // higher = snappier, lower = smoother
 const EPSILON = 0.0005;         // radians; below this we stop animating
 
 const C = {
-  bgHex: 0xe9e6ff,
-  bgCss: "#e9e6ff",
+  bgHex: "#ffffff",
+  bgCss: "#ffffff",
   text: "#070707",
   line: "rgb(0, 2, 74)",
 };

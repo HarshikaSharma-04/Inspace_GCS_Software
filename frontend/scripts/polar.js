@@ -6,7 +6,7 @@ const FONT_FAMILY = 'monospace';
 
 // colors for the #e9e6ff background
 const COLORS = {
-    bg: '#e9e6ff',
+    bg: '#ffffff',
     text: '#070707',
     grid: 'rgba(0, 0, 0, 0.30)',
     axisLine: 'rgba(0, 0, 0, 0.60)',
