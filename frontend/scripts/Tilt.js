@@ -203,7 +203,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 
 // ---------- Config ----------
-const CANSAT_MODEL_URL = "../images/model.glb";
+const CANSAT_MODEL_URL = "../images/model_2.glb";
 // Only fetched if the .glb is Draco-compressed. Copy
 // node_modules/three/examples/jsm/libs/draco/ into your static folder.
 const DRACO_DECODER_PATH = "/draco/";
