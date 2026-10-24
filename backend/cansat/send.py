@@ -4,7 +4,7 @@ import time
 import os
 from transmit_sim import SimulationMode
 # --- CONFIGURATION ---
-PORT = "COM1" #/dev/cu.SLAB_USBtoUART
+PORT = "/dev/ttys005" #/dev/cu.SLAB_USBtoUART
 BAUD = 115200
 
 TELEMETRY_CSV = "stress_csv.csv"

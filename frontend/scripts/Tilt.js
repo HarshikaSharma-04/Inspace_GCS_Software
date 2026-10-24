@@ -209,22 +209,23 @@ const CANSAT_MODEL_URL = "../images/model_2.glb";
 const DRACO_DECODER_PATH = "/draco/";
 const FONT_FAMILY = "monospace";
 const MAX_PIXEL_RATIO = 2;      // caps GPU load on 3x displays
-const TARGET_MODEL_SIZE = 3.5;  // model's largest dimension in scene units
+const TARGET_MODEL_SIZE = 2.0;  // model's largest dimension in scene units
 const SMOOTHING = 8;            // higher = snappier, lower = smoother
 const EPSILON = 0.0005;         // radians; below this we stop animating
+const PITCH_CLAMP = 60;         // max visual pitch in degrees (readout still shows real value)
 
 const C = {
   bgHex: "#ffffff",
   bgCss: "#ffffff",
   text: "#070707",
   line: "rgb(0, 2, 74)",
+  pitchColor: "#cc3333",
+  yawColor: "#3366cc",
 };
 
 // ---------- State ----------
 let pitch = 0;
 let yaw = 0;
-let roll = 0;
-let lastTimestamp = null;
 let lastPacketCount = null;
 
 let pitchReadout = null;
@@ -245,7 +246,7 @@ let disposed = true;
 
 // Reused objects (avoid per-frame allocations)
 const targetQuat = new THREE.Quaternion();
-const euler = new THREE.Euler(0, 0, 0, "YXZ"); // yaw -> pitch -> roll
+const euler = new THREE.Euler(0, 0, 0, "YXZ"); // yaw -> pitch (no roll)
 
 const D2R = Math.PI / 180;
 
@@ -292,7 +293,10 @@ function frame(now) {
 }
 
 function updateTarget() {
-  euler.set(pitch * D2R, yaw * D2R, roll * D2R, "YXZ");
+  // Clamp visual pitch so the model stays in the viewport;
+  // the text readout still displays the real unclamped value.
+  const clampedPitch = Math.max(-PITCH_CLAMP, Math.min(PITCH_CLAMP, pitch));
+  euler.set(clampedPitch * D2R, yaw * D2R, 0, "YXZ");
   targetQuat.setFromEuler(euler);
 }
 
@@ -319,10 +323,8 @@ function renderTilt() {
 }
 
 export function resetTilt() {
-  roll = 0;
   pitch = 0;
   yaw = 0;
-  lastTimestamp = null;
   lastPacketCount = null;
   updateTarget();
   if (pivot) pivot.quaternion.copy(targetQuat); // snap back, no long sweep
@@ -367,22 +369,14 @@ function updateTilt(row) {
   }
   if (packetCount !== null) lastPacketCount = packetCount;
 
-  const timestamp = parseTimestamp(row.TIME_STAMP);
-  let dt = timestamp !== null && lastTimestamp !== null
-    ? timestamp - lastTimestamp
-    : 1;
-  if (dt <= 0 || dt > 5) dt = 1;
-  lastTimestamp = timestamp;
+  // Use pre-computed degree values from backend
+  const tiltPitch = parseNumber(row.TILT_PITCH);
+  const tiltYaw = parseNumber(row.TILT_YAW);
 
-  const gyroPitch = parseNumber(row.GYRO_P);
-  const gyroYaw = parseNumber(row.GYRO_Y);
-  const gyroRoll = parseNumber(row.GYRO_R); // optional
+  if (tiltPitch === null || tiltYaw === null) return;
 
-  if (gyroPitch === null || gyroYaw === null) return;
-
-  pitch += gyroPitch * dt;
-  yaw += gyroYaw * dt;
-  if (gyroRoll !== null) roll += gyroRoll * dt;
+  pitch = tiltPitch;
+  yaw = tiltYaw;
 
   renderTilt();
 }
@@ -449,6 +443,35 @@ function initThreeStage(stageContainer) {
   pivot = new THREE.Group();
   scene.add(pivot);
 
+  // --- Axis reference lines (fixed in scene, don't rotate with model) ---
+  const AXIS_LEN = 4; // half-length of each line
+  const dashSize = 0.15;
+  const gapSize = 0.1;
+
+  // Yaw axis — vertical dashed line (Y)
+  const yawGeo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0, -AXIS_LEN, 0),
+    new THREE.Vector3(0, AXIS_LEN, 0),
+  ]);
+  const yawLine = new THREE.Line(
+    yawGeo,
+    new THREE.LineDashedMaterial({ color: 0x3366cc, dashSize, gapSize, linewidth: 1 })
+  );
+  yawLine.computeLineDistances();
+  scene.add(yawLine);
+
+  // Pitch axis — horizontal dashed line (X)
+  const pitchGeo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-AXIS_LEN, 0, 0),
+    new THREE.Vector3(AXIS_LEN, 0, 0),
+  ]);
+  const pitchLine = new THREE.Line(
+    pitchGeo,
+    new THREE.LineDashedMaterial({ color: 0xcc3333, dashSize, gapSize, linewidth: 1 })
+  );
+  pitchLine.computeLineDistances();
+  scene.add(pitchLine);
+
   const draco = new DRACOLoader();
   draco.setDecoderPath(DRACO_DECODER_PATH);
   const loader = new GLTFLoader();
@@ -471,7 +494,19 @@ function initThreeStage(stageContainer) {
       const scale = TARGET_MODEL_SIZE / maxDim;
 
       cansatModel.scale.setScalar(scale);
-      cansatModel.position.copy(center).multiplyScalar(-scale);
+      // Anchor the pivot at the TOP of the model (pendulum style).
+      // 1. Inside the pivot: offset the model so its top aligns with pivot origin (0,0,0).
+      const scaledMaxY = box.max.y * scale;
+      const scaledMinY = box.min.y * scale;
+      const scaledCenterX = center.x * scale;
+      const scaledCenterZ = center.z * scale;
+      cansatModel.position.set(-scaledCenterX, -scaledMaxY, -scaledCenterZ);
+
+      // 2. Move the pivot group down so the model stays centered in the viewport.
+      //    The model now spans from y=0 (top) to y=-(scaledMaxY-scaledMinY) (bottom)
+      //    inside the pivot. Shifting pivot down by half the height centers it on screen.
+      const modelHeight = scaledMaxY - scaledMinY;
+      pivot.position.set(0, modelHeight / 2, 0);
 
       pivot.add(cansatModel);
       pivot.quaternion.copy(targetQuat); // apply any telemetry received while loading
@@ -519,21 +554,45 @@ export function initTilt(socket) {
         color: ${C.text};
         font-family: ${FONT_FAMILY};
       }
-      .tilt-container .tilt-ref {
+      .tilt-container .tilt-legend {
         position: absolute;
-        top: 60px;
-        bottom: 50px;
-        left: 50%;
-        border-left: 1px dashed ${C.line};
-        z-index: 1;
+        top: 36px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        font-size: 11px;
+        font-family: ${FONT_FAMILY};
+        font-weight: 600;
+        z-index: 2;
         pointer-events: none;
+      }
+      .tilt-container .tilt-legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #444444;
+      }
+      .tilt-container .tilt-legend-line {
+        display: inline-block;
+        width: 16px;
+        height: 0;
+        border-top: 2px dashed;
+      }
+      .tilt-container .tilt-legend-line--pitch {
+        border-color: ${C.pitchColor};
+      }
+      .tilt-container .tilt-legend-line--yaw {
+        border-color: ${C.yawColor};
       }
       .tilt-container .tilt-stage {
         position: absolute;
         left: 0;
         right: 0;
-        top: 60px;
-        bottom: 50px;
+        top: 55px;
+        bottom: 45px;
       }
       .tilt-container .tilt-readout {
         position: absolute;
@@ -541,30 +600,67 @@ export function initTilt(socket) {
         width: 100%;
         display: flex;
         justify-content: space-around;
-        color: ${C.text};
         font-family: ${FONT_FAMILY};
         font-weight: bold;
         z-index: 2;
+      }
+      .tilt-container .tilt-readout-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .tilt-container .tilt-readout-item--pitch {
+        color: ${C.pitchColor};
+      }
+      .tilt-container .tilt-readout-item--yaw {
+        color: ${C.yawColor};
       }
     `;
     document.head.appendChild(style);
   }
 
-  const referenceLine = document.createElement("div");
-  referenceLine.className = "tilt-ref";
+  const legend = document.createElement("div");
+  legend.className = "tilt-legend";
+
+  const pitchLegend = document.createElement("span");
+  pitchLegend.className = "tilt-legend-item";
+  const pitchLegendLine = document.createElement("span");
+  pitchLegendLine.className = "tilt-legend-line tilt-legend-line--pitch";
+  pitchLegend.append(pitchLegendLine, document.createTextNode("Pitch (Horizontal)"));
+
+  const yawLegend = document.createElement("span");
+  yawLegend.className = "tilt-legend-item";
+  const yawLegendLine = document.createElement("span");
+  yawLegendLine.className = "tilt-legend-line tilt-legend-line--yaw";
+  yawLegend.append(yawLegendLine, document.createTextNode("Yaw (Vertical)"));
+
+  legend.append(pitchLegend, yawLegend);
 
   const stage = document.createElement("div");
   stage.className = "tilt-stage";
 
   const readout = document.createElement("div");
   readout.className = "tilt-readout";
+
+  const pitchItem = document.createElement("div");
+  pitchItem.className = "tilt-readout-item tilt-readout-item--pitch";
+  const pitchSwatch = document.createElement("span");
+  pitchSwatch.className = "tilt-legend-line tilt-legend-line--pitch";
   pitchReadout = document.createElement("span");
   pitchReadout.className = "tilt-pitch";
+  pitchItem.append(pitchSwatch, pitchReadout);
+
+  const yawItem = document.createElement("div");
+  yawItem.className = "tilt-readout-item tilt-readout-item--yaw";
+  const yawSwatch = document.createElement("span");
+  yawSwatch.className = "tilt-legend-line tilt-legend-line--yaw";
   yawReadout = document.createElement("span");
   yawReadout.className = "tilt-yaw";
-  readout.append(pitchReadout, yawReadout);
+  yawItem.append(yawSwatch, yawReadout);
 
-  container.append(referenceLine, stage, readout);
+  readout.append(pitchItem, yawItem);
+
+  container.append(legend, stage, readout);
 
   initThreeStage(stage);
   updateTarget();
@@ -605,6 +701,7 @@ export function destroyTilt() {
 
   const container = document.querySelector(".tilt-container");
   if (container) {
+    container.querySelector(".tilt-legend")?.remove();
     container.querySelector(".tilt-ref")?.remove();
     container.querySelector(".tilt-stage")?.remove();
     container.querySelector(".tilt-readout")?.remove();

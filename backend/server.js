@@ -9,7 +9,7 @@ const io = new Server(server, { cors: { origin: "*" } });
 const { filterGarbage } = require("./pipeline/filtergarbage");
 const serialPort = require("./pipeline/serialPort");
 // importing functions from telemetryWriter.js file
-const { initTelemetryCSV, writeTelemetryRow, deleteTelemetryCSV, } = require("./pipeline/telemetrywriter");
+const { initTelemetryCSV, writeTelemetryRow, deleteTelemetryCSV, integrateGyroToDegrees, resetGyroIntegration } = require("./pipeline/telemetrywriter");
 const { getSimulationCommands, stripSimCommand } = require("./pipeline/readSimValues");
 
 const PORT = 3000;
@@ -115,6 +115,11 @@ async function handleCanSatData(rawString) {
     BEARING: resolveDecimal(BEARING, 2),
     HEADING_ERROR: resolveDecimal(HEADING_ERROR, 2)
   };
+  // Integrate gyro rates (°/s) into orientation angles (°) for tilt visualization
+  const tiltAngles = integrateGyroToDegrees(data);
+  data.TILT_PITCH = tiltAngles.TILT_PITCH;
+  data.TILT_YAW = tiltAngles.TILT_YAW;
+
   let cleanedData = data; // Temporary variable to hold filtered data
   try {
     writeTelemetryRow(cleanedData).catch((err) => {

@@ -7,7 +7,7 @@ class SerialService extends EventEmitter {
     super();
 
     this.port = new SerialPort({
-      path: "COM2", // virtual serial port
+      path: "/dev/ttys000", // virtual serial port
       baudRate: 115200,
     });
 
