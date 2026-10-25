@@ -25,9 +25,7 @@ const sidebarTempEl = document.querySelector(".sidebar-temp-value");
 const sidebarVoltageEl = document.querySelector(".sidebar-voltage-value");
 const sidebarPressureEl = document.querySelector(".sidebar-pressure-value");
 const sidebarAltitudeEl = document.querySelector(".sidebar-altitude-value");
-const sidebarVelocityEl = document.querySelector(".sidebar-velocity-value");
-const sidebarTimeToImpactEl = document.querySelector(".sidebar-time-to-impact-value");
-const time2impact = document.querySelector(".sidebar-time-to-impact-value");
+
 
 // command buttons:
 const cxBtn = document.getElementById("btn-cx");
@@ -186,9 +184,7 @@ const _CT_COLS = [
   { title: "GYRO_Y", field: "GYRO_Y", w: 60 },
 
   { title: "STATE", field: "FLIGHT_SOFTWARE_STATE", w: 110 },
-  { title: "CMD", field: "CMD_ECHO", w: 60 },
-  { title: "DESC_VELOCITY", field: "DESC_VELOCITY", w: 70 },
-  { title: "TIME2IMPACT", field: "TIME2IMPACT", w: 70 }
+  { title: "CMD", field: "CMD_ECHO", w: 60 }
 ];
 // initialization and default view setup
 setActiveButton(homeBtn);
@@ -239,14 +235,11 @@ function resetAllTelemetryData() {
     sidebarVoltageEl,
     sidebarPressureEl,
     sidebarAltitudeEl,
-    sidebarVelocityEl,
-    time2impact
   ].forEach((el) => {
     if (el) el.innerText = "0";
   });
 
-  if (sidebarTimeToImpactEl) sidebarTimeToImpactEl.innerText = "00";
-
+ 
   [
     ...sidebarGNSSTimeEls,
     ...sidebarGNSSAltitudeEls,
@@ -553,8 +546,6 @@ function updateSidebarTelemetry(row) {
   if (sidebarVoltageEl) sidebarVoltageEl.innerText = row["VOLTAGE"] + " V";
   if (sidebarPressureEl) sidebarPressureEl.innerText = row["PRESSURE"] + " Pa";
   if (sidebarAltitudeEl) sidebarAltitudeEl.innerText = row["ALTITUDE"] + " m";
-  if (sidebarVelocityEl) sidebarVelocityEl.innerText = row["DESC_VELOCITY"] + " m/s";
-  if (time2impact) time2impact.innerText = row["TIME2IMPACT"] + " s";
 
   document.querySelector(".sidebar-gyro-r").innerText = row.GYRO_R;
   document.querySelector(".sidebar-gyro-p").innerText = row.GYRO_P;
@@ -563,9 +554,6 @@ function updateSidebarTelemetry(row) {
   document.querySelector(".sidebar-accel-r").innerText = row.ACCEL_R;
   document.querySelector(".sidebar-accel-p").innerText = row.ACCEL_P;
   document.querySelector(".sidebar-accel-y").innerText = row.ACCEL_Y;
-
-
-
 
 
   sidebarGNSSTimeEls.forEach((el) => (el.innerText = `${row["GNSS_TIME"]}`));
@@ -712,10 +700,9 @@ const UNIT_MAP = {
 const GRAPH_LAYOUT = [
 
   {
-    id: "ALTITUDE_VELOCITY",
-    title: "ALTITUDE/VELOCITY",
-    units: "ALTITUDE/VELOCITY",
-    combined: ["ALTITUDE", "DESC_VELOCITY"],
+    id: "ALTITUDE",
+    title: "ALTITUDE",
+    units: "ALTITUDE",
   },
   { id: "PRESSURE", title: "PRESSURE", units: "PRESSURE" },
   { id: "TEMPERATURE", title: "TEMPERATURE", units: "TEMPERATURE" },
@@ -861,32 +848,32 @@ function loadGraphs() {
             },
           },
 
-          ...(graph.combined?.includes("DESC_VELOCITY")
-            ? {
-              y1: {
-                position: "right",
-                beginAtZero: true,
+          // ...(graph.combined?.includes("DESC_VELOCITY")
+          //   ? {
+          //     y1: {
+          //       position: "right",
+          //       beginAtZero: true,
 
-                grid: {
-                  drawOnChartArea: false,
-                },
+          //       grid: {
+          //         drawOnChartArea: false,
+          //       },
 
-                ticks: {
-                  color: "#000000",
-                },
+          //       ticks: {
+          //         color: "#000000",
+          //       },
 
-                title: {
-                  display: true,
-                  text: "DESC_VELOCITY (m/s)",
-                  color: "#000000",
-                  font: {
-                    weight: "bold",
-                    size: 16,
-                  },
-                },
-              },
-            }
-            : {}),
+          //       title: {
+          //         display: true,
+          //         text: "DESC_VELOCITY (m/s)",
+          //         color: "#000000",
+          //         font: {
+          //           weight: "bold",
+          //           size: 16,
+          //         },
+          //       },
+          //     },
+          //   }
+          //   : {}),
         },
       },
     });
