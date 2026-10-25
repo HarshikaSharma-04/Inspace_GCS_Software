@@ -1,7 +1,7 @@
 # this file will contains the logic for writing on port, virtual port
 import serial
 import time
-from detect_port import *
+from backend.detect_port import *
 
 class Port:
     def __init__(self, port):

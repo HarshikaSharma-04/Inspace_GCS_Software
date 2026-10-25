@@ -7,7 +7,7 @@ class SerialService extends EventEmitter {
     super();
 
     this.port = new SerialPort({
-      path: "/dev/ttys000", // virtual serial port
+      path: "COM1", // virtual serial port
       baudRate: 115200,
     });
 
@@ -18,7 +18,7 @@ class SerialService extends EventEmitter {
     });
 
     parser.on("data", (data) => {
-      // //console.log("Telemetry received:", data);
+      //console.log("Telemetry received:", data);
       // emit event
       this.emit("telemetry", data.trim());
     });
@@ -32,7 +32,8 @@ class SerialService extends EventEmitter {
       return callback(new Error("Serial port is not open"));
     }
 
-    this.port.write(`${cmd}\n`, (err) => {
+    this.port.write(`${cmd}`, (err) => {
+      //console.log("Command sent:", cmd);
       if (err) {
         console.error("Serial Write Error:", err);
         return callback(err);

@@ -209,7 +209,7 @@ const CANSAT_MODEL_URL = "../images/model_2.glb";
 const DRACO_DECODER_PATH = "/draco/";
 const FONT_FAMILY = "monospace";
 const MAX_PIXEL_RATIO = 2;      // caps GPU load on 3x displays
-const TARGET_MODEL_SIZE = 2.0;  // model's largest dimension in scene units
+const TARGET_MODEL_SIZE = 3.0;  // model's largest dimension in scene units
 const SMOOTHING = 8;            // higher = snappier, lower = smoother
 const EPSILON = 0.0005;         // radians; below this we stop animating
 const PITCH_CLAMP = 60;         // max visual pitch in degrees (readout still shows real value)

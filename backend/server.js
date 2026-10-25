@@ -9,7 +9,7 @@ const io = new Server(server, { cors: { origin: "*" } });
 const { filterGarbage } = require("./pipeline/filtergarbage");
 const serialPort = require("./pipeline/serialPort");
 // importing functions from telemetryWriter.js file
-const { initTelemetryCSV, writeTelemetryRow, deleteTelemetryCSV, integrateGyroToDegrees, resetGyroIntegration } = require("./pipeline/telemetrywriter");
+const { writeTelemetryRow, integrateGyroToDegrees } = require("./pipeline/telemetrywriter");
 const { getSimulationCommands, stripSimCommand } = require("./pipeline/readSimValues");
 
 const PORT = 3000;
@@ -45,7 +45,6 @@ app.use(express.static(path.join(__dirname, "..", "frontend")));
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "frontend", "index.html"));
 });
-
 
 //Resolve decimal values to a specific precision
 function resolveDecimal(value, precision) {
@@ -136,6 +135,7 @@ async function handleCanSatData(rawString) {
   io.emit("telemetry-update", cleanedData);
 }
 
+
 serialPort.on("telemetry", (packet) => {
   handleCanSatData(packet);
 });
@@ -144,13 +144,13 @@ serialPort.on("telemetry", (packet) => {
 io.on("connection", (socket) => {
   socket.on("send-command", (cmd) => {
     const command = validCommands[cmd];
-    if (!command) {
-      socket.emit("command-response", "Invalid Command");
+    if (!command || (cmd in validCommands) === false) {
+      socket.emit("command-warning", "Invalid Command");
       return;
     }
     if (cmd === "CMD,041,CX,ON") {
-      if (isSimActivated) {
-        socket.emit("command-warning", "Warning: Cannot enable Flight Mode while in Simulation Mode!");
+      if (isSimEnabled || isSimActivated) {
+        socket.emit("command-warning", "[WARNING]:Cannot switch the Mode");
         return;
       }
       isCxSent = true;
@@ -161,21 +161,25 @@ io.on("connection", (socket) => {
     // handling simulation commands:
     if (cmd === "CMD,041,SIM,ENABLE") {
       if (isCxSent) {
-        socket.emit("command-warning", "Warning: Cannot enable simulation while in Flight Mode!");
+        socket.emit("command-warning", "[WARNING]:Cannot switch the Mode");
         return;
       }
       isSimEnabled = true;
     }
     else if (cmd === "CMD,041,SIM,ACTIVATE") {
+      if (isCxSent) {
+        socket.emit("command-warning", "[WARNING]:Cannot switch the Mode");
+        return;
+      }
       if (!isSimEnabled) {
-        socket.emit("command-warning", "Warning: Please ENABLE the simulation mode first!");
+        socket.emit("command-warning", "[WARNING]:Simulation not ENABLED");
         return;
       }
       isSimActivated = true;
     }
     else if (cmd === "CMD,041,SIM,DISABLE") {
       if (!isSimActivated) {
-        socket.emit("command-warning", "Warning: Simulation must be ACTIVATED before it can be disabled!");
+        socket.emit("command-warning", "[WARNING]:Not in Simulation Mode");
         return;
       }
       // Reset states upon successful disable
@@ -187,7 +191,7 @@ io.on("connection", (socket) => {
       }
       socket.emit("command-response", "Simulation Stopped");
     }
-    if (isSimActivated) {
+    if (isSimActivated && isSimActivated) {
       socket.emit("sim-command-response", "Simulation Mode Started");
       const rawSimCommands = getSimulationCommands();
       let index = 0;
@@ -209,9 +213,10 @@ io.on("connection", (socket) => {
     }
 
     // write on port
+
     serialPort.sendCommand(command, (err) => {
       if (err) {
-        socket.emit("command-response", "Failed to send command");
+        socket.emit("command-warning", "Failed to send command");
         return;
       }
       if (cmd === "CMD,041,SIM,ENABLE") {
@@ -240,6 +245,5 @@ function shutdown() {
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 server.listen(PORT, "127.0.0.1", async () => {
-  //await initTelemetryCSV();
   console.log(`Server running at http://127.0.0.1:${PORT}`);
 });

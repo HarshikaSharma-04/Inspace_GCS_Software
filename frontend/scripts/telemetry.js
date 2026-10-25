@@ -114,7 +114,7 @@ const GRAPH_LAYOUT = [
 ];
 
 // the main line that connects the backend with the frontend
-export const socket = io("http://localhost:3000");
+export const socket = io("http://127.0.0.1:3000");
 
 socket.on("telemetry-update", (data) => {
   telemetryQueue.push(data);
@@ -130,12 +130,12 @@ socket.on("command-success", (verifiedCommand) => {
   addCommandEcho(verifiedCommand);
 });
 
-socket.on("command-warning", (warningMessage) => {
+function showCommandMessage(message) {
   if (!commandInput) return;
-  commandInput.value = warningMessage;
+  commandInput.value = message;
   commandInput.style.color = "red";
   commandInput.style.fontWeight = "bold";
-  commandInput.style.fontSize = "22px";
+  commandInput.style.fontSize = "18px";
 
   const clearWarning = () => {
     commandInput.value = "";
@@ -145,10 +145,11 @@ socket.on("command-warning", (warningMessage) => {
     commandInput.removeEventListener("focus", clearWarning);
     commandInput.removeEventListener("input", clearWarning);
   };
-
   commandInput.addEventListener("focus", clearWarning);
   commandInput.addEventListener("input", clearWarning);
-});
+}
+
+socket.on("command-warning", showCommandMessage);
 
 socket.on("clear-data", () => {
   csvData = [];
@@ -656,7 +657,7 @@ if (sendBtn) {
     const command = commandInput.value.trim().toUpperCase();
     if (!command) return;
 
-    addCommandEcho(command);
+    //addCommandEcho(command);
     socket.emit("send-command", command);
 
     commandInput.value = "";

@@ -14,7 +14,7 @@ def detect():
     ports = serial.tools.list_ports.comports()
 
     if not ports:
-        return "No physical or virtual ports found."
+        print("No physical or virtual ports found.")
 
     matched_ports = []
 
@@ -33,7 +33,8 @@ def detect():
         ):
         # if name in port
             if is_port_available(port):
-                return port
+                print(port)
 
-    return "No available XBEE port found."
+    print("No available XBEE port found.")
 
+detect()

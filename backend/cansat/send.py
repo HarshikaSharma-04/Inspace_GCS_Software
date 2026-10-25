@@ -3,38 +3,59 @@ import serial
 import time
 import os
 from transmit_sim import SimulationMode
-# --- CONFIGURATION ---
-PORT = "/dev/ttys005" #/dev/cu.SLAB_USBtoUART
-BAUD = 115200
 
+# --- CONFIGURATION ---
+PORT = "COM2"
+BAUD = 115200
 TELEMETRY_CSV = "stress_csv.csv"
 
-SIMULATION_CSV = "sim.txt"  # Create this file or point to your SIM path
-H = 0.0
-IS_SIM_ENABLED = False
-IS_SIM_ACTIVATED = False
+is_sim_enabled = False
+is_sim_activated = False
 sim = SimulationMode()
 
+def process_command(ser, command, current_row=None):
+    """Single point of truth for command processing."""
+    global is_sim_enabled, is_sim_activated
 
-def calculate_tti(desc_velocity,altitude):
-    adjustment_factor = 0.000001 # avoid dividing by 0
-    tti = float(altitude) / (float(desc_velocity) + adjustment_factor)
-    return tti
+    print(f"[GCS] Command Received: {command}")
 
-def is_pressure_command(command):
-    if not command.endswith("N") or command in {
-        "1N", "2N", "3N", "4N", "5N", "6N", "7N", "8N", "9N", "10N", "11N"
-    }:
-        return False
-    try:
-        float(command[:-1])
-    except ValueError:
-        return False
-    return True
-
+    if command == "1N":
+        print("Action: Starting Telemetry Stream...")
+        stream_csv_data(ser, TELEMETRY_CSV)
+    elif command == "2N":
+        print("Action: Stopping Telemetry Stream...")
+        return "STOP"
+    elif command == "3N":
+        is_sim_enabled = True
+        print("Action: Simulation ENABLED")
+    elif command == "4N":
+        if is_sim_enabled:
+            is_sim_activated = True
+            print("Action: Simulation Mode ACTIVATED")
+            sim.read_csv(ser, command)
+        else:
+            print("ERROR: Simulation Mode NOT ENABLED")
+    elif command == "5N":
+        if is_sim_enabled:
+            is_sim_activated = False
+            print("Action: Simulation Mode DEACTIVATED")
+        else:
+            print("ERROR: Simulation Mode NOT ACTIVATED")
+    elif command == "7N":
+        print("Action: Calibrating altitude...")
+        if current_row and len(current_row) > 3:
+            current_row[3] = "0.0"
+    elif command == "8N":
+        print("Action: Servo ON")
+    elif command == "9N":
+        print("Action: Servo OFF")
+    elif command == "10N":
+        print("Action: GYRO ON")
+    elif command == "11N":
+        print("Action: GYRO OFF")
+    return None
 
 def run_sender():
-    global IS_SIM_ENABLED; global IS_SIM_ACTIVATED
     try:
         ser = serial.Serial(port=PORT, baudrate=BAUD, timeout=0.1)
         print(f"Serial port opened: {ser.name}")
@@ -43,50 +64,11 @@ def run_sender():
         return
 
     print("--- GCS SENDER ACTIVE ---")
-    print("Waiting for commands...")
-
     try:
-        # command reception loop
         while True:
             if ser.in_waiting > 0:
-                # Read command from Node.js
                 command = ser.readline().decode("utf-8").strip().upper()
-                print(f"Command Received: {command}")
-                print(command)
-                if command == "1N":
-                    print(f"Command Received: CXON")
-                    print("Action: Starting Telemetry Stream...")
-                    stream_csv_data(ser, TELEMETRY_CSV)
-                if command == "2N":
-                    print(f"Command Received: CXOFF")
-                    #print("CX_OFF") 
-                if command == "3N":
-                    print(f"Command Received: SIM ENABLE")
-                    print("Action: Simulation ENABLED")
-                if command == "4N":
-                    print(f"Command Received: SIM ACTIVE")
-                    print("Action: Simulation Mode Active")
-                    sim.read_csv(ser,command)
-                if command == "5N":
-                    print(f"Command Received: SIM DISABLE")
-                    print("Action: Simulation DISABLED")
-                    return
-                if command == "7N":
-                    print(f"Command Received: CAL")
-                    print("Action: Calibrating altitude...")
-                if command == "8N":
-                    print(f"Command Received: SERVO ON")
-                    print("Action: Servo ON")
-                if command == "9N":
-                    print(f"Command Received: SERVO OFF")
-                    print("Action: Servo OFF")
-                if command == "10N": 
-                    print(f"Command Received: GYRO ON")
-                    print("Action: GYRO ON") 
-                    ser.write("")
-                if command == "11N":
-                    print(f"Command Received: GYRO OFF")
-                    print("Action: GYRO OFF")
+                process_command(ser, command)
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("\nSender stopped by user.")
@@ -95,67 +77,27 @@ def run_sender():
             ser.close()
             print("Serial port closed.")
 
-
-    
-def stream_csv_data(ser, file_path, simulated_H = None, simulated_P = None):
-    """Generic function to stream any CSV until finished or stopped by GCS."""
-    TOTAL_PKT_COUNT = 0 
-    global IS_SIM_ENABLED;global IS_SIM_ACTIVATED
+def stream_csv_data(ser, file_path):
     if not os.path.exists(file_path):
         print(f"Error: File {file_path} not found.")
         return
     try:
         with open(file_path, "r") as file:
             reader = csv.reader(file)
-            header = next(reader)
+            next(reader, None)  # Skip header
             for row in reader:
-                # Use 'while' instead of 'if' to read ALL waiting commands and prevent lagging
                 while ser.in_waiting > 0:
                     interrupt = ser.readline().decode("utf-8").strip().upper()
-                    print("Interrupt: ",interrupt)
-                    if interrupt == "2N":
-                        print(f"Stream stopped by: CXOFF")
+                    status = process_command(ser, interrupt, current_row=row)
+                    if status == "STOP":
                         return
-                    elif interrupt == "3N":
-                        IS_SIM_ENABLED = True
-                        print("Action: Simulation ENABLED")
-                    elif interrupt == "4N":
-                        if IS_SIM_ENABLED:
-                            print("SIMULATION MODE ACTIVATED....")  
-                            IS_SIM_ACTIVATED = True 
-                        else:
-                            print("ERROR: SIMULATION MODE NOT ENABLED") 
-                    elif interrupt == "5N":
-                        if IS_SIM_ENABLED:
-                            print("SIMULATION MODE DEACTIVATED...")
-                            IS_SIM_ACTIVATED = False
-                        else:
-                            print("ERROR: SIMULATION MODE NOT ACTIVATED..")  
-                    elif interrupt == "7N":
-                        print("Action: Calibrating...")
-                        row[3] = "0.0"
-                    elif interrupt == "8N":
-                         print("Action: Servo ON")
-                    elif interrupt == "9N":
-                         print("Action: Servo Off")   
-                    elif interrupt == "10N":
-                         print("Action: GYRO ON")   
-                    elif interrupt == "11N":
-                        print("GYRO OFF")
-                # append the new data
-                current_tti = calculate_tti(row[20],row[3])
-                print(current_tti)
-                row.append(str(current_tti))
-                # Send the data row
-                data_line = ",".join(row) + "\n"
-                ser.write(data_line.encode("utf-8"))
-                TOTAL_PKT_COUNT += 1
-                
-                # Telemetry rate (1 second)
-                time.sleep(1)
-            
-            print("End of file reached.")
 
+                data_line = ",".join(row) + "\n"
+                print(f"[PKT SENT]: {row[2]}")
+                ser.write(data_line.encode("utf-8"))
+                time.sleep(1)
+
+            print("End of file reached.")
     except Exception as e:
         print(f"Streaming Error: {e}")
 
