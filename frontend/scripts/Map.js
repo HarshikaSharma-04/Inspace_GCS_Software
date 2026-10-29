@@ -4,7 +4,7 @@ let initialMarker = null;
 let flightPathPolyline = null;
 let trajectoryCoordinates = [];
 let circle = null;
-const cansatLocation = [19.2243, 72.8680];
+const cansatLocation = [26.7210, 84.3036];
 const greenIcon = new L.Icon({
     iconUrl: 'images/launch_pad.png',
     iconSize: [25, 41],
@@ -44,11 +44,19 @@ export function Map() {
         zoomControl: false,
         preferCanvas: true
     }).setView(cansatLocation, 17);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    L.tileLayer('/tiles/{z}/{x}/{y}.jpg', {
+        minZoom: 11,
+        maxZoom: 19,
+        maxNativeZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
     }).addTo(map);
     trajectoryCoordinates = [[cansatLocation[0], cansatLocation[1]]];
-    circle = L.circle([19.2243, 72.8680], {
+    circle = L.circle([26.7210, 84.3036], {
         color: 'green',
         fillColor: 'rgb(17, 255, 0)',
         fillOpacity: 0.4,

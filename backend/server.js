@@ -13,10 +13,17 @@ const { writeTelemetryRow, integrateGyroToDegrees } = require("./pipeline/teleme
 const { getSimulationCommands, stripSimCommand } = require("./pipeline/readSimValues");
 
 const PORT = 3000;
+const COMMAND_RATE_HZ = 20;
+const COMMAND_INTERVAL_NS = BigInt(1_000_000_000 / COMMAND_RATE_HZ);
 let isSimEnabled = false;
 let isSimActivated = false;
 let isCxSent = false;
 let simInterval = null;
+let currentCommand = null;
+let commandStreamTimer = null;
+let commandStreamRunning = false;
+let nextCommandTick = null;
+let commandsRemaining = 0;
 //6N:SIMP
 
 const validCommands = {
@@ -32,11 +39,65 @@ const validCommands = {
   "CMD,041,MEC,GYRO,OFF": "11N",
 };
 
+function setCurrentCommand(command) {
+  currentCommand = command;
+  commandsRemaining = COMMAND_RATE_HZ;
+  startCommandStream();
+}
+
+function stopCommandStream() {
+  commandStreamRunning = false;
+  nextCommandTick = null;
+  commandsRemaining = 0;
+  if (commandStreamTimer) {
+    clearTimeout(commandStreamTimer);
+    commandStreamTimer = null;
+  }
+}
+
+function commandStreamTick() {
+  if (!commandStreamRunning) return;
+
+  if (currentCommand && commandsRemaining > 0) {
+    const commandNumber = COMMAND_RATE_HZ - commandsRemaining + 1;
+    commandsRemaining--;
+    console.log(`Sending command (${commandNumber}/${COMMAND_RATE_HZ}):`, currentCommand);
+    serialPort.sendCommand(currentCommand, (err) => {
+      if (err) {
+        console.error("Serial Write Error:", err.message);
+        stopCommandStream();
+      }
+    });
+  }
+
+  if (!commandStreamRunning) return;
+  if (commandsRemaining === 0) {
+    stopCommandStream();
+    return;
+  }
+
+  nextCommandTick += COMMAND_INTERVAL_NS;
+  const delayNs = nextCommandTick - process.hrtime.bigint();
+  commandStreamTimer = setTimeout(
+    commandStreamTick,
+    Number(delayNs > 0n ? delayNs : 0n) / 1_000_000
+  );
+}
+
+function startCommandStream() {
+  if (commandStreamRunning) return;
+
+  commandStreamRunning = true;
+  nextCommandTick = process.hrtime.bigint();
+  commandStreamTick();
+}
+
 //for offline
 app.use(
   "/node_modules",
   express.static(path.join(__dirname, "node_modules"))
 );
+app.use("/tiles", express.static(path.join(__dirname, "..", "frontend", "tiles")));
 
 // Serve static files from the frontend directory
 app.use(express.static(path.join(__dirname, "..", "frontend")));
@@ -140,6 +201,8 @@ serialPort.on("telemetry", (packet) => {
   handleCanSatData(packet);
 });
 
+serialPort.on("serial-error", stopCommandStream);
+
 
 io.on("connection", (socket) => {
   socket.on("send-command", (cmd) => {
@@ -202,9 +265,7 @@ io.on("connection", (socket) => {
           //io.emit("sim-command", fullCommand);
           socket.emit("command-success", fullCommand);
           const strippedValue = stripSimCommand(fullCommand);
-          serialPort.sendCommand(strippedValue, (err) => {
-            if (err) console.error("Serial Write Error:", err.message);
-          });
+          setCurrentCommand(strippedValue);
           index++;
         } else {
           clearInterval(simInterval);
@@ -214,18 +275,7 @@ io.on("connection", (socket) => {
 
     // write on port
 
-    serialPort.sendCommand(command, (err) => {
-      if (err) {
-        socket.emit("command-warning", "Failed to send command");
-        return;
-      }
-      if (cmd === "CMD,041,SIM,ENABLE") {
-        socket.emit("command-response", "Simulation Enabled");
-      }
-      else if (cmd === "CMD,041,SIM,ACTIVATE") {
-        socket.emit("command-response", "Simulation Started");
-      }
-    });
+    setCurrentCommand(command);
     socket.emit("command-success", cmd);
   });
   socket.on("disconnect", () => {
@@ -236,6 +286,7 @@ io.on("connection", (socket) => {
 
 function shutdown() {
   console.log("Closing server and serial connections...");
+  stopCommandStream();
   serialPort.close(() => {
     server.close(() => {
       process.exit(0);

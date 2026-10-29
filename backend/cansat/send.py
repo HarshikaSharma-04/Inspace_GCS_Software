@@ -8,18 +8,36 @@ from transmit_sim import SimulationMode
 PORT = "COM2"
 BAUD = 115200
 TELEMETRY_CSV = "stress_csv.csv"
+COMMAND_DEDUPLICATION_SECONDS = 2
 
 is_sim_enabled = False
 is_sim_activated = False
+is_telemetry_streaming = False
+last_processed_command = None
+last_processed_command_time = 0
 sim = SimulationMode()
 
 def process_command(ser, command, current_row=None):
     """Single point of truth for command processing."""
-    global is_sim_enabled, is_sim_activated
+    global is_sim_enabled, is_sim_activated, last_processed_command, last_processed_command_time
+
+    current_time = time.monotonic()
+    if (
+        command == last_processed_command and
+        current_time - last_processed_command_time < COMMAND_DEDUPLICATION_SECONDS
+    ):
+        print(f"[GCS] Duplicate Command Ignored: {command}")
+        return
+
+    last_processed_command = command
+    last_processed_command_time = current_time
 
     print(f"[GCS] Command Received: {command}")
 
     if command == "1N":
+        if is_telemetry_streaming:
+            print("Action: Telemetry Stream already running.")
+            return
         print("Action: Starting Telemetry Stream...")
         stream_csv_data(ser, TELEMETRY_CSV)
     elif command == "2N":
@@ -78,8 +96,15 @@ def run_sender():
             print("Serial port closed.")
 
 def stream_csv_data(ser, file_path):
+    global is_telemetry_streaming
+
+    if is_telemetry_streaming:
+        return
+    is_telemetry_streaming = True
+
     if not os.path.exists(file_path):
         print(f"Error: File {file_path} not found.")
+        is_telemetry_streaming = False
         return
     try:
         with open(file_path, "r") as file:
@@ -100,6 +125,8 @@ def stream_csv_data(ser, file_path):
             print("End of file reached.")
     except Exception as e:
         print(f"Streaming Error: {e}")
+    finally:
+        is_telemetry_streaming = False
 
 if __name__ == "__main__":
     run_sender()

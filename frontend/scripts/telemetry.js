@@ -62,8 +62,8 @@ const GNSS_PLOT_ID = "GNSS-3d-plot";
 
 // --- Global state ---
 const MAX_3D_POINTS = 900;
-const MAX_BUFFERED_ROWS = 900;
-const MAX_TABLE_ROWS = 10000;
+const MAX_BUFFERED_ROWS = 900;//for 3D plot
+const MAX_TABLE_ROWS = 900;//for csv table
 let MAX_POINTS = 900;
 
 const xBuffer = new Float32Array(MAX_3D_POINTS);

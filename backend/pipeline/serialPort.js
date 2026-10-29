@@ -25,6 +25,7 @@ class SerialService extends EventEmitter {
 
     this.port.on("error", (err) => {
       console.error("Serial error:", err);
+      this.emit("serial-error", err);
     });
   }
   sendCommand(cmd, callback) {
@@ -32,7 +33,7 @@ class SerialService extends EventEmitter {
       return callback(new Error("Serial port is not open"));
     }
 
-    this.port.write(`${cmd}`, (err) => {
+    this.port.write(`${cmd}\n`, (err) => {
       //console.log("Command sent:", cmd);
       if (err) {
         console.error("Serial Write Error:", err);
@@ -41,6 +42,13 @@ class SerialService extends EventEmitter {
 
 
     });
+  }
+  close(callback) {
+    if (!this.port.isOpen) {
+      return callback();
+    }
+
+    this.port.close(callback);
   }
 }
 
