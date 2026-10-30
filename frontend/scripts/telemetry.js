@@ -46,6 +46,7 @@ const sidebarGNSSSatsEls = document.querySelectorAll(".sidebar-gnss-sats-value")
 const RPY_SELECTORS = [
   ".sidebar-gyro-r", ".sidebar-gyro-p", ".sidebar-gyro-y",
   ".sidebar-accel-r", ".sidebar-accel-p", ".sidebar-accel-y",
+  ".sidebar-mag-r", ".sidebar-mag-p", ".sidebar-mag-y",
 ];
 
 // --- Commands ---
@@ -110,6 +111,12 @@ const GRAPH_LAYOUT = [
     units: "GYROSCOPE",
     combined: ["GYRO_R", "GYRO_P", "GYRO_Y"],
   },
+  {
+    id: "MAG_COMBINED",
+    title: "MAGNETIC FIELD",
+    units: "MAGNETOMETER",
+    combined: ["MAG_R", "MAG_P", "MAG_Y"],
+  },
   { id: "VOLTAGE", title: "VOLTAGE", units: "VOLTAGE" },
 ];
 
@@ -160,32 +167,36 @@ socket.on("clear-data", () => {
 const _CT_COLS = [
   { title: "TEAM_ID", field: "TEAM_ID", w: 120 },
   { title: "TIME", field: "TIME_STAMP", w: 50 },
-  { title: "PKT", field: "PACKET_COUNT", w: 40 },
+  { title: "PKT", field: "PACKET_COUNT", w: 30 },
   { title: "ALT", field: "ALTITUDE", w: 35 },
-  { title: "PRESSURE", field: "PRESSURE", w: 45 },
+  { title: "PRESSURE", field: "PRESSURE", w: 49 },
   { title: "TEMP", field: "TEMPERATURE", w: 35 },
-  { title: "VOLT", field: "VOLTAGE", w: 40 },
+  { title: "VOLT", field: "VOLTAGE", w: 35 },
 
   { title: "GNSS_TIME", field: "GNSS_TIME", w: 55 },
   { title: "GNSS_LAT", field: "GNSS_LATITUDE", w: 55 },
-  { title: "GNSS_LONG", field: "GNSS_LONGITUDE", w: 55 },
-  { title: "GNSS_ALT", field: "GNSS_ALTITUDE", w: 55 },
-  { title: "GNSS_SATS", field: "GNSS_SATS", w: 50 },
+  { title: "GNSS_LONG", field: "GNSS_LONGITUDE", w: 57 },
+  { title: "GNSS_ALT", field: "GNSS_ALTITUDE", w: 50 },
+  { title: "GNSS_SATS", field: "GNSS_SATS", w: 55 },
 
-  { title: "ACCEL_R", field: "ACCEL_R", w: 55 },
-  { title: "ACCEL_P", field: "ACCEL_P", w: 55 },
-  { title: "ACCEL_Y", field: "ACCEL_Y", w: 55 },
+  { title: "ACCEL_R", field: "ACCEL_R", w: 45 },
+  { title: "ACCEL_P", field: "ACCEL_P", w: 45 },
+  { title: "ACCEL_Y", field: "ACCEL_Y", w: 45 },
 
-  { title: "GYRO_R", field: "GYRO_R", w: 50 },
-  { title: "GYRO_P", field: "GYRO_P", w: 50 },
-  { title: "GYRO_Y", field: "GYRO_Y", w: 50 },
+  { title: "GYRO_R", field: "GYRO_R", w: 45 },
+  { title: "GYRO_P", field: "GYRO_P", w: 45 },
+  { title: "GYRO_Y", field: "GYRO_Y", w: 45 },
+
+  { title: "MAG_R", field: "MAG_R", w: 40 },
+  { title: "MAG_P", field: "MAG_P", w: 40 },
+  { title: "MAG_Y", field: "MAG_Y", w: 40 },
 
   { title: "STATE", field: "FLIGHT_SOFTWARE_STATE", w: 90 },
   { title: "CMD", field: "CMD_ECHO", w: 50 },
   { title: "G/D_RATIO", field: "GLIDE_RATIO", w: 50 },
-  { title: "HEADING", field: "HEADING", w: 40 },
-  { title: "BEARING", field: "BEARING", w: 40 },
-  { title: "HEADING_ERR", field: "HEADING_ERROR", w: 50 }
+  { title: "H/D", field: "HEADING", w: 40 },
+  { title: "B/R", field: "BEARING", w: 40 },
+  { title: "H/D_ERR", field: "HEADING_ERROR", w: 50 }
 ];
 
 function initTabulator() {
@@ -351,6 +362,9 @@ function updateSidebarTelemetry(row) {
   setText(".sidebar-accel-r", row.ACCEL_R);
   setText(".sidebar-accel-p", row.ACCEL_P);
   setText(".sidebar-accel-y", row.ACCEL_Y);
+  setText(".sidebar-mag-r", row.MAG_R);
+  setText(".sidebar-mag-p", row.MAG_P);
+  setText(".sidebar-mag-y", row.MAG_Y);
 
   // GNSS
   sidebarGNSSTimeEls.forEach((el) => (el.innerText = `${row["GNSS_TIME"]}`));

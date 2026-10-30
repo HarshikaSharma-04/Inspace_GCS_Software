@@ -30,7 +30,7 @@ const TELEMETRY_CSV_PATH = join(
 const CSV_HEADER =
   "TEAM_ID,TIME_STAMP,PACKET_COUNT,ALTITUDE,PRESSURE,TEMPERATURE,VOLTAGE," +
   "GNSS_TIME,GNSS_LATITUDE,GNSS_LONGITUDE,GNSS_ALTITUDE,GNSS_SATS,ACCEL_R,ACCEL_P,ACCEL_Y," +
-  "GYRO_R,GYRO_P,GYRO_Y,FLIGHT_SOFTWARE_STATE,CMD_ECHO\n";
+  "GYRO_R,GYRO_P,GYRO_Y,MAG_R,MAG_P,MAG_Y,FLIGHT_SOFTWARE_STATE,CMD_ECHO\n";
 
 
 async function initTelemetryCSV() {
@@ -68,6 +68,9 @@ async function writeTelemetryRow(data) {
       GYRO_R,
       GYRO_P,
       GYRO_Y,
+      MAG_R,
+      MAG_P,
+      MAG_Y,
       FLIGHT_SOFTWARE_STATE,
       CMD_ECHO
   } = data;
@@ -93,6 +96,9 @@ async function writeTelemetryRow(data) {
       GYRO_R,
       GYRO_P,
       GYRO_Y,
+      MAG_R,
+      MAG_P,
+      MAG_Y,
       FLIGHT_SOFTWARE_STATE,
       CMD_ECHO
     ].join(",") + "\n";
