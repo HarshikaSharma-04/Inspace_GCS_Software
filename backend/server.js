@@ -123,6 +123,11 @@ function resolveDecimal(value, precision) {
 async function handleCanSatData(rawString) {
   let data;
   const parts = rawString.split(",").map((p) => p.trim());
+  // if (parts.length !== 27) {
+  //   console.warn("Ignoring non-telemetry serial data:", rawString);
+  //   return;
+  // }
+
   const [
     TEAM_ID,
     TIME_STAMP,
@@ -142,6 +147,9 @@ async function handleCanSatData(rawString) {
     GYRO_R,
     GYRO_P,
     GYRO_Y,
+    MAG_R,
+    MAG_P,
+    MAG_Y,
     FLIGHT_SOFTWARE_STATE,
     CMD_ECHO,
     GLIDE_RATIO,
@@ -149,6 +157,7 @@ async function handleCanSatData(rawString) {
     BEARING,
     HEADING_ERROR
   ] = parts;
+  
   data = {
     TEAM_ID,
     TIME_STAMP,
@@ -168,6 +177,9 @@ async function handleCanSatData(rawString) {
     GYRO_R: resolveDecimal(GYRO_R, 2),
     GYRO_P: resolveDecimal(GYRO_P, 2),
     GYRO_Y: resolveDecimal(GYRO_Y, 2),
+    MAG_R: resolveDecimal(MAG_R, 2),
+    MAG_P: resolveDecimal(MAG_P, 2),
+    MAG_Y: resolveDecimal(MAG_Y, 2),
     FLIGHT_SOFTWARE_STATE,
     CMD_ECHO: CMD_ECHO ? CMD_ECHO.replace(/"/g, "") : "",
     GLIDE_RATIO: resolveDecimal(GLIDE_RATIO, 2),
@@ -183,14 +195,14 @@ async function handleCanSatData(rawString) {
   let cleanedData = data; // Temporary variable to hold filtered data
   try {
     writeTelemetryRow(cleanedData).catch((err) => {
-      socket.emit("telemetry-write-error", "Error writing telemetry data: " + err.message);
+      io.emit("telemetry-write-error", "Error writing telemetry data: " + err.message);
     });
     const result = await filterGarbage(data);
     if (result != null) {
       cleanedData = result;
     }
   } catch (filterError) {
-    socket.emit("telemetry-filter-error", "Error filtering telemetry data: " + filterError.message);
+    io.emit("telemetry-filter-error", "Error filtering telemetry data: " + filterError.message);
   }
   // final emit....this is independent
   io.emit("telemetry-update", cleanedData);
@@ -254,7 +266,7 @@ io.on("connection", (socket) => {
       }
       socket.emit("command-response", "Simulation Stopped");
     }
-    if (isSimActivated && isSimActivated) {
+    if (isSimActivated && isSimEnabled && cmd === "CMD,041,SIM,ACTIVATE") {
       socket.emit("sim-command-response", "Simulation Mode Started");
       const rawSimCommands = getSimulationCommands();
       let index = 0;

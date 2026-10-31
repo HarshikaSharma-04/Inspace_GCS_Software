@@ -72,7 +72,11 @@ async function writeTelemetryRow(data) {
       MAG_P,
       MAG_Y,
       FLIGHT_SOFTWARE_STATE,
-      CMD_ECHO
+      CMD_ECHO,
+      GLIDE_RATIO,
+      HEADING,
+      BEARING,
+      HEADING_ERROR
   } = data;
 
   // Create CSV row
@@ -100,7 +104,11 @@ async function writeTelemetryRow(data) {
       MAG_P,
       MAG_Y,
       FLIGHT_SOFTWARE_STATE,
-      CMD_ECHO
+      CMD_ECHO,
+      GLIDE_RATIO,
+      HEADING,
+      BEARING,
+      HEADING_ERROR
     ].join(",") + "\n";
 
   try {
