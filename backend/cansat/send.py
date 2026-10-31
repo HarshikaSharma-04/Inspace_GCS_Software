@@ -9,6 +9,9 @@ PORT = "COM2"
 BAUD = 115200
 TELEMETRY_CSV = "stress_csv.csv"
 COMMAND_DEDUPLICATION_SECONDS = 2
+SIMULATOR_COMMANDS = {
+    "1N", "2N", "3N", "4N", "5N", "7N", "8N", "9N", "10N", "11N"
+}
 
 is_sim_enabled = False
 is_sim_activated = False
@@ -20,6 +23,10 @@ sim = SimulationMode()
 def process_command(ser, command, current_row=None):
     """Single point of truth for command processing."""
     global is_sim_enabled, is_sim_activated, last_processed_command, last_processed_command_time
+
+    command = command.strip().upper()
+    if command in SIMULATOR_COMMANDS:
+        ser.write(f"ACK,{command}\n".encode("utf-8"))
 
     current_time = time.monotonic()
     if (
