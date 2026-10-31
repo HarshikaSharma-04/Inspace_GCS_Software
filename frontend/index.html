@@ -6,48 +6,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DJS ARYA GUI</title>
   <link rel="stylesheet" href="sectionsCSS/style.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!--<link rel="stylesheet" href="sectionsCSS/style_update.css" />-->
+  <link rel="stylesheet" href="/node_modules/leaflet/dist/leaflet.css">
+  <script type="importmap">
+    {
+      "imports": {
+      "three": "/node_modules/three/build/three.module.js",
+      "three/examples/jsm/": "/node_modules/three/examples/jsm/"
+    }
+    }
+  </script>
+
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css">
 </head>
 
 <body>
   <header class="title-container">
 
-    <!-- TOP ROW -->
-    <div class="data-details">
+    <!-- LEFT SECTION: MAIN HEADER -->
+    <div class="main-header">
 
-      <img src="images/indian_flag.png" alt="flag" class="indian-flag" />
+      <img src="images/indian_flag.png" alt="flag" class="indian-flag">
 
-      <h3 class="team-id">TEAM ID 041</h3>
+      <div class="team-branding-box">
+        <h1 class="team-name">DJS ARYA</h1>
+        <h3 class="team-id">TEAM ID: 2026-INSPACe-CAN-7USAT-041</h3>
+      </div>
 
-      <h3 class="data">
-        Mission Time: <span class="mission-time-value">00:00:00</span>
-      </h3>
+      <div class="time-details">
 
-      <h1 class="team-name">DJS ARYA</h1>
+        <div class="time-data-box">
+          <span class="time-label">Mission Time: <span class="time-value mission-time-value">00:00:00</span></span>
 
-      <h3 class="data">
-        Packet Count: <span class="packet-count-value">0000</span>
-      </h3>
+        </div>
 
-      <h3 class="data">
-        Mode: <span class="mode-value">Flight</span>
-      </h3>
+        <div class="time-data-box">
+          <span class="time-label">GNSS Time: <span class="time-value sidebar-gnss-time-value">00:00:00</span></span>
 
-      <img src="images/team_logo.png" alt="team-logo" class="team-logo" />
+        </div>
+
+      </div>
 
     </div>
 
-    <!-- NAV ROW -->
-    <!-- <div class="nav-tabs"> -->
-    <div class="tabs-options">
-      <button class="page-button telemetry-btn--home">HOME</button>
-      <button class="page-button telemetry-btn--graph">GRAPHS</button>
-      <button class="page-button telemetry-btn--csv">CSV</button>
+    <!-- RIGHT SECTION: LOGO AND BUTTONS -->
+    <div class="header-right">
+
+      <div class="logo-container">
+        <img src="images/team_logo.png" alt="team-logo" class="team-logo">
+      </div>
+
+      <div class="tabs-options">
+        <button class="page-button telemetry-btn--home"><i class="fa fa-home"></i>HOME</button>
+        <button class="page-button telemetry-btn--graph"><i class="fa fa-line-chart"></i>GRAPHS</button>
+        <button class="page-button telemetry-btn--csv"><i class="fa fa-table"></i>CSV</button>
+      </div>
+
     </div>
-    <!-- </div> -->
+
+    </div>
 
   </header>
 
@@ -59,111 +77,101 @@
       <!--Yahan se Flight state aur command section-->
       <div class="flight-state-command-section">
         <div class="flight-stage">
-
-          <div class="stage-box">
-            BOOT
-          </div>
-
-          <div class="arrow">→</div>
-
           <div class="stage-box">
             LAUNCH_PAD
           </div>
-
-
           <div class="arrow">→</div>
-
           <div class="stage-box">
             ASCENT
           </div>
-
-
           <div class="arrow">→</div>
-
           <div class="stage-box">
             DESCENT
           </div>
-
           <div class="arrow">→</div>
-
           <div class="stage-box">
             PARAGLIDER_DEPLOYMENT
           </div>
-
           <div class="arrow">→</div>
-
           <div class="stage-box">
             LANDED
           </div>
+        </div>
+        <div class="time-panel-row">
+
+          <div class="field text-highlight-cell">
+            <span class="label p">Packet Count</span>
+            <span class="value packet-count-value">0000</span>
+          </div>
+
+          <div class="field text-highlight-cell">
+            <span class="label p">Mode</span>
+            <span class="value mode-value">FLIGHT</span>
+          </div>
 
         </div>
+
 
       </div>
       <!-- Main telemetry visualizations - csv, graphs, map section-->
       <div class="telemetry-visualization-section">
-        <div class="sidebar-sub-section gnss-container">
-          <div class="sidebar-sub-title">GNSS TELEMETRY</div>
-
-          <div class="sidebar-fields">
-
-            <div class="field">
-              <span class="label">GNSS Time:</span>
-              <span class="value sidebar-gnss-time-value">--</span>
-            </div>
-
-            <div class="field">
-              <span class="label">GNSS Altitude:</span>
-              <span class="value sidebar-gnss-altitude-value">--</span>
-            </div>
-
-            <div class="field">
-              <span class="label">GNSS Latitude:</span>
-              <span class="value sidebar-gnss-latitude-value">--</span>
-            </div>
-
-            <div class="field">
-              <span class="label">GNSS Longitude:</span>
-              <span class="value sidebar-gnss-longitude-value">--</span>
-            </div>
-
-            <div class="field">
-              <span class="label">GNSS Sats:</span>
-              <span class="value sidebar-gnss-sats-value">--</span>
-            </div>
-
+        <div id="telemetry-table" class="telemetry-csv-container"></div>
+        <div class="telemetry-graph-container"></div>
+        <div class="telemetry-map-container">
+          <div class="tilt-container">
+            <h2 class="telemetry-panel-heading">TILT ORIENTATION</h2>
           </div>
-          <div class="cmd-bottom-container">
-            <div class="cmd-echo-section">
-              <div class="cmd-echo-title">CMD ECHO</div>
-              <div class="cmd-echo-list" id="cmd-echo-list">
-                <span class="cmd-echo-empty">No commands sent</span>
+          <div class="servo-container">
+            <h2 class="telemetry-panel-heading">HEADING & BEARING ANGLE</h2>
+            <div id="heading-bearing-plot"></div>
+          </div>
+        </div>
+        <div class="map-wrapper">
+          <div class="map-split">
+            <div class="map-area">
+              <div id="map">
+                <div class="map-title">Live Location</div>
+                <div class="map-north-indicator" aria-label="North">
+                  <span class="map-north-arrow" aria-hidden="true"></span>
+                  <span>N</span>
+                </div>
+                <div class="map-controls">
+                  <input type="checkbox" id="autoPanToggle" checked />
+                  <label for="autoPanToggle">LOCK TO CANSAT</label>
+                </div>
               </div>
             </div>
-            <!--New position for Command section-->
-            <div class="command-area">
-              <div class="command-section">
-                <input type="text" class="command" id="commandInput" placeholder="Enter Command" />
+            <div class="cmd-bottom-container">
+              <div class="command-area">
+                <div class="command-section">
+                  <input type="text" class="command" id="commandInput" placeholder="Enter Command" />
+                  <button class="send-btn">SEND</button>
+                </div>
+                <div class="cmd-echo-section">
+                  <div class="cmd-echo-header">
+                    <div class="cmd-echo-title">CMD ECHO</div>
+                    <div class="cmd-echo-divider">────</div>
+                  </div>
+                  <div class="cmd-echo-list" id="cmd-echo-list">
+                    <span class="cmd-echo-empty">No commands sent</span>
+                  </div>
+                </div>
               </div>
-              <button class="send-btn">SEND</button>
             </div>
           </div>
         </div>
-        <div id="telemetry-table" class="telemetry-csv-container"></div>
-        <div class="telemetry-graph-container"></div>
-        <div class="telemetry-map-container"></div>
-        <div id="map"></div>
       </div>
     </div>
 
     <!-- Sidebar -->
     <div class="sidebar">
-
       <div class="sidebar-sub-section sidebar-sub-section">
         <div class="sidebar-sub-title telemetry">TELEMETRY</div>
 
         <div class="sidebar-fields">
           <!-- Grid wrapper for 1 row, 2 boxes -->
           <div class="sensor-grid">
+
             <div class="field">
               <span class="label">Temperature (°C)</span>
               <span class="value sidebar-temp-value">--</span>
@@ -184,6 +192,35 @@
               <span class="value sidebar-altitude-value">--</span>
             </div>
 
+            <div class="field">
+              <span class="label">GNSS Sats</span>
+              <span class="value sidebar-gnss-sats-value">--</span>
+            </div>
+
+            <div class="field">
+              <span class="label">GNSS Altitude</span>
+              <span class="value sidebar-gnss-altitude-value">--</span>
+            </div>
+
+            <div class="field">
+              <span class="label">GNSS Longitude</span>
+              <span class="value sidebar-gnss-longitude-value">--</span>
+            </div>
+
+            <div class="field">
+              <span class="label">GNSS Latitude</span>
+              <span class="value sidebar-gnss-latitude-value">--</span>
+            </div>
+
+            <div class="field">
+              <span class="label">Glide Ratio</span>
+              <span class="value sidebar-glide-ratio-value">--</span>
+            </div>
+
+            <div class="field">
+              <span class="label">Heading error (°)</span>
+              <span class="value sidebar-heading-error-value">--</span>
+            </div>
           </div>
 
 
@@ -206,23 +243,22 @@
             </span>
           </div>
 
+          <div class="field column">
+            <span class="label">Magnetic Field [R, P, Y] (µT)</span>
+            <span class="value">
+              [ <span class="sidebar-mag-r">--</span>,
+              <span class="sidebar-mag-p">--</span>,
+              <span class="sidebar-mag-y">--</span> ]
+            </span>
+          </div>
+
 
         </div>
       </div>
 
-      <!-- <div class="sidebar-sub-section-for-simulation">
-        <div class="sim-option">
-          <button class="switch"><h4 class="simulation-mode-title">SIM ENABLE</h4></button>
-        </div>
-
-        <div class="sim-option">
-          <button class="switch"><h4 class="simulation-mode-title">SIM ACTIVATE</h4></button>
-        </div>
-      </div> -->
-
       <!-- 3D Plot Section -->
       <div class="plot-3d-section">
-        <div class="plot-3d-title">GPS Coordinates</div>
+        <div class="plot-3d-title">GNSS PLOT</div>
         <div id="GNSS-3d-plot"></div>
       </div>
     </div>
@@ -230,14 +266,14 @@
   <!--seperate div for other data fields-->
   <div class="second-container"></div>
 </body>
+<script src="/node_modules/socket.io-client/dist/socket.io.js"></script>
+<script src="/node_modules/chart.js/dist/chart.umd.js"></script>
+<script src="/node_modules/papaparse/papaparse.min.js"></script>
+<script src="/node_modules/plotly.js-dist/plotly.js"></script>
+<script src="/node_modules/leaflet/dist/leaflet.js"></script>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 
-<script src="plot3d.js"></script>
 <script src="/socket.io/socket.io.js"></script>
-<script type="module" src="telemetry.js"></script>
+<script type="module" src="./scripts/telemetry.js"></script>
 
 </html>
