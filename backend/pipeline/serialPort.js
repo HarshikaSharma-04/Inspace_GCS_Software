@@ -18,9 +18,13 @@ class SerialService extends EventEmitter {
     });
 
     parser.on("data", (data) => {
-      //console.log("Telemetry received:", data);
-      // emit event
-      this.emit("telemetry", data.trim());
+      const line = data.trim();
+      const acknowledgement = /^ACK,(.+)$/i.exec(line);
+      if (acknowledgement) {
+        this.emit("ack", acknowledgement[1].trim().toUpperCase());
+        return;
+      }
+      this.emit("telemetry", line);
     });
 
     this.port.on("error", (err) => {

@@ -99,6 +99,14 @@ cd backend/cansat
 python send.py  
 ```
 
+## COMMAND SENDING MODES
+In `backend/server.js`, set `COMMAND_SENDING_MODE` to one of:
+- `"20hz"` — sends the command at 20 Hz for one second (the existing behavior).
+- `"ack-retry"` — sends immediately, retries every 700 ms, and aborts after 10 seconds without an ACK.
+- `"normal"` — writes the command once.
+
+For `"ack-retry"`, the CanSat must reply with a newline-terminated `ACK,<command>` frame (for example, `ACK,8N`). The `send.py` simulator emits this ACK when it receives a supported command.
+
 # ARCHITECTURE DIAGRAM  
 ![Architecture Diagram](frontend/diagrams/architecture.png "Current Project Structure")  
 

@@ -15,6 +15,10 @@ const { getSimulationCommands, stripSimCommand } = require("./pipeline/readSimVa
 const PORT = 3000;
 const COMMAND_RATE_HZ = 20;
 const COMMAND_INTERVAL_NS = BigInt(1_000_000_000 / COMMAND_RATE_HZ);
+const ACK_RETRY_INTERVAL_MS = 700;
+const ACK_TIMEOUT_MS = 10_000;
+// Select "20hz", "ack-retry", or "normal" to change command delivery behavior.
+const COMMAND_SENDING_MODE = "20hz";
 let isSimEnabled = false;
 let isSimActivated = false;
 let isCxSent = false;
@@ -24,6 +28,7 @@ let commandStreamTimer = null;
 let commandStreamRunning = false;
 let nextCommandTick = null;
 let commandsRemaining = 0;
+let acknowledgedCommandQueue = Promise.resolve();
 //6N:SIMP
 
 const validCommands = {
@@ -40,6 +45,86 @@ const validCommands = {
 };
 
 function setCurrentCommand(command) {
+  // Keep each mode isolated so changing the selection does not combine send strategies.
+  if (COMMAND_SENDING_MODE === "ack-retry") {
+    acknowledgedCommandQueue = acknowledgedCommandQueue
+      .then(() => sendCommandWithAck(command))
+      .catch((err) => {
+        console.error("Acknowledged Command Error:", err.message);
+        io.emit("command-warning", `[WARNING]:Command send failed: ${err.message}`);
+      });
+    return;
+  }
+  if (COMMAND_SENDING_MODE === "normal") {
+    sendCommandOnce(command);
+    return;
+  }
+  sendCommandAt20Hz(command);
+}
+
+// Send one command without waiting for an acknowledgement.
+function sendCommandOnce(command) {
+  serialPort.sendCommand(command, (err) => {
+    if (err) {
+      console.error("Serial Write Error:", err.message);
+    }
+  });
+}
+
+// Retry immediately and then every 700 ms until matching ACK or the 10-second deadline.
+async function sendCommandWithAck(command) {
+  const deadline = Date.now() + ACK_TIMEOUT_MS;
+
+  while (Date.now() < deadline) {
+    const waitMs = Math.min(ACK_RETRY_INTERVAL_MS, deadline - Date.now());
+    let ackTimeout;
+    let ackHandler;
+    let rejectAcknowledgement;
+    const acknowledgement = new Promise((resolve, reject) => {
+      rejectAcknowledgement = reject;
+      ackHandler = (acknowledgedCommand) => {
+        if (acknowledgedCommand !== command) return;
+        clearTimeout(ackTimeout);
+        serialPort.removeListener("ack", ackHandler);
+        resolve(true);
+      };
+      serialPort.on("ack", ackHandler);
+      ackTimeout = setTimeout(() => {
+        serialPort.removeListener("ack", ackHandler);
+        resolve(false);
+      }, waitMs);
+    });
+
+    try {
+      serialPort.sendCommand(command, (err) => {
+        if (err) {
+          clearTimeout(ackTimeout);
+          serialPort.removeListener("ack", ackHandler);
+          rejectAcknowledgement(err);
+        }
+      });
+      if (await acknowledgement) {
+        console.log(`ACK received for command: ${command}`);
+        return true;
+      }
+    } catch (err) {
+      clearTimeout(ackTimeout);
+      serialPort.removeListener("ack", ackHandler);
+      throw err;
+    }
+
+    if (Date.now() < deadline) {
+      console.log(`No ACK for ${command}; retrying in ${ACK_RETRY_INTERVAL_MS} ms.`);
+    }
+  }
+
+  console.warn(`No ACK received for ${command} within ${ACK_TIMEOUT_MS} ms; aborting.`);
+  io.emit("command-warning", `[WARNING]:No ACK received for ${command}; command aborted.`);
+  return false;
+}
+
+// Preserve the original behavior: send at 20 Hz for one second.
+function sendCommandAt20Hz(command) {
   currentCommand = command;
   commandsRemaining = COMMAND_RATE_HZ;
   startCommandStream();
