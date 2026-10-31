@@ -133,77 +133,39 @@ async function deleteTelemetryCSV() {
   }
 }
 
-// ---------- Gyro rate (°/s) → orientation (°) integration ----------
-// Maintains running state; call resetGyroIntegration() on mission reset.
-let _gyroPitchDeg = 0;
-let _gyroYawDeg = 0;
-let _lastGyroTimestamp = null;
-let _lastGyroPacketCount = null;
+// ---------- Accelerometer vector → absolute orientation (°) ----------
+function calculateAccelerometerTilt(data) {
+  if (!data || typeof data !== "object") return null;
 
-function _parseGyroTimestamp(value) {
-  if (typeof value !== "string") return null;
-  const match = /^(\d{2}):(\d{2}):(\d{2})$/.exec(value);
-  if (!match) return null;
-  const h = Number(match[1]);
-  const m = Number(match[2]);
-  const s = Number(match[3]);
-  if (h > 23 || m > 59 || s > 59) return null;
-  return h * 3600 + m * 60 + s;
-}
-
-/**
- * Integrate GYRO_P and GYRO_Y (°/s) into cumulative TILT_PITCH and TILT_YAW (°).
- * Accepts the full telemetry data object; returns { TILT_PITCH, TILT_YAW }.
- */
-function integrateGyroToDegrees(data) {
-  if (!data || typeof data !== "object") {
-    return { TILT_PITCH: _gyroPitchDeg, TILT_YAW: _gyroYawDeg };
+  const rawAcceleration = [data.ACCEL_R, data.ACCEL_P, data.ACCEL_Y];
+  if (rawAcceleration.some((value) =>
+    value === null ||
+    value === undefined ||
+    (typeof value !== "number" && typeof value !== "string") ||
+    (typeof value === "string" && value.trim() === "")
+  )) {
+    return null;
   }
 
-  // Reset accumulators if packet count wraps (new mission)
-  const pktCount = data.PACKET_COUNT !== undefined ? Number(data.PACKET_COUNT) : null;
-  if (
-    pktCount !== null &&
-    !isNaN(pktCount) &&
-    _lastGyroPacketCount !== null &&
-    pktCount < _lastGyroPacketCount
-  ) {
-    resetGyroIntegration();
-  }
-  if (pktCount !== null && !isNaN(pktCount)) {
-    _lastGyroPacketCount = pktCount;
-  }
+  const [accelR, accelP, accelY] = rawAcceleration.map(Number);
+  if (![accelR, accelP, accelY].every(Number.isFinite)) return null;
 
-  // Compute dt from timestamps
-  const ts = _parseGyroTimestamp(data.TIME_STAMP);
-  let dt = ts !== null && _lastGyroTimestamp !== null ? ts - _lastGyroTimestamp : 1;
-  if (dt <= 0 || dt > 5) dt = 1;
-  _lastGyroTimestamp = ts;
-
-  // Parse gyro rates
-  const gp = data.GYRO_P !== undefined ? Number(data.GYRO_P) : NaN;
-  const gy = data.GYRO_Y !== undefined ? Number(data.GYRO_Y) : NaN;
-
-  if (Number.isFinite(gp)) _gyroPitchDeg += gp * dt;
-  if (Number.isFinite(gy)) _gyroYawDeg += gy * dt;
+  const radiansToDegrees = 180 / Math.PI;
+  const pitch = Math.atan2(
+    -accelR,
+    Math.hypot(accelP, accelY)
+  ) * radiansToDegrees;
+  const roll = Math.atan2(accelP, accelY) * radiansToDegrees;
 
   return {
-    TILT_PITCH: Math.round(_gyroPitchDeg * 10) / 10,
-    TILT_YAW: Math.round(_gyroYawDeg * 10) / 10,
+    TILT_PITCH: Math.round(pitch * 10) / 10 || 0,
+    TILT_YAW: Math.round(roll * 10) / 10 || 0,
   };
-}
-
-function resetGyroIntegration() {
-  _gyroPitchDeg = 0;
-  _gyroYawDeg = 0;
-  _lastGyroTimestamp = null;
-  _lastGyroPacketCount = null;
 }
 
 module.exports = {
   initTelemetryCSV,
   writeTelemetryRow,
   deleteTelemetryCSV,
-  integrateGyroToDegrees,
-  resetGyroIntegration,
+  calculateAccelerometerTilt,
 };
