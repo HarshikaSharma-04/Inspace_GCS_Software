@@ -18,7 +18,7 @@ const timestamp = new Date()
   .replace(/, /g, "_")
   .replace(/:/g, "-");
 
-const TARGET_DIR = "./gcs_csv"; 
+const TARGET_DIR = "./gcs_csv";
 
 // 2. Update the path construction
 const TELEMETRY_CSV_PATH = join(
@@ -30,7 +30,7 @@ const TELEMETRY_CSV_PATH = join(
 const CSV_HEADER =
   "TEAM_ID,TIME_STAMP,PACKET_COUNT,ALTITUDE,PRESSURE,TEMPERATURE,VOLTAGE," +
   "GNSS_TIME,GNSS_LATITUDE,GNSS_LONGITUDE,GNSS_ALTITUDE,GNSS_SATS,ACCEL_R,ACCEL_P,ACCEL_Y," +
-  "GYRO_R,GYRO_P,GYRO_Y,MAG_R,MAG_P,MAG_Y,FLIGHT_SOFTWARE_STATE,CMD_ECHO\n";
+  "GYRO_R,GYRO_P,GYRO_Y,FLIGHT_SOFTWARE_STATE,CMD_ECHO,GLIDE_RATIO,HEADING,BEARING,HEADING_ERROR,MAG_R,MAG_P,MAG_Y,\n";
 
 
 async function initTelemetryCSV() {
@@ -51,32 +51,32 @@ async function initTelemetryCSV() {
 async function writeTelemetryRow(data) {
   const {
     TEAM_ID,
-      TIME_STAMP,
-      PACKET_COUNT,
-      ALTITUDE,
-      PRESSURE,
-      TEMPERATURE,
-      VOLTAGE,
-      GNSS_TIME,
-      GNSS_LATITUDE,
-      GNSS_LONGITUDE,
-      GNSS_ALTITUDE,
-      GNSS_SATS,
-      ACCEL_R,
-      ACCEL_P,
-      ACCEL_Y,
-      GYRO_R,
-      GYRO_P,
-      GYRO_Y,
-      MAG_R,
-      MAG_P,
-      MAG_Y,
-      FLIGHT_SOFTWARE_STATE,
-      CMD_ECHO,
-      GLIDE_RATIO,
-      HEADING,
-      BEARING,
-      HEADING_ERROR
+    TIME_STAMP,
+    PACKET_COUNT,
+    ALTITUDE,
+    PRESSURE,
+    TEMPERATURE,
+    VOLTAGE,
+    GNSS_TIME,
+    GNSS_LATITUDE,
+    GNSS_LONGITUDE,
+    GNSS_ALTITUDE,
+    GNSS_SATS,
+    ACCEL_R,
+    ACCEL_P,
+    ACCEL_Y,
+    GYRO_R,
+    GYRO_P,
+    GYRO_Y,
+    FLIGHT_SOFTWARE_STATE,
+    CMD_ECHO,
+    GLIDE_RATIO,
+    HEADING,
+    BEARING,
+    HEADING_ERROR,
+    MAG_R,
+    MAG_P,
+    MAG_Y,
   } = data;
 
   // Create CSV row
@@ -100,15 +100,15 @@ async function writeTelemetryRow(data) {
       GYRO_R,
       GYRO_P,
       GYRO_Y,
-      MAG_R,
-      MAG_P,
-      MAG_Y,
       FLIGHT_SOFTWARE_STATE,
       CMD_ECHO,
       GLIDE_RATIO,
       HEADING,
       BEARING,
-      HEADING_ERROR
+      HEADING_ERROR,
+      MAG_R,
+      MAG_P,
+      MAG_Y,
     ].join(",") + "\n";
 
   try {

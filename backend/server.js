@@ -147,17 +147,17 @@ async function handleCanSatData(rawString) {
     GYRO_R,
     GYRO_P,
     GYRO_Y,
-    MAG_R,
-    MAG_P,
-    MAG_Y,
     FLIGHT_SOFTWARE_STATE,
     CMD_ECHO,
     GLIDE_RATIO,
     HEADING,
     BEARING,
-    HEADING_ERROR
+    HEADING_ERROR,
+    MAG_R,
+    MAG_P,
+    MAG_Y,
   ] = parts;
-  
+
   data = {
     TEAM_ID,
     TIME_STAMP,
@@ -177,15 +177,15 @@ async function handleCanSatData(rawString) {
     GYRO_R: resolveDecimal(GYRO_R, 2),
     GYRO_P: resolveDecimal(GYRO_P, 2),
     GYRO_Y: resolveDecimal(GYRO_Y, 2),
-    MAG_R: resolveDecimal(MAG_R, 2),
-    MAG_P: resolveDecimal(MAG_P, 2),
-    MAG_Y: resolveDecimal(MAG_Y, 2),
     FLIGHT_SOFTWARE_STATE,
     CMD_ECHO: CMD_ECHO ? CMD_ECHO.replace(/"/g, "") : "",
     GLIDE_RATIO: resolveDecimal(GLIDE_RATIO, 2),
     HEADING: resolveDecimal(HEADING, 2),
     BEARING: resolveDecimal(BEARING, 2),
-    HEADING_ERROR: resolveDecimal(HEADING_ERROR, 2)
+    HEADING_ERROR: resolveDecimal(HEADING_ERROR, 2),
+    MAG_R: resolveDecimal(MAG_R, 2),
+    MAG_P: resolveDecimal(MAG_P, 2),
+    MAG_Y: resolveDecimal(MAG_Y, 2),
   };
   // Integrate gyro rates (°/s) into orientation angles (°) for tilt visualization
   const tiltAngles = integrateGyroToDegrees(data);

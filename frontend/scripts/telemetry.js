@@ -187,16 +187,15 @@ const _CT_COLS = [
   { title: "GYRO_P", field: "GYRO_P", w: 45 },
   { title: "GYRO_Y", field: "GYRO_Y", w: 45 },
 
-  { title: "MAG_R", field: "MAG_R", w: 40 },
-  { title: "MAG_P", field: "MAG_P", w: 40 },
-  { title: "MAG_Y", field: "MAG_Y", w: 40 },
-
   { title: "STATE", field: "FLIGHT_SOFTWARE_STATE", w: 90 },
   { title: "CMD", field: "CMD_ECHO", w: 50 },
   { title: "G/D_RATIO", field: "GLIDE_RATIO", w: 50 },
   { title: "H/D", field: "HEADING", w: 40 },
   { title: "B/R", field: "BEARING", w: 40 },
-  { title: "H/D_ERR", field: "HEADING_ERROR", w: 50 }
+  { title: "H/D_ERR", field: "HEADING_ERROR", w: 50 },
+  { title: "MAG_R", field: "MAG_R", w: 40 },
+  { title: "MAG_P", field: "MAG_P", w: 40 },
+  { title: "MAG_Y", field: "MAG_Y", w: 40 },
 ];
 
 function initTabulator() {
