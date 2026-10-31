@@ -9,7 +9,7 @@ const io = new Server(server, { cors: { origin: "*" } });
 const { filterGarbage } = require("./pipeline/filtergarbage");
 const serialPort = require("./pipeline/serialPort");
 // importing functions from telemetryWriter.js file
-const { writeTelemetryRow, integrateGyroToDegrees } = require("./pipeline/telemetrywriter");
+const { writeTelemetryRow, calculateAccelerometerTilt } = require("./pipeline/telemetrywriter");
 const { getSimulationCommands, stripSimCommand } = require("./pipeline/readSimValues");
 
 const PORT = 3000;
@@ -272,10 +272,12 @@ async function handleCanSatData(rawString) {
     MAG_P: resolveDecimal(MAG_P, 2),
     MAG_Y: resolveDecimal(MAG_Y, 2),
   };
-  // Integrate gyro rates (°/s) into orientation angles (°) for tilt visualization
-  const tiltAngles = integrateGyroToDegrees(data);
-  data.TILT_PITCH = tiltAngles.TILT_PITCH;
-  data.TILT_YAW = tiltAngles.TILT_YAW;
+  // Calculate absolute tilt from this packet's accelerometer values (not accumulated gyro rates).
+  const tiltAngles = calculateAccelerometerTilt(data);
+  if (tiltAngles) {
+    data.TILT_PITCH = tiltAngles.TILT_PITCH;
+    data.TILT_YAW = tiltAngles.TILT_YAW;
+  }
 
   let cleanedData = data; // Temporary variable to hold filtered data
   try {
