@@ -134,38 +134,63 @@ async function deleteTelemetryCSV() {
 }
 
 // ---------- Accelerometer vector → absolute orientation (°) ----------
-function calculateAccelerometerTilt(data) {
+// State variables must persist between telemetry packets
+// Inside pipeline/telemetrywriter.js
+
+let previousPitch = 0;
+let previousRoll = 0;
+let lastTimestamp = null;
+
+const ALPHA = 0.98;
+
+function calculateFusedTilt(data, currentTimestampMs = Date.now()) {
   if (!data || typeof data !== "object") return null;
 
-  const rawAcceleration = [data.ACCEL_R, data.ACCEL_P, data.ACCEL_Y];
-  if (rawAcceleration.some((value) =>
-    value === null ||
-    value === undefined ||
-    (typeof value !== "number" && typeof value !== "string") ||
-    (typeof value === "string" && value.trim() === "")
-  )) {
+  // Convert incoming string telemetry values to numbers
+  const accelR = Number(data.ACCEL_R);
+  const accelP = Number(data.ACCEL_P);
+  const accelY = Number(data.ACCEL_Y);
+  const gyroR = Number(data.GYRO_R);
+  const gyroP = Number(data.GYRO_P);
+
+  // Validate numeric values
+  if ([accelR, accelP, accelY, gyroR, gyroP].some((v) => !Number.isFinite(v))) {
     return null;
   }
 
-  const [accelR, accelP, accelY] = rawAcceleration.map(Number);
-  if (![accelR, accelP, accelY].every(Number.isFinite)) return null;
+  // Calculate delta time (dt) in seconds
+  if (lastTimestamp === null) {
+    lastTimestamp = currentTimestampMs;
+  }
+
+  let dt = (currentTimestampMs - lastTimestamp) / 1000.0;
+  // Guard against initial timestamp jumps or paused connections
+  if (dt <= 0 || dt > 5) dt = 1.0;
+  lastTimestamp = currentTimestampMs;
 
   const radiansToDegrees = 180 / Math.PI;
-  const pitch = Math.atan2(
-    -accelR,
-    Math.hypot(accelP, accelY)
-  ) * radiansToDegrees;
-  const roll = Math.atan2(accelP, accelY) * radiansToDegrees;
+
+  // 1. Calculate absolute angles from Accelerometer
+  const accelPitch = Math.atan2(-accelR, Math.hypot(accelP, accelY)) * radiansToDegrees;
+  const accelRoll = Math.atan2(accelP, accelY) * radiansToDegrees;
+
+  // 2. Apply Complementary Filter
+  const pitch = ALPHA * (previousPitch + gyroP * dt) + (1 - ALPHA) * accelPitch;
+  const roll = ALPHA * (previousRoll + gyroR * dt) + (1 - ALPHA) * accelRoll;
+
+  previousPitch = pitch;
+  previousRoll = roll;
 
   return {
     TILT_PITCH: Math.round(pitch * 10) / 10 || 0,
-    TILT_YAW: Math.round(roll * 10) / 10 || 0,
+    TILT_ROLL: Math.round(roll * 10) / 10 || 0,
   };
 }
+
 
 module.exports = {
   initTelemetryCSV,
   writeTelemetryRow,
   deleteTelemetryCSV,
-  calculateAccelerometerTilt,
+  calculateFusedTilt,
 };
