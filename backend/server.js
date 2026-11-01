@@ -9,7 +9,7 @@ const io = new Server(server, { cors: { origin: "*" } });
 const { filterGarbage } = require("./pipeline/filtergarbage");
 const serialPort = require("./pipeline/serialPort");
 // importing functions from telemetryWriter.js file
-const { writeTelemetryRow, calculateAccelerometerTilt } = require("./pipeline/telemetrywriter");
+const { writeTelemetryRow, calculateFusedTilt } = require("./pipeline/telemetrywriter");
 const { getSimulationCommands, stripSimCommand } = require("./pipeline/readSimValues");
 
 const PORT = 3000;
@@ -18,7 +18,7 @@ const COMMAND_INTERVAL_NS = BigInt(1_000_000_000 / COMMAND_RATE_HZ);
 const ACK_RETRY_INTERVAL_MS = 700;
 const ACK_TIMEOUT_MS = 10_000;
 // Select "20hz", "ack-retry", or "normal" to change command delivery behavior.
-const COMMAND_SENDING_MODE = "20hz";
+const COMMAND_SENDING_MODE = "normal";
 let isSimEnabled = false;
 let isSimActivated = false;
 let isCxSent = false;
@@ -207,11 +207,12 @@ function resolveDecimal(value, precision) {
 // this function is taking the emitted values
 async function handleCanSatData(rawString) {
   let data;
-  const parts = rawString.split(",").map((p) => p.trim());
-  // if (parts.length !== 27) {
-  //   console.warn("Ignoring non-telemetry serial data:", rawString);
-  //   return;
-  // }
+  const cleanedString = rawString.trim().replace(/,+$/, "");
+  const parts = cleanedString.split(",").map((p) => p.trim());
+  if (parts.length !== 27) {
+    console.warn("Ignoring non-telemetry serial data:", rawString);
+    return;
+  }
 
   const [
     TEAM_ID,
@@ -234,10 +235,10 @@ async function handleCanSatData(rawString) {
     GYRO_Y,
     FLIGHT_SOFTWARE_STATE,
     CMD_ECHO,
-    GLIDE_RATIO,
+    TILT_PITCH,
+    TILT_ROLL,
     HEADING,
     BEARING,
-    HEADING_ERROR,
     MAG_R,
     MAG_P,
     MAG_Y,
@@ -264,19 +265,19 @@ async function handleCanSatData(rawString) {
     GYRO_Y: resolveDecimal(GYRO_Y, 2),
     FLIGHT_SOFTWARE_STATE,
     CMD_ECHO: CMD_ECHO ? CMD_ECHO.replace(/"/g, "") : "",
-    GLIDE_RATIO: resolveDecimal(GLIDE_RATIO, 2),
+    TILT_PITCH: resolveDecimal(TILT_PITCH, 2),
+    TILT_ROLL: resolveDecimal(TILT_ROLL, 2),
     HEADING: resolveDecimal(HEADING, 2),
     BEARING: resolveDecimal(BEARING, 2),
-    HEADING_ERROR: resolveDecimal(HEADING_ERROR, 2),
     MAG_R: resolveDecimal(MAG_R, 2),
     MAG_P: resolveDecimal(MAG_P, 2),
     MAG_Y: resolveDecimal(MAG_Y, 2),
   };
   // Calculate absolute tilt from this packet's accelerometer values (not accumulated gyro rates).
-  const tiltAngles = calculateAccelerometerTilt(data);
+  const tiltAngles = calculateFusedTilt(data, Date.now());
   if (tiltAngles) {
     data.TILT_PITCH = tiltAngles.TILT_PITCH;
-    data.TILT_YAW = tiltAngles.TILT_YAW;
+    data.TILT_ROLL = tiltAngles.TILT_ROLL;
   }
 
   let cleanedData = data; // Temporary variable to hold filtered data

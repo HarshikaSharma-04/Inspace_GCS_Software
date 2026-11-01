@@ -401,10 +401,17 @@ function initThreeStage(stageContainer) {
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
   camera.position.set(0, 0, 5);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 1.2));
-  const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
-  dirLight.position.set(5, 10, 7.5);
-  scene.add(dirLight);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+  // const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+  // dirLight.position.set(5, 10, 7.5);
+  // scene.add(dirLight);
+  const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+  mainLight.position.set(5, 10, 7.5);
+  scene.add(mainLight);
+
+  const fillLight = new THREE.DirectionalLight(0x90caf9, 0.5); // Soft blue rim light
+  fillLight.position.set(-5, -5, -5);
+  scene.add(fillLight);
 
   renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -421,9 +428,9 @@ function initThreeStage(stageContainer) {
   scene.add(pivot);
 
   // --- Axis reference lines (fixed in scene) ---
-  const AXIS_LEN = 4;
-  const dashSize = 0.15;
-  const gapSize = 0.1;
+  const AXIS_LEN = 3.5;
+  const dashSize = 0.08;
+  const gapSize = 0.08;
 
   // Roll axis: vertical dashed line (Y, the CanSat's long axis)
   const rollGeo = new THREE.BufferGeometry().setFromPoints([
@@ -443,8 +450,11 @@ function initThreeStage(stageContainer) {
     new THREE.Vector3(AXIS_LEN, 0, 0),
   ]);
   const pitchLine = new THREE.Line(
-    pitchGeo,
-    new THREE.LineDashedMaterial({ color: 0xcc3333, dashSize, gapSize })
+    new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-AXIS_LEN, 0, 0),
+      new THREE.Vector3(AXIS_LEN, 0, 0),
+    ]),
+    new THREE.LineDashedMaterial({ color: 0xdc2626, dashSize, gapSize, opacity: 0.5, transparent: true })
   );
   pitchLine.computeLineDistances();
   scene.add(pitchLine);
