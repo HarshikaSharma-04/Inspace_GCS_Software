@@ -13,12 +13,12 @@ const { writeTelemetryRow, calculateFusedTilt } = require("./pipeline/telemetryw
 const { getSimulationCommands, stripSimCommand } = require("./pipeline/readSimValues");
 
 const PORT = 3000;
-const COMMAND_RATE_HZ = 20;
+const COMMAND_RATE_HZ = 5.0;
 const COMMAND_INTERVAL_NS = BigInt(1_000_000_000 / COMMAND_RATE_HZ);
 const ACK_RETRY_INTERVAL_MS = 700;
 const ACK_TIMEOUT_MS = 10_000;
 // Select "20hz", "ack-retry", or "normal" to change command delivery behavior.
-const COMMAND_SENDING_MODE = "normal";
+const COMMAND_SENDING_MODE = "20hz";
 let isSimEnabled = false;
 let isSimActivated = false;
 let isCxSent = false;
@@ -209,10 +209,10 @@ async function handleCanSatData(rawString) {
   let data;
   const cleanedString = rawString.trim().replace(/,+$/, "");
   const parts = cleanedString.split(",").map((p) => p.trim());
-  if (parts.length !== 27) {
-    console.warn("Ignoring non-telemetry serial data:", rawString);
-    return;
-  }
+  // if (parts.length !== 27) {
+  //   console.warn("Ignoring non-telemetry serial data:", rawString);
+  //   return;
+  // }
 
   const [
     TEAM_ID,
@@ -238,10 +238,7 @@ async function handleCanSatData(rawString) {
     TILT_PITCH,
     TILT_ROLL,
     HEADING,
-    BEARING,
-    MAG_R,
-    MAG_P,
-    MAG_Y,
+    BEARING
   ] = parts;
 
   data = {
@@ -268,10 +265,7 @@ async function handleCanSatData(rawString) {
     TILT_PITCH: resolveDecimal(TILT_PITCH, 2),
     TILT_ROLL: resolveDecimal(TILT_ROLL, 2),
     HEADING: resolveDecimal(HEADING, 2),
-    BEARING: resolveDecimal(BEARING, 2),
-    MAG_R: resolveDecimal(MAG_R, 2),
-    MAG_P: resolveDecimal(MAG_P, 2),
-    MAG_Y: resolveDecimal(MAG_Y, 2),
+    BEARING: resolveDecimal(BEARING, 2)
   };
   // Calculate absolute tilt from this packet's accelerometer values (not accumulated gyro rates).
   const tiltAngles = calculateFusedTilt(data, Date.now());

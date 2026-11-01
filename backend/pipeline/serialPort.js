@@ -7,8 +7,8 @@ class SerialService extends EventEmitter {
     super();
 
     this.port = new SerialPort({
-      path: "COM18", // virtual serial port
-      baudRate: 9600,
+      path: "/dev/cu.usbmodem166664401", // virtual serial port
+      baudRate: 115200,
     });
 
     const parser = this.port.pipe(new ReadlineParser({ delimiter: "\n" }));

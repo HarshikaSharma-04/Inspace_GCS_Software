@@ -111,12 +111,6 @@ const GRAPH_LAYOUT = [
     units: "GYROSCOPE",
     combined: ["GYRO_R", "GYRO_P", "GYRO_Y"],
   },
-  {
-    id: "MAG_COMBINED",
-    title: "MAGNETIC FIELD",
-    units: "MAGNETOMETER",
-    combined: ["MAG_R", "MAG_P", "MAG_Y"],
-  },
   { id: "VOLTAGE", title: "VOLTAGE", units: "VOLTAGE" },
 ];
 
@@ -192,10 +186,7 @@ const _CT_COLS = [
   { title: "TILT_PITCH", field: "TILT_PITCH", w: 50 },
   { title: "TILT_ROLL", field: "TILT_ROLL", w: 50 },
   { title: "H/D", field: "HEADING", w: 40 },
-  { title: "B/R", field: "BEARING", w: 40 },
-  { title: "MAG_R", field: "MAG_R", w: 40 },
-  { title: "MAG_P", field: "MAG_P", w: 40 },
-  { title: "MAG_Y", field: "MAG_Y", w: 40 },
+  { title: "B/R", field: "BEARING", w: 40 }
 ];
 
 function initTabulator() {
